@@ -1,0 +1,32 @@
+# wordpress-qcloud-cos
+
+本插件的原作者射雕天龙，更新截止时间为2015-11-14
+
+我使用的时候已经失效了，所以更新了一下
+
+使用腾讯云对象存储服务 COS 作为附件存储空间的Wordpress插件，本插件核心功能使用了腾讯云COS官方SDK。
+
+## 插件特色
+
+* 使用腾讯云对象存储服务存储wordpress站点图片等多媒体文件
+* 可配置是否上传缩略图和是否保留本地备份
+* 本地删除可同步删除腾讯云上面的文件
+* 支持腾讯云云存储服务绑定的个性域名
+
+github项目地址:  [https://github.com/sy-records/wordpress-qcloud-cos](https://github.com/sy-records/wordpress-qcloud-cos)
+
+
+## 安装
+### 直接下载源码
+从github下载源码，通过wordpress后台上传安装，或者直接将源码上传到wordpress插件目录`wp-content\plugins`，然后在后台启用。
+
+## 修改配置
+* 方法一：在wordpress插件管理页面有设置按钮，进行设置
+* 方法二：在wordpress后台管理左侧导航栏`设置`下`腾讯云cos设置`，点击进入设置页面
+
+## 特别说明
+* 本插件仅支持`PHP 5.3+`版本
+
+## 截图
+![设置页面](https://img.qq52o.me/wp-content/uploads/2018/04/cos-1.png)
+![设置页面](https://img.qq52o.me/wp-content/uploads/2018/04/cos-2.png)
