@@ -28,5 +28,4 @@ github项目地址:  [https://github.com/sy-records/wordpress-qcloud-cos](https:
 * 本插件仅支持`PHP 5.3+`版本
 
 ## 截图
-![设置页面](https://img.qq52o.me/wp-content/uploads/2018/04/cos-1.png)
-![设置页面](https://img.qq52o.me/wp-content/uploads/2018/04/cos-2.png)
+![设置页面](https://raw.githubusercontent.com/sy-records/wordpress-qcloud-cos/master/screenshot-1.png)
