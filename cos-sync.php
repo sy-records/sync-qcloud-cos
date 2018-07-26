@@ -1,10 +1,10 @@
 <?php
 /*
-Plugin Name: 腾讯云COS同步
+Plugin Name: 腾讯云对象存储服务COS
 Plugin URI: https://qq52o.me/2130.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses QCloud Cloud Object Service for attachments remote saving.）
 Version: 1.2
-Author: 沈唁志
+Author: sy-records
 Author URI: https://qq52o.me
 License: GPL v3
  */

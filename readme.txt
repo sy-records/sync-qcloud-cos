@@ -1,8 +1,11 @@
-=== Cloud Object Storage ===
-Contributors: 沈唁志
+=== Tencent Cloud Object Storage Service COS ===
+Contributors: sy-records
+Donate link: https://qq52o.me/sponsor.html
 Tags: COS, 腾讯云, 对象存储
 Requires at least: 4.2
 Tested up to: 4.9.5
+Stable tag: 4.3
+Requires PHP: 5.4.0
 Stable tag: 1.2
 License: GPL v3
 License URI: https://opensource.org/licenses/GPL-3.0
@@ -17,16 +20,22 @@ License URI: https://opensource.org/licenses/GPL-3.0
 
 1. Upload the folder `cos-sync` to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
-1. That's all 
+1. That's all
 
 == Screenshots ==
 
-1. The WordPress editor after installing this plugin.
+1.WordPress settings after installing this plugin
 
 == Changelog ==
 
 = 1.2 =
-* Modify settings button.
+* Modify settings button
 
 = 1.0 =
 * First version
+
+== Upgrade Notice ==
+
+= 1.2 =
+* Fix release notes
+* Repair settings
