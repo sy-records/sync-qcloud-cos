@@ -1,4 +1,4 @@
-=== TinyMCE Smiley Button ===
+=== Cloud Object Storage ===
 Contributors: 沈唁志
 Tags: COS, 腾讯云, 对象存储
 Requires at least: 4.2
