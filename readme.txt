@@ -3,7 +3,7 @@ Contributors: 沈唁志
 Tags: COS, 腾讯云, 对象存储
 Requires at least: 4.2
 Tested up to: 4.9.5
-Stable tag: 1.0.0
+Stable tag: 1.2
 License: GPL v3
 License URI: https://opensource.org/licenses/GPL-3.0
 
@@ -24,6 +24,9 @@ License URI: https://opensource.org/licenses/GPL-3.0
 1. The WordPress editor after installing this plugin.
 
 == Changelog ==
+
+= 1.2 =
+* Modify settings button.
 
 = 1.0 =
 * First version
