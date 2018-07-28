@@ -4,7 +4,7 @@
 
 我使用的时候已经失效了，所以更新了一下
 
-使用腾讯云对象存储服务 COS 作为附件存储空间的Wordpress插件，本插件核心功能使用了腾讯云COS官方SDK。
+使用腾讯云对象存储服务 COS 作为附件存储空间的WordPress插件，本插件核心功能使用了腾讯云COS官方SDK。
 
 ## 插件特色
 
@@ -18,14 +18,16 @@ github项目地址:  [https://github.com/sy-records/wordpress-qcloud-cos](https:
 
 ## 安装
 ### 直接下载源码
-从github下载源码，通过wordpress后台上传安装，或者直接将源码上传到wordpress插件目录`wp-content\plugins`，然后在后台启用。
+从github下载源码，通过WordPress后台上传安装，或者直接将源码上传到WordPress插件目录`wp-content\plugins`，然后在后台启用。
 
 ## 修改配置
-* 方法一：在wordpress插件管理页面有设置按钮，进行设置
-* 方法二：在wordpress后台管理左侧导航栏`设置`下`腾讯云cos设置`，点击进入设置页面
+* 方法一：在WordPress插件管理页面有设置按钮，进行设置
+* 方法二：在WordPress后台管理左侧导航栏`设置`下`腾讯云cos设置`，点击进入设置页面
 
 ## 特别说明
-* 本插件仅支持`PHP 5.3+`版本
+* 本插件仅支持`PHP 5.4+`版本
+* 推荐使用腾讯云cos v5版本
+* WordPress后台设置时`Bucket设置`只需填写桶名，无需带上`-你的APPID`
 
 ## 截图
 ![设置页面](https://raw.githubusercontent.com/sy-records/wordpress-qcloud-cos/master/screenshot-1.png)
