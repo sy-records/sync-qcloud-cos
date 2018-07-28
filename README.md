@@ -27,7 +27,7 @@ github项目地址:  [https://github.com/sy-records/wordpress-qcloud-cos](https:
 ## 特别说明
 * 本插件仅支持`PHP 5.4+`版本
 * 推荐使用腾讯云`cos v5`版本
-* WordPress后台设置时`Bucket设置`只需填写桶名，无需带上`-你的APPID`
+* WordPress后台设置时，`Bucket设置`的input框只需填写桶名，无需带上`-你的APPID`，不是下面的APPID不填！！！不是下面的APPID不填！！！不是下面的APPID不填！！！重要的事情说3遍
 
 ## 截图
 ![设置页面](https://raw.githubusercontent.com/sy-records/wordpress-qcloud-cos/master/screenshot-1.png)
