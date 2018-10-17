@@ -30,7 +30,7 @@ function cos_set_options() {
 		'app_id' => "",
 		'secret_id' => "",
 		'secret_key' => "",
-		'nothumb' => "false", // 是否上传所旅途
+		'nothumb' => "false", // 是否上传缩略图
 		'nolocalsaving' => "false", // 是否保留本地备份
 		'upload_url_path' => "", // URL前缀
 	);
