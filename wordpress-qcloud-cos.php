@@ -3,12 +3,12 @@
 Plugin Name: 腾讯云对象存储服务COS
 Plugin URI: https://qq52o.me/2130.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses QCloud Cloud Object Service for attachments remote saving.）
-Version: 1.2
+Version: 1.3
 Author: sy-records
 Author URI: https://qq52o.me
 License: GPL v3
- */
-error_reporting(0);
+*/
+
 require_once 'sdk/include.php';
 use Qcloudcos\Cosapi;
 if (!defined('WP_PLUGIN_URL')) {
@@ -289,8 +289,8 @@ function cos_read_dir_queue($dir) {
 
 // 在插件列表页添加设置按钮
 function cos_plugin_action_links($links, $file) {
-	if ($file == plugin_basename(dirname(__FILE__) . '/cos-sync.php')) {
-		$links[] = '<a href="options-general.php?page=' . COS_BASEFOLDER . '/cos-sync.php">' . 设置 . '</a>';
+	if ($file == plugin_basename(dirname(__FILE__) . '/wordpress-qcloud-cos.php')) {
+		$links[] = '<a href="options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php">设置</a>';
 	}
 	return $links;
 }
@@ -373,7 +373,7 @@ function cos_setting_page() {
     <div class="wrap" style="margin: 10px;">
         <h2>腾讯云 COS 附件设置</h2>
 
-        <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/cos-sync.php'); ?>">
+        <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
                 <tr>
                     <th>
@@ -491,7 +491,7 @@ function cos_setting_page() {
             </table>
             <input type="hidden" name="type" value="cos_set">
         </form>
-        <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/cos-sync.php'); ?>">
+        <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
                 <tr>
                     <th>
