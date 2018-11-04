@@ -371,7 +371,7 @@ function cos_setting_page() {
 	$cos_nolocalsaving = ($cos_nolocalsaving == 'true');
 	?>
     <div class="wrap" style="margin: 10px;">
-        <h2>腾讯云 COS 附件设置</h2>
+        <h2>腾讯云 COS 设置</h2>
 
         <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
