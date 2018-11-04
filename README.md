@@ -6,6 +6,8 @@
 
 使用腾讯云对象存储服务 COS 作为附件存储空间的WordPress插件，本插件核心功能使用了腾讯云COS官方SDK。
 
+2018-11-4 Henry Rò Mantic 更新支持所有地域使用（https://github.com/udidi/wordpress-qcloud-cos）
+
 ## 插件特色
 
 * 使用腾讯云对象存储服务存储wordpress站点图片等多媒体文件
