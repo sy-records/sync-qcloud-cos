@@ -392,10 +392,17 @@ function cos_setting_page() {
                         <legend>Bucket 地域</legend>
                     </th>
                     <td><select name="regional">
-                            <option value="gz" <?php if ($cos_regional == 'gz') {echo ' selected="selected"';}?>>华南</option>
+							<option value="tj" <?php if ($cos_regional == 'tj') {echo ' selected="selected"';}?>>北京一区（华北）</option>
+							<option value="bj" <?php if ($cos_regional == 'bj') {echo ' selected="selected"';}?>>北京</option>
+							<option value="sh" <?php if ($cos_regional == 'sh') {echo ' selected="selected"';}?>>上海（华东）</option>
+                            <option value="gz" <?php if ($cos_regional == 'gz') {echo ' selected="selected"';}?>>广州（华南）</option>
+							<option value="cd" <?php if ($cos_regional == 'cd') {echo ' selected="selected"';}?>>成都（西南）</option>
                             <option value="sh" <?php if ($cos_regional == 'sh') {echo ' selected="selected"';}?>>华中</option>
-                            <option value="tj" <?php if ($cos_regional == 'tj') {echo ' selected="selected"';}?>>华北</option>
-							<option value="sh" <?php if ($cos_regional == 'sh') {echo ' selected="selected"';}?>>华东</option>
+							<option value="sgp" <?php if ($cos_regional == 'sgp') {echo ' selected="selected"';}?>>新加坡</option>
+							<option value="hk" <?php if ($cos_regional == 'hk') {echo ' selected="selected"';}?>>香港</option>
+							<option value="ca" <?php if ($cos_regional == 'ca') {echo ' selected="selected"';}?>>多伦多</option>
+							<option value="ger" <?php if ($cos_regional == 'ger') {echo ' selected="selected"';}?>>法兰克福</option>
+
                         </select>
                         <p>请选择您创建的 <code>bucket</code> 所在地域</p>
                     </td>
