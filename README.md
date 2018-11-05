@@ -1,8 +1,13 @@
-# wordpress-qcloud-cos
+<p align="center">
+    <img src="/wordpress-cos.png" alt="wordpress-qcloud-cos" align="center" />
+</p>
+<p align="center">使用腾讯云对象存储服务 COS 作为附件存储空间的 WordPress 插件</p>
 
-使用腾讯云对象存储服务 COS 作为附件存储空间的 WordPress 插件，本插件核心功能使用了腾讯云 COS 官方 SDK
+## 前言
 
-本插件的原作者射雕天龙，更新截止时间为2015-11-14
+本插件核心功能使用了腾讯云 COS 官方 SDK
+
+原作者射雕天龙，更新截止时间为2015-11-14
 
 我使用的时候已经失效了，所以更新了一下
 
