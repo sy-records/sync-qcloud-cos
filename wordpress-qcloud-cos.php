@@ -321,7 +321,7 @@ function cos_setting_page() {
 		$options['upload_url_path'] = (isset($_POST['upload_url_path'])) ? trim(stripslashes($_POST['upload_url_path'])) : '';
 	}
 
-	if (!empty($_POST) and $_POST['type'] == 'cos_sync_all') {
+	if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_all') {
 		$cos_options = get_option('cos_options', TRUE);
 		$cos_bucket = esc_attr($cos_options['bucket']);
 
@@ -336,6 +336,17 @@ function cos_setting_page() {
 		}
 		echo '<div class="updated"><p><strong>本次操作成功同步' . $i . '个文件</strong></p></div>';
 	}
+
+    // 替换数据库链接
+    if(!empty($_POST) and $_POST['type'] == 'qcloud_cos_replace'){
+        global $wpdb;
+        $table_name = $wpdb->prefix .'posts';
+        $oldurl = $_POST['old_url'];
+        $newurl = $_POST['new_url'];
+        $result = $wpdb->query("UPDATE $table_name SET post_content = REPLACE( post_content, '$oldurl', '$newurl') ");;
+
+        echo '<div class="updated"><p><strong>替换成功！共批量执行'.$result.'条！</strong></p></div>';
+    }
 
 	// 若$options不为空数组，则更新数据
 	if ($options !== array()) {
@@ -504,11 +515,42 @@ function cos_setting_page() {
                     <th>
                         <legend>同步历史附件</legend>
                     </th>
-                    <input type="hidden" name="type" value="cos_sync_all">
+                    <input type="hidden" name="type" value="qcloud_cos_all">
                     <td>
                         <input type="submit" name="submit" value="开始同步"/>
                         <p><b>注意：如果是首次同步，执行时间将会十分十分长（根据你的历史附件数量），有可能会因执行时间过长，页面显示超时或者报错。<br>
-                                所以，建议那些几千上万附件的大神们，考虑官方的 <a href="https://www.qcloud.com/document/product/436/7133">同步工具</a></b></p>
+                                所以，建议那些几千上万附件的大神们，考虑官方的 <a target="_blank" rel="nofollow" href="https://www.qcloud.com/document/product/436/7133">同步工具</a></b></p>
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <hr>
+        <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
+            <table class="form-table">
+                <tr>
+                    <th>
+                                               <legend>数据库原链接替换</legend>
+                    </th>
+                    <td>
+                        <input type="text" name="old_url"  size="50" placeholder="请输入要替换的旧域名"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend></legend>
+                    </th>
+                    <td>
+                        <input type="text" name="new_url"  size="50" placeholder="请输入要替换的新域名"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                                               <legend></legend>
+                    </th>
+                    <input type="hidden" name="type" value="qcloud_cos_replace">
+                    <td>
+                        <input type="submit" name="submit" value="开始替换"/>
+                                           <p><b>注意：如果是首次替换，请注意备份！此功能只限于替换文章中使用的资源链接</b></p>
                     </td>
                 </tr>
             </table>
