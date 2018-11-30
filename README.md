@@ -51,13 +51,13 @@ Github 项目地址:  [https://github.com/sy-records/wordpress-qcloud-cos](https
 
 ## 常见问题
 
-1. 怎么替换文章中之前的旧资源地址链接
+1、怎么替换文章中之前的旧资源地址链接
 
 这个插件已经加上了替换数据库中之前的旧资源地址链接功能，只需要填好对应的链接即可，如图所示
 
 ![update-wordpress-posts-photos.png](https://ws2.sinaimg.cn/large/0072Lfvtly1fxpxr5iy88j30qv07x74r.jpg)
 
-2.控制报错跨域问题
+2、控制报错跨域问题
 
 见之前的文章[https://qq52o.me/2130.html](https://qq52o.me/2130.html)
 
