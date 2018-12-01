@@ -343,7 +343,7 @@ function cos_setting_page() {
         $table_name = $wpdb->prefix .'posts';
         $oldurl = $_POST['old_url'];
         $newurl = $_POST['new_url'];
-        $result = $wpdb->query("UPDATE $table_name SET post_content = REPLACE( post_content, '$oldurl', '$newurl') ");;
+        $result = $wpdb->query("UPDATE $table_name SET post_content = REPLACE( post_content, '$oldurl', '$newurl') ");
 
         echo '<div class="updated"><p><strong>替换成功！共批量执行'.$result.'条！</strong></p></div>';
     }
