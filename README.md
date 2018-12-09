@@ -69,3 +69,4 @@ Github 项目地址:  [https://github.com/sy-records/wordpress-qcloud-cos](https
 
 ## 插件截图
 ![设置页面](https://raw.githubusercontent.com/sy-records/wordpress-qcloud-cos/master/screenshot-1.png)
+![同步历史记录&替换数据库链接](https://ws1.sinaimg.cn/large/0072Lfvtly1fy0n7dem0hj31180ciq4i.jpg)
