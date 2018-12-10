@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: 腾讯云对象存储服务COS
-Plugin URI: https://qq52o.me/2130.html
+Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses QCloud Cloud Object Service for attachments remote saving.）
 Version: 1.4.1
 Author: sy-records
