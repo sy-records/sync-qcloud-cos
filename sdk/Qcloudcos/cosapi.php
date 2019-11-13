@@ -4,7 +4,7 @@ namespace Qcloudcos;
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'error_code.php');
 
-date_default_timezone_set('PRC');
+date_default_timezone_set('UTC+8');
 
 class Cosapi {
 
