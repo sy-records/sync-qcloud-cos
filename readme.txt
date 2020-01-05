@@ -18,7 +18,7 @@ License URI: https://opensource.org/licenses/GPL-3.0
 
 == Installation ==
 
-1. Upload the folder `cos-sync` to the `/wp-content/plugins/` directory
+1. Upload the folder `wordpress-qcloud-cos` to the `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. That's all
 
