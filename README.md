@@ -49,6 +49,7 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 2020-01-09
 * 修复第一次删除文件失败，报错`ERROR_PROXY_APPID_USERID_NOTMATCH`，导致删除文件不完整
+* 优化删除逻辑
 * 移除时区设置
 * 增加发布版本链接
 * 修改`README`中的常见问题
