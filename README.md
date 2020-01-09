@@ -54,6 +54,12 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 * 增加发布版本链接
 * 修改`README`中的常见问题
 
+2019-11-23
+* 修复地域选择上海地区跳转华中问题
+
+2019-11-13
+* 修复导致评论时间戳差 8 小时问题
+
 2018-11-30
 * 增加数据库链接替换功能
 
