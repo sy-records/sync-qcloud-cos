@@ -3,8 +3,8 @@
 Plugin Name: 腾讯云对象存储服务COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses QCloud Cloud Object Service for attachments remote saving.）
-Version: 1.4.3
-Author: sy-records
+Version: 1.5.0
+Author: 沈唁
 Author URI: https://qq52o.me
 License: GPL v3
 */
@@ -14,8 +14,8 @@ use Qcloudcos\Cosapi;
 if (!defined('WP_PLUGIN_URL')) {
     define('WP_PLUGIN_URL', WP_CONTENT_URL . '/plugins');
 }
-//  plugin url
 
+//  plugin url
 define('COS_BASENAME', plugin_basename(__FILE__));
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
@@ -42,6 +42,7 @@ function cos_set_options()
 $cos_opt = get_option('cos_options', true);
 $regional = esc_attr($cos_opt['regional']);
 Cosapi::setRegion($regional);
+
 /**
  * 上传函数
  *
@@ -50,7 +51,6 @@ Cosapi::setRegion($regional);
  * @param  $opt
  * @return bool
  */
-
 function cos_file_upload($object, $file, $opt = array())
 {
     //如果文件不存在，直接返回FALSE
@@ -68,11 +68,9 @@ function cos_file_upload($object, $file, $opt = array())
     } else {
         return false;
     }
-    /*
-            echo $object.'<br>';
-            echo $file.'<br>';
-            echo $dirname.'<br>';
-    */
+//    echo $object.'<br>';
+//    echo $file.'<br>';
+//    echo $dirname.'<br>';
 }
 
 /**
@@ -234,24 +232,57 @@ if (substr_count($_SERVER['REQUEST_URI'], '/update.php') <= 0) {
 /**
  * 删除远程服务器上的单个文件
  */
-function cos_delete_remote_file($file)
-{
-    //获取WP配置信息
+//function cos_delete_remote_file($file)
+//{
+//    //获取WP配置信息
+//    $cos_options = get_option('cos_options', true);
+//    $cos_bucket = esc_attr($cos_options['bucket']);
+//
+//    //得到远程路径
+//    $file = str_replace("\\", '/', $file);
+//    $del_file_path = str_replace(get_home_path(), '/', $file);
+//    try {
+//        //删除文件
+//        Cosapi::delFile($cos_bucket, $del_file_path);
+//    } catch (Exception $ex) {
+//
+//    }
+//    return $file;
+//}
+//add_action('wp_delete_file', 'cos_delete_remote_file', 100);
+
+/**
+ * 删除远端文件，删除文件时触发
+ * @param $post_id
+ */
+function wpcos_delete_remote_attachment($post_id) {
+    $meta = wp_get_attachment_metadata( $post_id );
+
     $cos_options = get_option('cos_options', true);
     $cos_bucket = esc_attr($cos_options['bucket']);
 
-    //得到远程路径
-    $file = str_replace("\\", '/', $file);
-    $del_file_path = str_replace(get_home_path(), '/', $file);
-    try {
-        //删除文件
-        Cosapi::delFile($cos_bucket, $del_file_path);
-    } catch (Exception $ex) {
+    if (isset($meta['file'])) {
+        // meta['file']的格式为 "2020/01/wp-bg.png"
+        $upload_path = get_option('upload_path');
+        if ($upload_path == '') {
+            $upload_path = 'wp-content/uploads';
+        }
+        $file_path = $upload_path . '/' . $meta['file'];
 
+        Cosapi::delFile($cos_bucket, str_replace("\\", '/', $file_path));
+        $is_nothumb = (esc_attr($cos_options['nothumb']) == 'false');
+        if ($is_nothumb) {
+            // 删除缩略图
+            if (isset($meta['sizes']) && count($meta['sizes']) > 0) {
+                foreach ($meta['sizes'] as $val) {
+                    $size_file = dirname($file_path) . '/' . $val['file'];
+                    Cosapi::delFile($cos_bucket, str_replace("\\", '/', $size_file));
+                }
+            }
+        }
     }
-    return $file;
 }
-add_action('wp_delete_file', 'cos_delete_remote_file', 100);
+add_action('delete_attachment', 'wpcos_delete_remote_attachment');
 
 // 当upload_path为根目录时，需要移除URL中出现的“绝对路径”
 function modefiy_img_url($url, $post_id)
@@ -400,23 +431,23 @@ function cos_setting_page()
     $cos_nolocalsaving = ($cos_nolocalsaving == 'true');
     ?>
     <div class="wrap" style="margin: 10px;">
-        <h2>腾讯云 COS 设置</h2>
+        <h2>腾讯云 COS 设置<a href="https://github.com/sy-records/wordpress-qcloud-cos/releases/latest" class="feedback add-new-h2" target="_blank">查看发布版本</a> <span style="font-size: 13px;">当前版本：1.5.0</span></h2>
 
         <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
                 <tr>
                     <th>
-                        <legend>Bucket 设置</legend>
+                        <legend>存储桶名称</legend>
                     </th>
                     <td>
-                        <input type="text" name="bucket" value="<?php echo $cos_bucket; ?>" size="50" placeholder="BUCKET"/>
+                        <input type="text" name="bucket" value="<?php echo $cos_bucket; ?>" size="50" placeholder="请填写存储桶名称"/>
 
-                        <p>请先访问 <a href="http://console.qcloud.com/cos" target="_blank">腾讯云控制台</a> 创建<code>bucket</code> ，再填写以上内容。</p>
+                        <p>请先访问 <a href="https://console.cloud.tencent.com/cos5/bucket" target="_blank">腾讯云控制台</a> 创建<code>存储桶</code>，再填写以上内容。</p>
                     </td>
                 </tr>
                 <tr>
                     <th>
-                        <legend>Bucket 地域</legend>
+                        <legend>存储桶地域</legend>
                     </th>
                     <td><select name="regional">
                             <option value="tj" <?php if ($cos_regional == 'tj') {echo ' selected="selected"';
@@ -439,7 +470,7 @@ function cos_setting_page()
                                                 }?>>法兰克福</option>
 
                         </select>
-                        <p>请选择您创建的 <code>bucket</code> 所在地域</p>
+                        <p>请选择您创建的<code>存储桶</code>所在地域</p>
                     </td>
                 </tr>
                 <tr>
@@ -449,7 +480,7 @@ function cos_setting_page()
                     <td>
                         <input type="text" name="app_id" value="<?php echo $cos_app_id; ?>" size="50" placeholder="APP ID"/>
 
-                        <p>请先访问 <a href="http://console.qcloud.com/cos" target="_blank">腾讯云控制台</a> 点击<code>获取secretKey</code>获取 <code>APP ID、secretID、secretKey</code></p>
+                        <p>请先访问 <a href="https://console.cloud.tencent.com/cos5/key" target="_blank">腾讯云控制台</a> 获取 <code>APP ID、secretID、secretKey</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -508,7 +539,7 @@ function cos_setting_page()
 
                         <p>1）URL前缀的格式为 <code>http://{cos域名}</code> （“本地文件夹”为 <code>.</code> 时），或者 <code>http://{cos域名}/{本地文件夹}</code> ，“本地文件夹”务必与上面保持一致（结尾无 <code>/</code> ）。</p>
 
-                        <p>2）cos中的存放路径（即“文件夹”）与上述 <code>本地文件夹</code> 中定义的路径是相同的（出于方便切换考虑）。</p>
+                        <p>2）COS中的存放路径（即“文件夹”）与上述 <code>本地文件夹</code> 中定义的路径是相同的（出于方便切换考虑）。</p>
 
                         <p>3）如果需要使用 <code>独立域名</code> ，直接将 <code>{cos域名}</code> 替换为 <code>独立域名</code> 即可。</p>
                     </td>
