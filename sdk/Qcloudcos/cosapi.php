@@ -4,8 +4,6 @@ namespace Qcloudcos;
 
 require_once(__DIR__ . DIRECTORY_SEPARATOR . 'error_code.php');
 
-date_default_timezone_set('UTC+8');
-
 class Cosapi {
 
     //计算sign签名的时间参数
@@ -563,7 +561,8 @@ class Cosapi {
     private static function generateResUrl($bucket, $dstPath) {
         $endPoint = Conf::API_COSAPI_END_POINT;
         $endPoint = str_replace('region', self::$region, $endPoint);
-        return $endPoint . Conf::$APPID . '/' . $bucket . $dstPath;
+        $conf_object = new Conf();
+        return $endPoint . $conf_object::$APPID . '/' . $bucket . $dstPath;
     }
 
 	/*
