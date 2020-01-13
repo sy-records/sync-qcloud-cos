@@ -148,12 +148,12 @@ class LibcurlWrapper {
         if (function_exists('curl_reset')) {
             curl_reset($handle);
         } else {
-            curl_setopt($handler, CURLOPT_URL, '');
-            curl_setopt($handler, CURLOPT_HTTPHEADER, array());
-            curl_setopt($handler, CURLOPT_POSTFIELDS, array());
-            curl_setopt($handler, CURLOPT_TIMEOUT, 0);
-            curl_setopt($handler, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($handler, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($handle, CURLOPT_URL, '');
+            curl_setopt($handle, CURLOPT_HTTPHEADER, array());
+            curl_setopt($handle, CURLOPT_POSTFIELDS, array());
+            curl_setopt($handle, CURLOPT_TIMEOUT, 0);
+            curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, 0);
         }
     }
 }
