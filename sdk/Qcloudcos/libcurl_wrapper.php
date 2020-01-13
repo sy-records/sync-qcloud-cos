@@ -60,7 +60,7 @@ class LibcurlWrapper {
             }
 
             curl_setopt($curlHandle, CURLOPT_POST, true);
-            $arr = buildCustomPostFields($httpRequest->dataToPost);
+            $arr = cosBuildCustomPostFields($httpRequest->dataToPost);
             array_push($headers, 'Expect: 100-continue');
             array_push($headers, 'Content-Type: multipart/form-data; boundary=' . $arr[0]);
             curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $arr[1]);

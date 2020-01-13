@@ -2,15 +2,6 @@
 
 namespace Qcloudcos;
 
-function my_curl_reset($handler) {
-    curl_setopt($handler, CURLOPT_URL, '');
-    curl_setopt($handler, CURLOPT_HTTPHEADER, array());
-    curl_setopt($handler, CURLOPT_POSTFIELDS, array());
-    curl_setopt($handler, CURLOPT_TIMEOUT, 0);
-    curl_setopt($handler, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($handler, CURLOPT_SSL_VERIFYHOST, 0);
-}
-
 class HttpClient {
     private static $httpInfo = '';
     private static $curlHandler;
@@ -33,7 +24,7 @@ class HttpClient {
             if (function_exists('curl_reset')) {
                 curl_reset(self::$curlHandler);
             } else {
-                my_curl_reset(self::$curlHandler);
+                self::myCurlReset(self::$curlHandler);
             }
         } else {
             self::$curlHandler = curl_init();
@@ -68,7 +59,7 @@ class HttpClient {
             array_push($header, 'Expect: 100-continue');
 
             if (is_array($request['data'])) {
-                $arr = buildCustomPostFields($request['data']);
+                $arr = cosBuildCustomPostFields($request['data']);
                 array_push($header, 'Content-Type: multipart/form-data; boundary=' . $arr[0]);
                 curl_setopt(self::$curlHandler, CURLOPT_POSTFIELDS, $arr[1]);
             } else {
@@ -99,6 +90,15 @@ class HttpClient {
         $ret = curl_exec(self::$curlHandler);
         self::$httpInfo = curl_getinfo(self::$curlHandler);
         return $ret;
+    }
+
+    public static function myCurlReset($handler) {
+        curl_setopt($handler, CURLOPT_URL, '');
+        curl_setopt($handler, CURLOPT_HTTPHEADER, array());
+        curl_setopt($handler, CURLOPT_POSTFIELDS, array());
+        curl_setopt($handler, CURLOPT_TIMEOUT, 0);
+        curl_setopt($handler, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($handler, CURLOPT_SSL_VERIFYHOST, 0);
     }
 
     public static function info() {

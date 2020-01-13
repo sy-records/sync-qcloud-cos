@@ -5,7 +5,7 @@
  * @param $fields array of key -> value fields to post.
  * @return $boundary and encoded post fields.
  */
-function buildCustomPostFields($fields) {
+function cosBuildCustomPostFields($fields) {
     // invalid characters for "name" and "filename"
     static $disallow = array("\0", "\"", "\r", "\n");
 
