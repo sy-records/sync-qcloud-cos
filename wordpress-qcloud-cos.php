@@ -1,22 +1,19 @@
 <?php
 /*
-Plugin Name: 腾讯云对象存储服务COS
+Plugin Name: QCloud COS
 Plugin URI: https://qq52o.me/2518.html
-Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses QCloud Cloud Object Service for attachments remote saving.）
-Version: 1.5.0
+Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
+Version: 1.5.1
 Author: 沈唁
 Author URI: https://qq52o.me
 License: GPL v3
 */
 
 require_once 'sdk/include.php';
-use Qcloudcos\Cosapi;
-if (!defined('WP_PLUGIN_URL')) {
-    define('WP_PLUGIN_URL', WP_CONTENT_URL . '/plugins');
-}
 
-//  plugin url
-define('COS_BASENAME', plugin_basename(__FILE__));
+use Qcloudcos\Cosapi;
+
+define('COS_VERSION', "1.5.1");
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -64,13 +61,10 @@ function cos_file_upload($object, $file, $opt = array())
     if (@file_exists($file)) {
         $dirname = dirname($object);
         cos_create_folder($cos_bucket, $dirname);
-        $ret = Cosapi::upload($cos_bucket, $file, $object);
+        Cosapi::upload($cos_bucket, $file, $object);
     } else {
         return false;
     }
-//    echo $object.'<br>';
-//    echo $file.'<br>';
-//    echo $dirname.'<br>';
 }
 
 /**
@@ -255,7 +249,7 @@ if (substr_count($_SERVER['REQUEST_URI'], '/update.php') <= 0) {
  * 删除远端文件，删除文件时触发
  * @param $post_id
  */
-function wpcos_delete_remote_attachment($post_id) {
+function cos_delete_remote_attachment($post_id) {
     $meta = wp_get_attachment_metadata( $post_id );
 
     $cos_options = get_option('cos_options', true);
@@ -282,10 +276,10 @@ function wpcos_delete_remote_attachment($post_id) {
         }
     }
 }
-add_action('delete_attachment', 'wpcos_delete_remote_attachment');
+add_action('delete_attachment', 'cos_delete_remote_attachment');
 
 // 当upload_path为根目录时，需要移除URL中出现的“绝对路径”
-function modefiy_img_url($url, $post_id)
+function cos_modefiy_img_url($url, $post_id)
 {
     $home_path = str_replace(array('/', '\\'), array('', ''), get_home_path());
     $url = str_replace($home_path, '', $url);
@@ -293,7 +287,7 @@ function modefiy_img_url($url, $post_id)
 }
 
 if (get_option('upload_path') == '.') {
-    add_filter('wp_get_attachment_url', 'modefiy_img_url', 30, 2);
+    add_filter('wp_get_attachment_url', 'cos_modefiy_img_url', 30, 2);
 }
 
 function cos_read_dir_queue($dir)
@@ -390,8 +384,8 @@ function cos_setting_page()
     if(!empty($_POST) and $_POST['type'] == 'qcloud_cos_replace') {
         global $wpdb;
         $table_name = $wpdb->prefix .'posts';
-        $oldurl = $_POST['old_url'];
-        $newurl = $_POST['new_url'];
+        $oldurl = esc_url_raw($_POST['old_url']);
+        $newurl = esc_url_raw($_POST['new_url']);
         $result = $wpdb->query("UPDATE $table_name SET post_content = REPLACE( post_content, '$oldurl', '$newurl') ");
 
         echo '<div class="updated"><p><strong>替换成功！共批量执行'.$result.'条！</strong></p></div>';
@@ -431,7 +425,7 @@ function cos_setting_page()
     $cos_nolocalsaving = ($cos_nolocalsaving == 'true');
     ?>
     <div class="wrap" style="margin: 10px;">
-        <h2>腾讯云 COS 设置<a href="https://github.com/sy-records/wordpress-qcloud-cos/releases/latest" class="feedback add-new-h2" target="_blank">查看发布版本</a> <span style="font-size: 13px;">当前版本：1.5.0</span></h2>
+        <h2>腾讯云 COS 设置<a href="https://github.com/sy-records/wordpress-qcloud-cos/releases/latest" class="feedback add-new-h2" target="_blank">查看发布版本</a> <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h2>
 
         <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
@@ -450,24 +444,15 @@ function cos_setting_page()
                         <legend>存储桶地域</legend>
                     </th>
                     <td><select name="regional">
-                            <option value="tj" <?php if ($cos_regional == 'tj') {echo ' selected="selected"';
-                                               }?>>北京一区（华北）</option>
-                            <option value="bj" <?php if ($cos_regional == 'bj') {echo ' selected="selected"';
-                                               }?>>北京</option>
-                            <option value="sh" <?php if ($cos_regional == 'sh') {echo ' selected="selected"';
-                                               }?>>上海（华东）</option>
-                            <option value="gz" <?php if ($cos_regional == 'gz') {echo ' selected="selected"';
-                                               }?>>广州（华南）</option>
-                            <option value="cd" <?php if ($cos_regional == 'cd') {echo ' selected="selected"';
-                                               }?>>成都（西南）</option>
-                            <option value="sgp" <?php if ($cos_regional == 'sgp') {echo ' selected="selected"';
-                                                }?>>新加坡</option>
-                            <option value="hk" <?php if ($cos_regional == 'hk') {echo ' selected="selected"';
-                                               }?>>香港</option>
-                            <option value="ca" <?php if ($cos_regional == 'ca') {echo ' selected="selected"';
-                                               }?>>多伦多</option>
-                            <option value="ger" <?php if ($cos_regional == 'ger') {echo ' selected="selected"';
-                                                }?>>法兰克福</option>
+                            <option value="tj" <?php if ($cos_regional == 'tj') {echo ' selected="selected"';}?>>北京一区（华北）</option>
+                            <option value="bj" <?php if ($cos_regional == 'bj') {echo ' selected="selected"';}?>>北京</option>
+                            <option value="sh" <?php if ($cos_regional == 'sh') {echo ' selected="selected"';}?>>上海（华东）</option>
+                            <option value="gz" <?php if ($cos_regional == 'gz') {echo ' selected="selected"';}?>>广州（华南）</option>
+                            <option value="cd" <?php if ($cos_regional == 'cd') {echo ' selected="selected"';}?>>成都（西南）</option>
+                            <option value="hk" <?php if ($cos_regional == 'hk') {echo ' selected="selected"';}?>>中国香港</option>
+                            <option value="sgp" <?php if ($cos_regional == 'sgp') {echo ' selected="selected"';}?>>新加坡</option>
+                            <option value="ca" <?php if ($cos_regional == 'ca') {echo ' selected="selected"';}?>>多伦多</option>
+                            <option value="ger" <?php if ($cos_regional == 'ger') {echo ' selected="selected"';}?>>法兰克福</option>
 
                         </select>
                         <p>请选择您创建的<code>存储桶</code>所在地域</p>
@@ -475,23 +460,23 @@ function cos_setting_page()
                 </tr>
                 <tr>
                     <th>
-                        <legend>APP ID 设置</legend>
+                        <legend>APP ID</legend>
                     </th>
                     <td>
                         <input type="text" name="app_id" value="<?php echo $cos_app_id; ?>" size="50" placeholder="APP ID"/>
 
-                        <p>请先访问 <a href="https://console.cloud.tencent.com/cos5/key" target="_blank">腾讯云控制台</a> 获取 <code>APP ID、secretID、secretKey</code></p>
+                        <p>请先访问 <a href="https://console.cloud.tencent.com/cos5/key" target="_blank">腾讯云控制台</a> 获取 <code>APP ID、SecretID、SecretKey</code></p>
                     </td>
                 </tr>
                 <tr>
                     <th>
-                        <legend>secretID</legend>
+                        <legend>SecretID</legend>
                     </th>
                     <td><input type="text" name="secret_id" value="<?php echo $cos_secret_id; ?>" size="50" placeholder="secretID"/></td>
                 </tr>
                 <tr>
                     <th>
-                        <legend>secretKey</legend>
+                        <legend>SecretKey</legend>
                     </th>
                     <td>
                         <input type="text" name="secret_key" value="<?php echo $cos_secret_key; ?>" size="50" placeholder="secretKey"/>
@@ -520,7 +505,7 @@ function cos_setting_page()
                 </tr>
                 <tr>
                     <th>
-                        <legend>本地文件夹：</legend>
+                        <legend>本地文件夹</legend>
                     </th>
                     <td>
                         <input type="text" name="upload_path" value="<?php echo $upload_path; ?>" size="50" placeholder="请输入上传文件夹"/>
@@ -530,7 +515,7 @@ function cos_setting_page()
                 </tr>
                 <tr>
                     <th>
-                        <legend>URL前缀：</legend>
+                        <legend>URL前缀</legend>
                     </th>
                     <td>
                         <input type="text" name="upload_url_path" value="<?php echo $upload_url_path; ?>" size="50" placeholder="请输入URL前缀"/>
@@ -545,10 +530,8 @@ function cos_setting_page()
                     </td>
                 </tr>
                 <tr>
-                    <th>
-                        <legend>更新选项</legend>
-                    </th>
-                    <td><input type="submit" name="submit" value="更新"/></td>
+                    <th><legend>保存/更新选项</legend></th>
+                    <td><input type="submit" name="submit" class="button button-primary" value="保存更改"/></td>
                 </tr>
             </table>
             <input type="hidden" name="type" value="cos_set">
@@ -561,7 +544,7 @@ function cos_setting_page()
                     </th>
                     <input type="hidden" name="type" value="qcloud_cos_all">
                     <td>
-                        <input type="submit" name="submit" value="开始同步"/>
+                        <input type="submit" name="submit" class="button button-secondary" value="开始同步"/>
                         <p><b>注意：如果是首次同步，执行时间将会十分十分长（根据你的历史附件数量），有可能会因执行时间过长，页面显示超时或者报错。<br> 所以，建议那些几千上万附件的大神们，考虑官方的 <a target="_blank" rel="nofollow" href="https://www.qcloud.com/document/product/436/7133">同步工具</a></b></p>
                     </td>
                 </tr>
@@ -575,7 +558,7 @@ function cos_setting_page()
                         <legend>数据库原链接替换</legend>
                     </th>
                     <td>
-                        <input type="text" name="old_url"  size="50" placeholder="请输入要替换的旧域名"/>
+                        <input type="text" name="old_url" size="50" placeholder="请输入要替换的旧域名"/>
                     </td>
                 </tr>
                 <tr>
@@ -583,7 +566,7 @@ function cos_setting_page()
                         <legend></legend>
                     </th>
                     <td>
-                        <input type="text" name="new_url"  size="50" placeholder="请输入要替换的新域名"/>
+                        <input type="text" name="new_url" size="50" placeholder="请输入要替换的新域名"/>
                     </td>
                 </tr>
                 <tr>
@@ -592,7 +575,7 @@ function cos_setting_page()
                     </th>
                     <input type="hidden" name="type" value="qcloud_cos_replace">
                     <td>
-                        <input type="submit" name="submit" value="开始替换"/>
+                        <input type="submit" name="submit"  class="button button-secondary" value="开始替换"/>
                         <p><b>注意：如果是首次替换，请注意备份！此功能只限于替换文章中使用的资源链接</b></p>
                     </td>
                 </tr>
