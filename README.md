@@ -46,6 +46,10 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 * WordPress 后台设置时，`存储桶设置`的 input 框只需填写桶名，无需带上`-你的APPID`
 
 ## 更新记录
+2020-01-14
+* 优化button按钮样式
+* 优化sdk中的代码
+> v4 sdk的最后一个版本
 
 2020-01-09
 * 修复第一次删除文件失败，报错`ERROR_PROXY_APPID_USERID_NOTMATCH`，导致删除文件不完整
@@ -91,7 +95,7 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 * 存储桶设置
 > 访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/bucket) 创建存储桶，把创建存储桶时要求你填写的**存储桶名称**，把**存储桶名称**填到这里就可以了，没有后面的`-appid`  
-> 比如我创建成功的存储桶是`luffy-125000000`，这里填写`luffy`即可
+> `examplebucket-1250000000`，其中`examplebucket`为存储桶名称，`1250000000`为 APPID。
 
 * 存储桶地域
 > 选择你创建存储桶时所选的地域即可
