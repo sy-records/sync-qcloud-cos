@@ -1,0 +1,5 @@
+{
+    "require": {
+        "qcloud/cos-sdk-v5": "^2.0"
+    }
+}
