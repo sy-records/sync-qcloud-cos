@@ -1,30 +1,29 @@
 <?php
 /*
-Plugin Name: QCloud COS
+Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.5.1
+Version: 1.6.0
 Author: 沈唁
 Author URI: https://qq52o.me
 License: GPL v3
 */
 
-require_once 'sdk/include.php';
+require_once 'cos-sdk-v5/vendor/autoload.php';
 
-use Qcloudcos\Cosapi;
+use Qcloud\Cos\Client;
 
-define('COS_VERSION', "1.5.1");
+define('COS_VERSION', "1.6.0");
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
 register_activation_hook(__FILE__, 'cos_set_options');
-
 // 初始化选项
 function cos_set_options()
 {
     $options = array(
         'bucket' => "",
-        'regional' => 'gz',
+        'regional' => "ap-beijing",
         'app_id' => "",
         'secret_id' => "",
         'secret_key' => "",
@@ -35,10 +34,24 @@ function cos_set_options()
     add_option('cos_options', $options, '', 'yes');
 }
 
-// 设置COS所在的区域：
-$cos_opt = get_option('cos_options', true);
-$regional = esc_attr($cos_opt['regional']);
-Cosapi::setRegion($regional);
+function cos_get_client()
+{
+    $cos_opt = get_option('cos_options', true);
+    return new Client(array(
+                    'region' => esc_attr($cos_opt['regional']),
+                    'credentials' => array(
+                            "secretId" => esc_attr($cos_opt['secret_id']),
+                            "secretKey" => esc_attr($cos_opt['secret_key'])
+                    )));
+}
+
+function cos_get_bucket_name()
+{
+    $cos_options = get_option('cos_options', true);
+    $cos_bucket = esc_attr($cos_options['bucket']);
+    $cos_app_id = esc_attr($cos_options['app_id']);
+    return $cos_bucket . '-' . $cos_app_id;
+}
 
 /**
  * 上传函数
@@ -48,46 +61,21 @@ Cosapi::setRegion($regional);
  * @param  $opt
  * @return bool
  */
-function cos_file_upload($object, $file, $opt = array())
+function cos_file_upload($object, $file)
 {
-    //如果文件不存在，直接返回FALSE
+    //如果文件不存在，直接返回false
     if (!@file_exists($file)) {
         return false;
     }
 
-    //获取WP配置信息
-    $cos_options = get_option('cos_options', true);
-    $cos_bucket = esc_attr($cos_options['bucket']);
-    if (@file_exists($file)) {
-        $dirname = dirname($object);
-        cos_create_folder($cos_bucket, $dirname);
-        Cosapi::upload($cos_bucket, $file, $object);
+    $bucket = cos_get_bucket_name();
+    $file = fopen($file, 'rb');
+    if ($file) {
+        $cosClient = cos_get_client();
+        $cosClient->Upload($bucket, $object, $file);
     } else {
         return false;
     }
-}
-
-/**
- * 创建相应的目录
- *
- * @param $cos_bucket
- * @param $dir
- */
-function cos_create_folder($cos_bucket, $dir)
-{
-    $data = Cosapi::statFolder($cos_bucket, $dir . '/');
-    if ($data['code'] == -166) {
-        $dir_array = explode('/', $dir);
-        $dir_name = '';
-        foreach ($dir_array as $dir) {
-            $dir_name .= ($dir . '/');
-            $result = Cosapi::statFolder($cos_bucket, $dir_name);
-            if ($result['code'] == -166) {
-                $ret = Cosapi::createFolder($cos_bucket, $dir_name);
-            }
-        }
-    }
-    //var_dump($data,$result,$ret);
 }
 
 /**
@@ -127,6 +115,18 @@ function cos_delete_local_file($file)
 }
 
 /**
+ * 删除cos中的文件
+ * @param $file
+ * @return bool
+ */
+function cos_delete_cos_file($file)
+{
+    $bucket = cos_get_bucket_name();
+    $cosClient = cos_get_client();
+    $cosClient->deleteObject(array('Bucket' => $bucket, 'Key' => $file));
+}
+
+/**
  * 上传附件（包括图片的原图）
  *
  * @param  $metadata
@@ -134,7 +134,6 @@ function cos_delete_local_file($file)
  */
 function cos_upload_attachments($metadata)
 {
-    $wp_uploads = wp_upload_dir();
     //生成object在OSS中的存储路径
     if (get_option('upload_path') == '.') {
         //如果含有“./”则去除之
@@ -146,11 +145,8 @@ function cos_upload_attachments($metadata)
     //在本地的存储路径
     $file = get_home_path() . $object; //向上兼容，较早的WordPress版本上$metadata['file']存放的是相对路径
 
-    //设置可选参数
-    $opt = array('Content-Type' => $metadata['type']);
-
     //执行上传操作
-    cos_file_upload('/' . $object, $file, $opt);
+    cos_file_upload('/' . $object, $file);
 
     //如果不在本地保存，则删除本地文件
     if (cos_is_delete_local_file()) {
@@ -202,11 +198,9 @@ function cos_upload_thumbs($metadata)
             $object = '/' . $object_path . $val['file'];
             //生成本地存储路径
             $file = $file_path . $val['file'];
-            //设置可选参数
-            $opt = array('Content-Type' => $val['mime-type']);
 
             //执行上传操作
-            cos_file_upload($object, $file, $opt);
+            cos_file_upload($object, $file);
 
             //如果不在本地保存，则删除
             if ($is_delete_local_file) {
@@ -222,28 +216,6 @@ function cos_upload_thumbs($metadata)
 if (substr_count($_SERVER['REQUEST_URI'], '/update.php') <= 0) {
     add_filter('wp_generate_attachment_metadata', 'cos_upload_thumbs', 100);
 }
-
-/**
- * 删除远程服务器上的单个文件
- */
-//function cos_delete_remote_file($file)
-//{
-//    //获取WP配置信息
-//    $cos_options = get_option('cos_options', true);
-//    $cos_bucket = esc_attr($cos_options['bucket']);
-//
-//    //得到远程路径
-//    $file = str_replace("\\", '/', $file);
-//    $del_file_path = str_replace(get_home_path(), '/', $file);
-//    try {
-//        //删除文件
-//        Cosapi::delFile($cos_bucket, $del_file_path);
-//    } catch (Exception $ex) {
-//
-//    }
-//    return $file;
-//}
-//add_action('wp_delete_file', 'cos_delete_remote_file', 100);
 
 /**
  * 删除远端文件，删除文件时触发
@@ -262,15 +234,14 @@ function cos_delete_remote_attachment($post_id) {
             $upload_path = 'wp-content/uploads';
         }
         $file_path = $upload_path . '/' . $meta['file'];
-
-        Cosapi::delFile($cos_bucket, str_replace("\\", '/', $file_path));
+        cos_delete_cos_file(str_replace("\\", '/', $file_path));
         $is_nothumb = (esc_attr($cos_options['nothumb']) == 'false');
         if ($is_nothumb) {
             // 删除缩略图
             if (isset($meta['sizes']) && count($meta['sizes']) > 0) {
                 foreach ($meta['sizes'] as $val) {
                     $size_file = dirname($file_path) . '/' . $val['file'];
-                    Cosapi::delFile($cos_bucket, str_replace("\\", '/', $size_file));
+                    cos_delete_cos_file(str_replace("\\", '/', $size_file));
                 }
             }
         }
@@ -290,24 +261,36 @@ if (get_option('upload_path') == '.') {
     add_filter('wp_get_attachment_url', 'cos_modefiy_img_url', 30, 2);
 }
 
+function cos_function_each(&$array)
+{
+    $res = array();
+    $key = key($array);
+    if ($key !== null) {
+        next($array);
+        $res[1] = $res['value'] = $array[$key];
+        $res[0] = $res['key'] = $key;
+    } else {
+        $res = false;
+    }
+    return $res;
+}
+
 function cos_read_dir_queue($dir)
 {
     if (isset($dir)) {
         $files = array();
         $queue = array($dir);
-        while ($data = each($queue)) {
+        while ($data = cos_function_each($queue)) {
             $path = $data['value'];
             if (is_dir($path) && $handle = opendir($path)) {
                 while ($file = readdir($handle)) {
                     if ($file == '.' || $file == '..') {
                         continue;
                     }
-
                     $files[] = $real_path = $path . '/' . $file;
                     if (is_dir($real_path)) {
                         $queue[] = $real_path;
                     }
-
                     //echo explode(get_option('upload_path'),$path)[1];
                 }
             }
@@ -332,6 +315,8 @@ function cos_plugin_action_links($links, $file)
 {
     if ($file == plugin_basename(dirname(__FILE__) . '/wordpress-qcloud-cos.php')) {
         $links[] = '<a href="options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php">设置</a>';
+        $links[] = '<a href="https://qq52o.me/sponsor.html" target="_blank">赞赏</a>';
+        $links[] = '<a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">给个star</a>';
     }
     return $links;
 }
@@ -353,29 +338,23 @@ function cos_setting_page()
     }
     $options = array();
     if (!empty($_POST) and $_POST['type'] == 'cos_set') {
-        $options['bucket'] = (isset($_POST['bucket'])) ? trim(stripslashes($_POST['bucket'])) : '';
-        $options['regional'] = (isset($_POST['regional'])) ? trim(stripslashes($_POST['regional'])) : '';
-        $options['app_id'] = (isset($_POST['app_id'])) ? trim(stripslashes($_POST['app_id'])) : '';
-        $options['secret_id'] = (isset($_POST['secret_id'])) ? trim(stripslashes($_POST['secret_id'])) : '';
-        $options['secret_key'] = (isset($_POST['secret_key'])) ? trim(stripslashes($_POST['secret_key'])) : '';
-        $options['nothumb'] = (isset($_POST['nothumb'])) ? 'true' : 'false';
-        $options['nolocalsaving'] = (isset($_POST['nolocalsaving'])) ? 'true' : 'false';
+        $options['bucket'] = isset($_POST['bucket']) ? sanitize_text_field($_POST['bucket']) : '';
+        $options['regional'] = isset($_POST['regional']) ? sanitize_text_field($_POST['regional']) : '';
+        $options['app_id'] = isset($_POST['app_id']) ? sanitize_text_field($_POST['app_id']) : '';
+        $options['secret_id'] = isset($_POST['secret_id']) ? sanitize_text_field($_POST['secret_id']) : '';
+        $options['secret_key'] = isset($_POST['secret_key']) ? sanitize_text_field($_POST['secret_key']) : '';
+        $options['nothumb'] = isset($_POST['nothumb']) ? 'true' : 'false';
+        $options['nolocalsaving'] = isset($_POST['nolocalsaving']) ? 'true' : 'false';
         //仅用于插件卸载时比较使用
-        $options['upload_url_path'] = (isset($_POST['upload_url_path'])) ? trim(stripslashes($_POST['upload_url_path'])) : '';
+        $options['upload_url_path'] = isset($_POST['upload_url_path']) ? sanitize_text_field(stripslashes($_POST['upload_url_path'])) : '';
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_all') {
-        $cos_options = get_option('cos_options', true);
-        $cos_bucket = esc_attr($cos_options['bucket']);
-
         $synv = cos_read_dir_queue(get_home_path() . get_option('upload_path'));
         $i = 0;
         foreach ($synv as $k) {
-            $ret = Cosapi::stat($cos_bucket, $k['x']);
-            if ($ret['code'] != 0) {
-                $i++;
-                cos_file_upload($k['x'], $k['j']);
-            }
+            $i++;
+            cos_file_upload($k['x'], $k['j']);
         }
         echo '<div class="updated"><p><strong>本次操作成功同步' . $i . '个文件</strong></p></div>';
     }
@@ -396,11 +375,10 @@ function cos_setting_page()
         //更新数据库
         update_option('cos_options', $options);
 
-        $upload_path = trim(trim(stripslashes($_POST['upload_path'])), '/');
+        $upload_path = sanitize_text_field(trim(stripslashes($_POST['upload_path']), '/'));
         $upload_path = ($upload_path == '') ? ('wp-content/uploads') : ($upload_path);
         update_option('upload_path', $upload_path);
-
-        $upload_url_path = trim(trim(stripslashes($_POST['upload_url_path'])), '/');
+        $upload_url_path = sanitize_text_field(trim(stripslashes($_POST['upload_url_path']), '/'));
         update_option('upload_url_path', $upload_url_path);
 
         ?>
@@ -423,10 +401,15 @@ function cos_setting_page()
 
     $cos_nolocalsaving = esc_attr($cos_options['nolocalsaving']);
     $cos_nolocalsaving = ($cos_nolocalsaving == 'true');
+    
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
     ?>
     <div class="wrap" style="margin: 10px;">
-        <h2>腾讯云 COS 设置<a href="https://github.com/sy-records/wordpress-qcloud-cos/releases/latest" class="feedback add-new-h2" target="_blank">查看发布版本</a> <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h2>
-
+        <h1>腾讯云 COS 设置 <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
+        <p>插件网站： <a href="https://qq52o.me/" target="_blank">沈唁志</a> / <a href="https://qq52o.me/2518.html" target="_blank">Sync QCloud COS发布页面</a> / <a href="https://qq52o.me/2722.html" target="_blank">详细使用教程</a>；</p>
+        <p>优惠促销： <a href="https://qq52o.me/welfare.html#qcloud" target="_blank">腾讯云优惠</a> / <a href="https://qq52o.me/go/qcloud-cos" target="_blank">腾讯云COS资源包优惠</a>；</p>
+        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">Github</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；</p>
+        <hr/>
         <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
                 <tr>
@@ -444,15 +427,22 @@ function cos_setting_page()
                         <legend>存储桶地域</legend>
                     </th>
                     <td><select name="regional">
-                            <option value="tj" <?php if ($cos_regional == 'tj') {echo ' selected="selected"';}?>>北京一区（华北）</option>
-                            <option value="bj" <?php if ($cos_regional == 'bj') {echo ' selected="selected"';}?>>北京</option>
-                            <option value="sh" <?php if ($cos_regional == 'sh') {echo ' selected="selected"';}?>>上海（华东）</option>
-                            <option value="gz" <?php if ($cos_regional == 'gz') {echo ' selected="selected"';}?>>广州（华南）</option>
-                            <option value="cd" <?php if ($cos_regional == 'cd') {echo ' selected="selected"';}?>>成都（西南）</option>
-                            <option value="hk" <?php if ($cos_regional == 'hk') {echo ' selected="selected"';}?>>中国香港</option>
-                            <option value="sgp" <?php if ($cos_regional == 'sgp') {echo ' selected="selected"';}?>>新加坡</option>
-                            <option value="ca" <?php if ($cos_regional == 'ca') {echo ' selected="selected"';}?>>多伦多</option>
-                            <option value="ger" <?php if ($cos_regional == 'ger') {echo ' selected="selected"';}?>>法兰克福</option>
+                            <option value="ap-beijing-1" <?php if ($cos_regional == 'tj' || $cos_regional == 'ap-beijing-1') {echo ' selected="selected"';}?>>北京一区（华北）</option>
+                            <option value="ap-beijing" <?php if ($cos_regional == 'bj' || $cos_regional == 'ap-beijing') {echo ' selected="selected"';}?>>北京</option>
+                            <option value="ap-shanghai" <?php if ($cos_regional == 'sh' || $cos_regional == 'ap-shanghai') {echo ' selected="selected"';}?>>上海（华东）</option>
+                            <option value="ap-guangzhou" <?php if ($cos_regional == 'gz' || $cos_regional == 'ap-guangzhou') {echo ' selected="selected"';}?>>广州（华南）</option>
+                            <option value="ap-chengdu" <?php if ($cos_regional == 'cd' || $cos_regional == 'ap-chengdu') {echo ' selected="selected"';}?>>成都（西南）</option>
+                            <option value="ap-chongqing" <?php if ($cos_regional == 'ap-chongqing') {echo ' selected="selected"';}?>>重庆</option>
+                            <option value="ap-hongkong" <?php if ($cos_regional == 'hk' || $cos_regional == 'ap-hongkong') {echo ' selected="selected"';}?>>中国香港</option>
+                            <option value="ap-singapore" <?php if ($cos_regional == 'sgp' || $cos_regional == '	ap-singapore') {echo ' selected="selected"';}?>>新加坡</option>
+                            <option value="na-toronto" <?php if ($cos_regional == 'ca' || $cos_regional == 'na-toronto') {echo ' selected="selected"';}?>>多伦多</option>
+                            <option value="eu-frankfurt" <?php if ($cos_regional == 'ger' || $cos_regional == 'eu-frankfurt') {echo ' selected="selected"';}?>>法兰克福</option>
+                            <option value="ap-mumbai" <?php if ($cos_regional == 'ap-mumbai') {echo ' selected="selected"';}?>>孟买</option>
+                            <option value="ap-mumbai" <?php if ($cos_regional == 'ap-mumbai') {echo ' selected="selected"';}?>>首尔</option>
+                            <option value="na-siliconvalley" <?php if ($cos_regional == 'na-siliconvalley') {echo ' selected="selected"';}?>>硅谷</option>
+                            <option value="na-ashburn" <?php if ($cos_regional == 'na-ashburn') {echo ' selected="selected"';}?>>弗吉尼亚</option>
+                            <option value="ap-bangkok" <?php if ($cos_regional == 'ap-bangkok') {echo ' selected="selected"';}?>>曼谷</option>
+                            <option value="eu-moscow" <?php if ($cos_regional == 'eu-moscow') {echo ' selected="selected"';}?>>莫斯科</option>
 
                         </select>
                         <p>请选择您创建的<code>存储桶</code>所在地域</p>
@@ -487,7 +477,7 @@ function cos_setting_page()
                         <legend>不上传缩略图</legend>
                     </th>
                     <td>
-                        <input type="checkbox" name="nothumb" <?php if ($cos_nothumb) { echo 'checked="TRUE"'; } ?> />
+                        <input type="checkbox" name="nothumb" <?php if ($cos_nothumb) { echo 'checked="checked"'; } ?> />
 
                         <p>建议不勾选</p>
                     </td>
@@ -498,7 +488,7 @@ function cos_setting_page()
                     </th>
                     <td>
                         <input type="checkbox"
-                               name="nolocalsaving" <?php if ($cos_nolocalsaving) { echo 'checked="TRUE"'; } ?> />
+                               name="nolocalsaving" <?php if ($cos_nolocalsaving) { echo 'checked="checked"'; } ?> />
 
                         <p>建议不勾选</p>
                     </td>
@@ -522,7 +512,7 @@ function cos_setting_page()
 
                         <p><b>注意：</b></p>
 
-                        <p>1）URL前缀的格式为 <code>http://{cos域名}</code> （“本地文件夹”为 <code>.</code> 时），或者 <code>http://{cos域名}/{本地文件夹}</code> ，“本地文件夹”务必与上面保持一致（结尾无 <code>/</code> ）。</p>
+                        <p>1）URL前缀的格式为 <code><?php echo $protocol;?>{cos域名}/{本地文件夹}</code> ，“本地文件夹”务必与上面保持一致（结尾无 <code>/</code> ），或者“本地文件夹”为 <code>.</code> 时 <code><?php echo $protocol;?>{cos域名}</code> 。</p>
 
                         <p>2）COS中的存放路径（即“文件夹”）与上述 <code>本地文件夹</code> 中定义的路径是相同的（出于方便切换考虑）。</p>
 
@@ -536,7 +526,7 @@ function cos_setting_page()
             </table>
             <input type="hidden" name="type" value="cos_set">
         </form>
-        <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
+        <form name="form2" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
                 <tr>
                     <th>
@@ -551,7 +541,7 @@ function cos_setting_page()
             </table>
         </form>
         <hr>
-        <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
+        <form name="form3" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
                 <tr>
                     <th>
