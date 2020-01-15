@@ -20,32 +20,35 @@
 
 * 可配置是否上传缩略图和是否保留本地备份
 * 本地删除可同步删除腾讯云上面的文件
-* 支持腾讯云云存储服务绑定的个性域名
+* 支持腾讯云COS存储桶绑定自定义域名
 * 支持替换数据库中旧的资源链接地址
 * 支持北京、上海、广州、香港、法兰克福等完整地域使用
 
 ## 安装
 
-### 直接下载源码
+### 后台安装
+
+WordPress 后台安装插件页面搜索`Sync QCloud COS`，点击安装
+
+> 2020-01-15：近期会支持，正在和 WordPress Plugin Review Team 沟通
+
+### 下载源码
 
 从 Github 下载源码，通过 WordPress 后台上传安装，或者直接将源码上传到 WordPress 插件目录`wp-content/plugins`，然后在后台启用
 
-Github 项目地址:  [https://github.com/sy-records/wordpress-qcloud-cos](https://github.com/sy-records/wordpress-qcloud-cos)
-
-Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releases](https://github.com/sy-records/wordpress-qcloud-cos/releases)
+Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releases/latest](https://github.com/sy-records/wordpress-qcloud-cos/releases/latest)
 
 ## 修改配置
 * 方法一：在 WordPress 插件管理页面有设置按钮，进行设置
 * 方法二：在 WordPress 后台管理左侧导航栏`设置`下`腾讯云COS设置`，点击进入设置页面
 
-## 特别说明
-
-* 本插件仅支持`PHP 5.4+`版本
-* 推荐使用腾讯云`COS V5`版本
-* 存储桶访问权限设置为`公有读私有写`
-* WordPress 后台设置时，`存储桶设置`的 input 框只需填写桶名，无需带上`-你的APPID`
-
 ## 更新记录
+
+2020-01-15
+* 升级sdk为v5版本
+* 修复本地文件夹和URL前缀结尾`/`去除失败
+* 优化URL前缀注意事项提示中的http和https
+
 2020-01-14
 * 优化button按钮样式
 * 优化sdk中的代码
@@ -87,11 +90,9 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 ![update-wordpress-posts-photos.png](images/update-wordpress-posts-photos.png)
 
-2、浏览器控制台报错跨域问题
-
-见之前的文章[https://qq52o.me/2130.html](https://qq52o.me/2130.html)
-
 ## 配置指南
+
+查看详细教程[https://qq52o.me/2722.html](https://qq52o.me/2722.html)
 
 * 存储桶设置
 > 访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/bucket) 创建存储桶，把创建存储桶时要求你填写的**存储桶名称**，把**存储桶名称**填到这里就可以了，没有后面的`-appid`  
@@ -100,8 +101,8 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 * 存储桶地域
 > 选择你创建存储桶时所选的地域即可
 
-* APP ID、secretID、secretKey
-> APP ID 填写上文存储桶设置中所说的`125000000`即可；也可以访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/key) 获取 APP ID、secretID、secretKey
+* APP ID、SecretID、SecretKey
+> APP ID 填写上文存储桶设置中所说的`125000000`即可；也可以访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/key) 获取 APP ID、SecretID、SecretKey
 
 ## 插件截图
 
