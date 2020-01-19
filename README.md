@@ -85,9 +85,7 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 1. 怎么替换文章中之前的旧资源地址链接
 
-这个插件已经加上了替换数据库中之前的旧资源地址链接功能，只需要填好对应的链接即可，如图所示
-
-![update-wordpress-posts-photos.png](images/update-wordpress-posts-photos.png)
+这个插件已经加上了替换数据库中之前的旧资源地址链接功能，只需要填好对应的链接即可
 
 2. 使用子账户报错`Cos Error Code: AccessDenied, Status Code: 403`
 
@@ -110,3 +108,6 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 ## 插件截图
 
 ![设置页面](images/screenshot-1.png)
+
+![update-wordpress-posts-photos.png](images/update-wordpress-posts-photos.png)
+
