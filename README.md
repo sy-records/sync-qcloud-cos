@@ -55,6 +55,7 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 2020-02-09
 * 增强存储桶配置验证
 * cos client增加schema
+* 修复腾讯云cos返回数据格式不一致问题
 
 2020-01-15
 * 升级sdk为v5版本
