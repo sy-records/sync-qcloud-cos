@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.6.1
+Version: 1.6.2
 Author: 沈唁
 Author URI: https://qq52o.me
 License: GPL v3
@@ -13,7 +13,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 
 use Qcloud\Cos\Client;
 
-define('COS_VERSION', "1.6.1");
+define('COS_VERSION', "1.6.2");
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -81,11 +81,19 @@ function cos_check_bucket($cos_opt)
             }
 
             $buckets_msg = "存储桶名称错误，你需要设置的存储桶名称可能在以下名称中： ";
-            foreach ($buckets_obj['Buckets'][0]['Bucket'] as $bucket) {
-                if ($setting_bucket == $bucket['Name']) {
+            if (isset($buckets_obj['Buckets'][0]['Bucket'][0])) {
+                foreach ($buckets_obj['Buckets'][0]['Bucket'] as $bucket) {
+                    if ($setting_bucket == $bucket['Name']) {
+                        return true;
+                    } else {
+                        $buckets_msg .= "<code>{$bucket['Name']}</code> ";
+                    }
+                }
+            } else {
+                if ($setting_bucket == $buckets_obj['Buckets'][0]['Bucket']['Name']) {
                     return true;
                 } else {
-                    $buckets_msg .= "<code>{$bucket['Name']}</code> ";
+                    $buckets_msg .= "<code>{$buckets_obj['Buckets'][0]['Bucket']['Name']}</code> ";
                 }
             }
             echo '<div class="error"><p><strong>'. $buckets_msg .'</strong></p></div>';
