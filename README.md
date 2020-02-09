@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="/wordpress-cos.png" alt="Sync QCloud COS" />
+</p>
+
 # Sync QCloud COS
 
 使用腾讯云对象存储服务 COS 作为附件存储空间的 WordPress 插件
@@ -7,9 +11,6 @@
 [![contact-@Luffy](https://img.shields.io/badge/contact-@Luffy-blue.svg)](https://qq52o.me)
 [![contributors](https://img.shields.io/github/contributors/sy-records/wordpress-qcloud-cos?color=blue)](https://github.com/sy-records/design-patterns/graphs/contributors)
 
-<p align="center">
-    <img src="/wordpress-cos.png" alt="Sync QCloud COS" />
-</p>
 ## 费用
 
 > 腾讯云`COS`目前已修改免费额度，老用户费用不变，长期 50GB
@@ -50,6 +51,10 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 * 方法二：在 WordPress 后台管理左侧导航栏`设置`下`腾讯云COS设置`，点击进入设置页面
 
 ## 更新记录
+
+2020-02-09
+* 增强存储桶配置验证
+* cos client增加schema
 
 2020-01-15
 * 升级sdk为v5版本
