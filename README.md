@@ -1,8 +1,15 @@
-<p align="center">
-    <img src="/wordpress-cos.png" alt="wordpress-qcloud-cos" align="center" />
-</p>
-<p align="center">使用腾讯云对象存储服务 COS 作为附件存储空间的 WordPress 插件</p>
+# Sync QCloud COS
 
+使用腾讯云对象存储服务 COS 作为附件存储空间的 WordPress 插件
+
+[![Latest Version](https://img.shields.io/github/release/sy-records/wordpress-qcloud-cos.svg?style=flat-square)](https://github.com/sy-records/wordpress-qcloud-cos/releases)
+[![License](https://img.shields.io/badge/license-GPL-blue.svg)](LICENSE)
+[![contact-@Luffy](https://img.shields.io/badge/contact-@Luffy-blue.svg)](https://qq52o.me)
+[![contributors](https://img.shields.io/github/contributors/sy-records/wordpress-qcloud-cos?color=blue)](https://github.com/sy-records/design-patterns/graphs/contributors)
+
+<p align="center">
+    <img src="/wordpress-cos.png" alt="Sync QCloud COS" />
+</p>
 ## 费用
 
 > 腾讯云`COS`目前已修改免费额度，老用户费用不变，长期 50GB
@@ -18,12 +25,13 @@
 
 ## 插件特色
 
-* 可配置是否上传缩略图和是否保留本地备份
-* 本地删除可同步删除腾讯云上面的文件
-* 支持腾讯云COS存储桶绑定自定义域名
-* 支持替换数据库中旧的资源链接地址
-* 支持北京、上海、广州、香港、法兰克福等完整地域使用
-* 支持同步历史附件到 COS
+* [x] 可配置是否上传缩略图和是否保留本地备份
+* [x] 本地删除可同步删除腾讯云上面的文件
+* [x] 支持腾讯云COS存储桶绑定自定义域名
+* [x] 支持替换数据库中旧的资源链接地址
+* [x] 支持北京、上海、广州、香港、法兰克福等完整地域使用
+* [x] 支持同步历史附件到 COS
+* [x] 支持验证桶名是否填写正确
 
 ## 安装
 
@@ -90,6 +98,16 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 2. 使用子账户报错`Cos Error Code: AccessDenied, Status Code: 403`
 
 可以使用子账户，但是 APPID 需要填写为存储桶创建者的ID，而不是子账户的ID
+
+3. 上传图片提示`图像后期处理失败，请将其缩小到2500像素并重新上传`
+
+配置的`存储桶名称`填写错误，正确的配置参照下文配置指南中`存储桶名称`
+
+> `v1.6.1`增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
+
+4. 从媒体库中删除了图片，但是`COS`中还是存在
+
+原因是在配置页面选择了`不在本地保留备份`，因为WordPress机制问题，无法获取对应的文件信息
 
 ## 配置指南
 
