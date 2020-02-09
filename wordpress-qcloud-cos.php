@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.6.0
+Version: 1.6.1
 Author: 沈唁
 Author URI: https://qq52o.me
 License: GPL v3
@@ -13,7 +13,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 
 use Qcloud\Cos\Client;
 
-define('COS_VERSION', "1.6.0");
+define('COS_VERSION', "1.6.1");
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -39,6 +39,7 @@ function cos_get_client()
     $cos_opt = get_option('cos_options', true);
     return new Client(array(
                     'region' => esc_attr($cos_opt['regional']),
+                    'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http",
                     'credentials' => array(
                             "secretId" => esc_attr($cos_opt['secret_id']),
                             "secretKey" => esc_attr($cos_opt['secret_key'])
@@ -50,7 +51,51 @@ function cos_get_bucket_name()
     $cos_options = get_option('cos_options', true);
     $cos_bucket = esc_attr($cos_options['bucket']);
     $cos_app_id = esc_attr($cos_options['app_id']);
-    return $cos_bucket . '-' . $cos_app_id;
+    $needle = "-" . $cos_app_id;
+    if (strpos($cos_bucket, $needle) !== false){
+        return $cos_bucket;
+    }
+    return $cos_bucket . $needle;
+}
+
+function cos_check_bucket($cos_opt)
+{
+    $client = new Client(array(
+                     'region' => esc_attr($cos_opt['regional']),
+                     'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http",
+                     'credentials' => array(
+                         "secretId" => esc_attr($cos_opt['secret_id']),
+                         "secretKey" => esc_attr($cos_opt['secret_key'])
+                     )
+                 ));
+    try {
+        $buckets_obj = $client->listBuckets();
+        if (isset($buckets_obj['Buckets'][0]['Bucket'])) {
+            $cos_bucket = esc_attr($cos_opt['bucket']);
+            $cos_app_id = esc_attr($cos_opt['app_id']);
+            $needle = "-".$cos_app_id;
+            if (strpos($cos_bucket, $needle) !== false){
+                $setting_bucket = $cos_bucket;
+            } else {
+                $setting_bucket = $cos_bucket . $needle;
+            }
+
+            $buckets_msg = "存储桶名称错误，你需要设置的存储桶名称可能以下名称中： ";
+            foreach ($buckets_obj['Buckets'][0]['Bucket'] as $bucket) {
+                if ($setting_bucket == $bucket['Name']) {
+                    return true;
+                } else {
+                    $buckets_msg .= "<code>{$bucket['Name']}</code> ";
+                }
+            }
+            echo '<div class="error"><p><strong>'. $buckets_msg .'</strong></p></div>';
+        }
+    } catch (Qcloud\Cos\Exception\ServiceResponseException $e) {
+        $errorMessage = $e->getMessage();
+        $statusCode = $e->getStatusCode();
+        echo '<div class="error"><p><strong>ErrorCode：'. $statusCode .'，ErrorMessage：'. $errorMessage .'</strong></p></div>';
+    }
+    return false;
 }
 
 /**
@@ -225,7 +270,6 @@ function cos_delete_remote_attachment($post_id) {
     $meta = wp_get_attachment_metadata( $post_id );
 
     $cos_options = get_option('cos_options', true);
-    $cos_bucket = esc_attr($cos_options['bucket']);
 
     if (isset($meta['file'])) {
         // meta['file']的格式为 "2020/01/wp-bg.png"
@@ -316,7 +360,7 @@ function cos_plugin_action_links($links, $file)
     if ($file == plugin_basename(dirname(__FILE__) . '/wordpress-qcloud-cos.php')) {
         $links[] = '<a href="options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php">设置</a>';
         $links[] = '<a href="https://qq52o.me/sponsor.html" target="_blank">赞赏</a>';
-        $links[] = '<a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">给个star</a>';
+        $links[] = '<a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">Star支持</a>';
     }
     return $links;
 }
@@ -372,18 +416,20 @@ function cos_setting_page()
 
     // 若$options不为空数组，则更新数据
     if ($options !== array()) {
-        //更新数据库
-        update_option('cos_options', $options);
 
-        $upload_path = sanitize_text_field(trim(stripslashes($_POST['upload_path']), '/'));
-        $upload_path = ($upload_path == '') ? ('wp-content/uploads') : ($upload_path);
-        update_option('upload_path', $upload_path);
-        $upload_url_path = sanitize_text_field(trim(stripslashes($_POST['upload_url_path']), '/'));
-        update_option('upload_url_path', $upload_url_path);
+        $check_status = cos_check_bucket($options);
 
-        ?>
-        <div class="updated"><p><strong>设置已保存！</strong></p></div>
-        <?php
+        if ($check_status){
+            //更新数据库
+            update_option('cos_options', $options);
+
+            $upload_path = sanitize_text_field(trim(stripslashes($_POST['upload_path']), '/'));
+            $upload_path = ($upload_path == '') ? ('wp-content/uploads') : ($upload_path);
+            update_option('upload_path', $upload_path);
+            $upload_url_path = sanitize_text_field(trim(stripslashes($_POST['upload_url_path']), '/'));
+            update_option('upload_url_path', $upload_url_path);
+            echo '<div class="updated"><p><strong>设置已保存！</strong></p></div>';
+        }
     }
 
     $cos_options = get_option('cos_options', true);
