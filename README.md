@@ -52,6 +52,9 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 ## 更新记录
 
+2020-02-16
+* 更新腾讯云SDK至[v2.0.6](https://github.com/tencentyun/cos-php-sdk-v5/releases/tag/v2.0.6)版本
+
 2020-02-09
 * 增强存储桶配置验证
 * cos client增加schema
