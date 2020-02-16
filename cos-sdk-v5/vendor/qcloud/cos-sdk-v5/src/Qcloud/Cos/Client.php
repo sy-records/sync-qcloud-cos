@@ -5,7 +5,6 @@ namespace Qcloud\Cos;
 include("Common.php");
 
 use Qcloud\Cos\Signature;
-use Qcloud\Cos\TokenListener;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\RequestInterface;
@@ -22,10 +21,12 @@ use GuzzleHttp\Pool;
 
 
 class Client extends GuzzleClient {
-    const VERSION = '2.0.5';
+    const VERSION = '2.0.6';
 
-    private $httpCilent;
+    public $httpClient;
+    
     private $api;
+    private $desc;
     private $cosConfig;
     private $signature;
     private $rawCosConfig;
@@ -33,7 +34,6 @@ class Client extends GuzzleClient {
     public function __construct($cosConfig) {
         $this->rawCosConfig = $cosConfig;
         $this->cosConfig['schema'] = isset($cosConfig['schema']) ? $cosConfig['schema'] : 'http';
-        $this->cosConfig['endpoint'] = isset($cosConfig['endpoint']) ? $cosConfig['endpoint'] : null;
         $this->cosConfig['region'] =  region_map($cosConfig['region']);
         $this->cosConfig['appId'] = isset($cosConfig['credentials']['appId']) ? $cosConfig['credentials']['appId'] : null;
         $this->cosConfig['secretId'] = isset($cosConfig['credentials']['secretId']) ? $cosConfig['credentials']['secretId'] : "";
@@ -45,6 +45,7 @@ class Client extends GuzzleClient {
         $this->cosConfig['ip'] = isset($cosConfig['ip']) ? $cosConfig['ip'] : null;
         $this->cosConfig['port'] = isset($cosConfig['port']) ? $cosConfig['port'] : null;
         $this->cosConfig['endpoint'] = isset($cosConfig['endpoint']) ? $cosConfig['endpoint'] : 'myqcloud.com';
+        $this->cosConfig['domain'] = isset($cosConfig['domain']) ? $cosConfig['domain'] : null;
         $this->cosConfig['proxy'] = isset($cosConfig['proxy']) ? $cosConfig['proxy'] : null;
         $this->cosConfig['userAgent'] = isset($cosConfig['userAgent']) ? $cosConfig['userAgent'] : 'cos-php-sdk-v5.'. Client::VERSION;
         $this->cosConfig['pathStyle'] = isset($cosConfig['pathStyle']) ? $cosConfig['pathStyle'] : false;
@@ -162,7 +163,7 @@ class Client extends GuzzleClient {
     public function getObjectUrl($bucket, $key, $expires = null, array $args = array()) {
         $command = $this->getCommand('GetObject', $args + array('Bucket' => $bucket, 'Key' => $key));
         $request = $this->commandToRequestTransformer($command);
-        return $this->createPresignedUrl($request, $expires);
+        return $this->createPresignedUrl($request, $expires)->__toString();
     }
 
     public function upload($bucket, $key, $body, $options = array()) {
@@ -265,26 +266,28 @@ class Client extends GuzzleClient {
     }
 
     public static function explodeKey($key) {
-
         // Remove a leading slash if one is found
         $split_key = explode('/', $key && $key[0] == '/' ? substr($key, 1) : $key);
         // Remove empty element
-
         $split_key = array_filter($split_key, function($var) {
             return !($var == '' || $var == null);
         });
-        return implode("/", $split_key);
+        $final_key = implode("/", $split_key);
+        if (substr($key, -1)  == '/') {
+            $final_key = $final_key . '/';
+        }
+        return $final_key;
     }
 
-	public static function handleSignature($secretId, $secretKey) {
-		return function (callable $handler) use ($secretId, $secretKey) {
-			return new SignatureMiddleware($handler, $secretId, $secretKey);
-		};
-	}
+    public static function handleSignature($secretId, $secretKey) {
+            return function (callable $handler) use ($secretId, $secretKey) {
+                    return new SignatureMiddleware($handler, $secretId, $secretKey);
+            };
+    }
 
-	public static function handleErrors() {
-		return function (callable $handler) {
-			return new ExceptionMiddleware($handler);
-		};
-	}
+    public static function handleErrors() {
+            return function (callable $handler) {
+                    return new ExceptionMiddleware($handler);
+            };
+    }
 }

@@ -401,17 +401,17 @@
     },
     {
         "name": "qcloud/cos-sdk-v5",
-        "version": "v2.0.5",
-        "version_normalized": "2.0.5.0",
+        "version": "v2.0.6",
+        "version_normalized": "2.0.6.0",
         "source": {
             "type": "git",
             "url": "https://github.com/tencentyun/cos-php-sdk-v5.git",
-            "reference": "fa6791c0761a35f4d2493eaf31ed326b56cc0a32"
+            "reference": "2e4b89aecdacf01dd9adeb9dc080eb8535f3f155"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/tencentyun/cos-php-sdk-v5/zipball/fa6791c0761a35f4d2493eaf31ed326b56cc0a32",
-            "reference": "fa6791c0761a35f4d2493eaf31ed326b56cc0a32",
+            "url": "https://api.github.com/repos/tencentyun/cos-php-sdk-v5/zipball/2e4b89aecdacf01dd9adeb9dc080eb8535f3f155",
+            "reference": "2e4b89aecdacf01dd9adeb9dc080eb8535f3f155",
             "shasum": "",
             "mirrors": [
                 {
@@ -425,7 +425,7 @@
             "guzzlehttp/guzzle-services": "~1.1",
             "php": ">=5.3.0"
         },
-        "time": "2019-12-24T09:54:39+00:00",
+        "time": "2020-02-14T12:07:18+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {

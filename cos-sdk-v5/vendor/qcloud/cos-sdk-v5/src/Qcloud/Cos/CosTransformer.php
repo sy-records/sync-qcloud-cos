@@ -8,7 +8,6 @@ use GuzzleHttp\HandlerStack;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Qcloud\Cos\Signature;
-use Qcloud\Cos\TokenListener;
 use GuzzleHttp\Command\Guzzle\Description;
 use GuzzleHttp\Command\Guzzle\GuzzleClient;
 use GuzzleHttp\Command\CommandInterface;
@@ -16,6 +15,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Psr7\Uri;
+use InvalidArgumentException;
 
 
 class CosTransformer {
@@ -56,8 +56,11 @@ class CosTransformer {
                 $uri = str_replace("{/Key*}", encodeKey($command['Key']), $uri);
             }
         }
-        
         $origin_host = $bucketname. '.cos.' . $this->config['region'] . '.' . $this->config['endpoint'];
+        // domain
+        if ($this->config['domain'] != null) {
+            $origin_host = $this->config['domain'];
+        }
         $host = $origin_host;
         if ($this->config['ip'] != null) {
             $host = $this->config['ip'];
@@ -96,7 +99,7 @@ class CosTransformer {
         if (null !== $body) {
             return $request;
         } else {
-            throw new Exception\InvalidArgumentException(
+            throw new InvalidArgumentException(
                 "You must specify a non-null value for the {$bodyParameter} or {$sourceParameter} parameters.");
         }
     }
