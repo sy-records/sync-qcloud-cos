@@ -13,7 +13,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 
 use Qcloud\Cos\Client;
 
-define('COS_VERSION', "1.6.2");
+define('COS_VERSION', "1.6.3");
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
