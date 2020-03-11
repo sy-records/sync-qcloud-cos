@@ -36,7 +36,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 == Installation ==
 
-1. Upload the folder `wordpress-qcloud-cos` to the `/wp-content/plugins/` directory
+1. Upload the folder `wordpress-qcloud-cos` or `sync-qcloud-cos` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. That's all
 
@@ -51,15 +51,15 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 这个插件已经加上了替换数据库中之前的旧资源地址链接功能，只需要填好对应的链接即可
 
-= 使用子账户报错`Cos Error Code: AccessDenied, Status Code: 403` =
+= 使用子账户报错：Cos Error Code: AccessDenied, Status Code: 403 =
 
 可以使用子账户，但是 APPID 需要填写为存储桶创建者的ID，而不是子账户的ID。例如[配置指南](https://github.com/sy-records/wordpress-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中的`1250000000`就是APPID
 
-= 上传图片提示`图像后期处理失败，请将其缩小到2500像素并重新上传` =
+= 上传图片提示：图像后期处理失败，请将其缩小到2500像素并重新上传 =
 
 配置的`存储桶名称`填写错误，正确的配置参照[配置指南](https://github.com/sy-records/wordpress-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中`存储桶名称`
 
-> `v1.6.1`增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
+`v1.6.1`版本增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
 
 == Changelog ==
 
