@@ -396,16 +396,16 @@
         },
         {
             "name": "qcloud/cos-sdk-v5",
-            "version": "v2.0.6",
+            "version": "v2.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tencentyun/cos-php-sdk-v5.git",
-                "reference": "2e4b89aecdacf01dd9adeb9dc080eb8535f3f155"
+                "reference": "ef772c83ec61c52ab0576ef74e841e8e77eceebb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tencentyun/cos-php-sdk-v5/zipball/2e4b89aecdacf01dd9adeb9dc080eb8535f3f155",
-                "reference": "2e4b89aecdacf01dd9adeb9dc080eb8535f3f155",
+                "url": "https://api.github.com/repos/tencentyun/cos-php-sdk-v5/zipball/ef772c83ec61c52ab0576ef74e841e8e77eceebb",
+                "reference": "ef772c83ec61c52ab0576ef74e841e8e77eceebb",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -445,7 +445,7 @@
                 "php",
                 "qcloud"
             ],
-            "time": "2020-02-14T12:07:18+00:00"
+            "time": "2020-03-10T10:02:19+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
