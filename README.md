@@ -11,19 +11,6 @@
 [![contact-@Luffy](https://img.shields.io/badge/contact-@Luffy-blue.svg)](https://qq52o.me)
 [![contributors](https://img.shields.io/github/contributors/sy-records/wordpress-qcloud-cos?color=blue)](https://github.com/sy-records/design-patterns/graphs/contributors)
 
-## 费用
-
-> 腾讯云`COS`目前已修改免费额度，老用户费用不变，长期 50GB
-
-使用`COS`标准存储的新用户，将享受以下免费额度
-
-| 用户类型 | 免费额度         | 有效期 |
-| -------- | ---------------- | ------ |
-| 个人用户 | 50GB标准存储容量 | 6个月  |
-| 企业用户 | 1TB标准存储容量  | 6个月  |
-
-外网下行流量、请求流量、CDN回源流量都单独计费
-
 ## 插件特色
 
 * [x] 可配置是否上传缩略图和是否保留本地备份
@@ -47,8 +34,49 @@ WordPress 后台安装插件页面搜索`Sync QCloud COS`，点击安装
 Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releases/latest](https://github.com/sy-records/wordpress-qcloud-cos/releases/latest)
 
 ## 修改配置
+
 * 方法一：在 WordPress 插件管理页面有设置按钮，进行设置
 * 方法二：在 WordPress 后台管理左侧导航栏`设置`下`腾讯云COS设置`，点击进入设置页面
+
+## 常见问题
+
+1. 怎么替换文章中之前的旧资源地址链接
+
+这个插件已经加上了替换数据库中之前的旧资源地址链接功能，只需要填好对应的链接即可
+
+2. 使用子账户报错`Cos Error Code: AccessDenied, Status Code: 403`
+
+可以使用子账户，但是 APPID 需要填写为存储桶创建者的ID，而不是子账户的ID。例如下文配置指南中的`1250000000`就是APPID
+
+3. 上传图片提示`图像后期处理失败，请将其缩小到2500像素并重新上传`
+
+配置的`存储桶名称`填写错误，正确的配置参照下文配置指南中`存储桶名称`
+
+> `v1.6.1`增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
+
+4. 从媒体库中删除了图片，但是`COS`中还是存在
+
+原因是在配置页面选择了`不在本地保留备份`，因为WordPress机制问题，无法获取对应的文件信息
+
+## 配置指南
+
+查看详细教程[https://qq52o.me/2722.html](https://qq52o.me/2722.html)
+
+* 存储桶设置
+> 访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/bucket) 创建存储桶，把创建存储桶时要求你填写的**存储桶名称**，把**存储桶名称**填到这里就可以了，没有后面的`-appid`  
+> `examplebucket-1250000000`，其中`examplebucket`为存储桶名称，`1250000000`为 APPID。
+
+* 存储桶地域
+> 选择你创建存储桶时所选的地域即可
+
+* APP ID、SecretID、SecretKey
+> APP ID 填写上文存储桶设置中所说的`125000000`即可；也可以访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/key) 获取 APP ID、SecretID、SecretKey
+
+## 插件截图
+
+![设置页面](screenshot-1.png)
+
+![update-wordpress-posts-photos.png](update-wordpress-posts-photos.png)
 
 ## 更新记录
 
@@ -97,44 +125,3 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 2018-05-22
 * 接手更新，创建仓库
-
-## 常见问题
-
-1. 怎么替换文章中之前的旧资源地址链接
-
-这个插件已经加上了替换数据库中之前的旧资源地址链接功能，只需要填好对应的链接即可
-
-2. 使用子账户报错`Cos Error Code: AccessDenied, Status Code: 403`
-
-可以使用子账户，但是 APPID 需要填写为存储桶创建者的ID，而不是子账户的ID
-
-3. 上传图片提示`图像后期处理失败，请将其缩小到2500像素并重新上传`
-
-配置的`存储桶名称`填写错误，正确的配置参照下文配置指南中`存储桶名称`
-
-> `v1.6.1`增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
-
-4. 从媒体库中删除了图片，但是`COS`中还是存在
-
-原因是在配置页面选择了`不在本地保留备份`，因为WordPress机制问题，无法获取对应的文件信息
-
-## 配置指南
-
-查看详细教程[https://qq52o.me/2722.html](https://qq52o.me/2722.html)
-
-* 存储桶设置
-> 访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/bucket) 创建存储桶，把创建存储桶时要求你填写的**存储桶名称**，把**存储桶名称**填到这里就可以了，没有后面的`-appid`  
-> `examplebucket-1250000000`，其中`examplebucket`为存储桶名称，`1250000000`为 APPID。
-
-* 存储桶地域
-> 选择你创建存储桶时所选的地域即可
-
-* APP ID、SecretID、SecretKey
-> APP ID 填写上文存储桶设置中所说的`125000000`即可；也可以访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/key) 获取 APP ID、SecretID、SecretKey
-
-## 插件截图
-
-![设置页面](images/screenshot-1.png)
-
-![update-wordpress-posts-photos.png](images/update-wordpress-posts-photos.png)
-
