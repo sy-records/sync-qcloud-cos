@@ -76,7 +76,7 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 ![设置页面](screenshot-1.png)
 
-![update-wordpress-posts-photos.png](update-wordpress-posts-photos.png)
+![update-wordpress-posts-photos.png](screenshot-2.png)
 
 ## 更新记录
 
