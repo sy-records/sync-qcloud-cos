@@ -80,7 +80,7 @@ function cos_check_bucket($cos_opt)
                 $setting_bucket = $cos_bucket . $needle;
             }
 
-            $buckets_msg = "存储桶名称错误，你需要设置的存储桶名称可能在以下名称中： ";
+            $buckets_msg = "存储桶名称或APPID错误，需要设置的存储桶名称或APPID可能在以下名称中： ";
             if (isset($buckets_obj['Buckets'][0]['Bucket'][0])) {
                 foreach ($buckets_obj['Buckets'][0]['Bucket'] as $bucket) {
                     if ($setting_bucket == $bucket['Name']) {
