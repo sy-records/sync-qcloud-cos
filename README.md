@@ -7,7 +7,7 @@
 使用腾讯云对象存储服务 COS 作为附件存储空间的 WordPress 插件
 
 [![Latest Version](https://img.shields.io/github/release/sy-records/wordpress-qcloud-cos.svg?style=flat-square)](https://github.com/sy-records/wordpress-qcloud-cos/releases)
-[![License](https://img.shields.io/badge/license-GPL-blue.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/sy-records/wordpress-qcloud-cos?color=blue)](LICENSE)
 [![contact-@Luffy](https://img.shields.io/badge/contact-@Luffy-blue.svg)](https://qq52o.me)
 [![contributors](https://img.shields.io/github/contributors/sy-records/wordpress-qcloud-cos?color=blue)](https://github.com/sy-records/design-patterns/graphs/contributors)
 
