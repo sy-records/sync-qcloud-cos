@@ -187,7 +187,7 @@ function cos_delete_cos_file($file)
  */
 function cos_upload_attachments($metadata)
 {
-    //生成object在OSS中的存储路径
+    //生成object在COS中的存储路径
     if (get_option('upload_path') == '.') {
         //如果含有“./”则去除之
         $metadata['file'] = str_replace("./", '', $metadata['file']);
