@@ -9,7 +9,7 @@
 [![Latest Version](https://img.shields.io/github/release/sy-records/wordpress-qcloud-cos.svg?style=flat-square)](https://github.com/sy-records/wordpress-qcloud-cos/releases)
 [![License](https://img.shields.io/github/license/sy-records/wordpress-qcloud-cos?color=blue)](LICENSE)
 [![contact-@Luffy](https://img.shields.io/badge/contact-@Luffy-blue.svg)](https://qq52o.me)
-[![contributors](https://img.shields.io/github/contributors/sy-records/wordpress-qcloud-cos?color=blue)](https://github.com/sy-records/design-patterns/graphs/contributors)
+[![contributors](https://img.shields.io/github/contributors/sy-records/wordpress-qcloud-cos?color=blue)](https://github.com/sy-records/wordpress-qcloud-cos/graphs/contributors)
 
 ## 插件特色
 
