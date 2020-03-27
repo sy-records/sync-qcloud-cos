@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 5.3.2
 Requires PHP: 5.6.0
-Stable tag: 1.6.4
+Stable tag: 1.6.5
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -62,6 +62,12 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 `v1.6.1`版本增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
 
 == Changelog ==
+
+= 1.6.5 =
+
+* 增加插件禁用事件，可选择是否删除配置
+* 增加上传文件try catch，提示文件上传错误时请打开控制台查看对应请求的Response输出信息
+* 修复首尔地域错误，感谢`서대현`反馈
 
 = 1.6.4 =
 

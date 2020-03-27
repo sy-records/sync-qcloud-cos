@@ -80,8 +80,12 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 ## 更新记录
 
-2020-03-11
+2020-03-27
+* 增加插件禁用事件，可选择是否删除配置
+* 增加上传文件try catch，提示文件上传错误时请打开控制台查看对应请求的Response输出信息
+* 修复首尔地域错误，感谢`서대현`反馈
 
+2020-03-11
 * 更新腾讯云SDK至[v2.0.7](https://github.com/tencentyun/cos-php-sdk-v5/releases/tag/v2.0.7)版本
 * 修改上个版本插件文件末尾空白符号问题
 
