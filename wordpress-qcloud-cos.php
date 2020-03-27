@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.6.4
+Version: 1.6.5
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -12,8 +12,9 @@ License: Apache 2.0
 require_once 'cos-sdk-v5/vendor/autoload.php';
 
 use Qcloud\Cos\Client;
+use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', "1.6.4");
+define('COS_VERSION', "1.6.5");
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -29,10 +30,22 @@ function cos_set_options()
         'secret_key' => "",
         'nothumb' => "false", // 是否上传缩略图
         'nolocalsaving' => "false", // 是否保留本地备份
+        'delete_options' => "false",
         'upload_url_path' => "", // URL前缀
     );
     add_option('cos_options', $options, '', 'yes');
 }
+
+// stop plugin
+function cos_stop_option()
+{
+    $option = get_option('cos_options');
+    if ($option['delete_options'] == "true") {
+        delete_option("cos_options");
+    }
+}
+
+register_deactivation_hook(__FILE__, 'cos_stop_option');
 
 function cos_get_client()
 {
@@ -98,7 +111,7 @@ function cos_check_bucket($cos_opt)
             }
             echo '<div class="error"><p><strong>'. $buckets_msg .'</strong></p></div>';
         }
-    } catch (Qcloud\Cos\Exception\ServiceResponseException $e) {
+    } catch (ServiceResponseException $e) {
         $errorMessage = $e->getMessage();
         $statusCode = $e->getStatusCode();
         echo '<div class="error"><p><strong>ErrorCode：'. $statusCode .'，ErrorMessage：'. $errorMessage .'</strong></p></div>';
@@ -120,14 +133,17 @@ function cos_file_upload($object, $file)
     if (!@file_exists($file)) {
         return false;
     }
-
     $bucket = cos_get_bucket_name();
-    $file = fopen($file, 'rb');
-    if ($file) {
-        $cosClient = cos_get_client();
-        $cosClient->Upload($bucket, $object, $file);
-    } else {
-        return false;
+    try {
+        $file = fopen($file, 'rb');
+        if ($file) {
+            $cosClient = cos_get_client();
+            $cosClient->Upload($bucket, $object, $file);
+        } else {
+            return false;
+        }
+    } catch (ServiceResponseException $e) {
+        print_r(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode()]);
     }
 }
 
@@ -145,7 +161,7 @@ function cos_is_delete_local_file()
 /**
  * 删除本地文件
  *
- * @param  $file 本地文件路径
+ * @param  $file
  * @return bool
  */
 function cos_delete_local_file($file)
@@ -397,6 +413,8 @@ function cos_setting_page()
         $options['secret_key'] = isset($_POST['secret_key']) ? sanitize_text_field($_POST['secret_key']) : '';
         $options['nothumb'] = isset($_POST['nothumb']) ? 'true' : 'false';
         $options['nolocalsaving'] = isset($_POST['nolocalsaving']) ? 'true' : 'false';
+        $options['delete_options'] = isset($_POST['delete_options']) ? 'true' : 'false';
+
         //仅用于插件卸载时比较使用
         $options['upload_url_path'] = isset($_POST['upload_url_path']) ? sanitize_text_field(stripslashes($_POST['upload_url_path'])) : '';
     }
@@ -455,6 +473,9 @@ function cos_setting_page()
 
     $cos_nolocalsaving = esc_attr($cos_options['nolocalsaving']);
     $cos_nolocalsaving = ($cos_nolocalsaving == 'true');
+
+    $cos_delete_options = esc_attr($cos_options['delete_options']);
+    $cos_delete_options = ($cos_delete_options == 'true');
     
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
     ?>
@@ -492,12 +513,11 @@ function cos_setting_page()
                             <option value="na-toronto" <?php if ($cos_regional == 'ca' || $cos_regional == 'na-toronto') {echo ' selected="selected"';}?>>多伦多</option>
                             <option value="eu-frankfurt" <?php if ($cos_regional == 'ger' || $cos_regional == 'eu-frankfurt') {echo ' selected="selected"';}?>>法兰克福</option>
                             <option value="ap-mumbai" <?php if ($cos_regional == 'ap-mumbai') {echo ' selected="selected"';}?>>孟买</option>
-                            <option value="ap-mumbai" <?php if ($cos_regional == 'ap-mumbai') {echo ' selected="selected"';}?>>首尔</option>
+                            <option value="ap-seoul" <?php if ($cos_regional == 'ap-seoul') {echo ' selected="selected"';}?>>首尔</option>
                             <option value="na-siliconvalley" <?php if ($cos_regional == 'na-siliconvalley') {echo ' selected="selected"';}?>>硅谷</option>
                             <option value="na-ashburn" <?php if ($cos_regional == 'na-ashburn') {echo ' selected="selected"';}?>>弗吉尼亚</option>
                             <option value="ap-bangkok" <?php if ($cos_regional == 'ap-bangkok') {echo ' selected="selected"';}?>>曼谷</option>
                             <option value="eu-moscow" <?php if ($cos_regional == 'eu-moscow') {echo ' selected="selected"';}?>>莫斯科</option>
-
                         </select>
                         <p>请选择您创建的<code>存储桶</code>所在地域</p>
                     </td>
@@ -541,10 +561,19 @@ function cos_setting_page()
                         <legend>不在本地保留备份</legend>
                     </th>
                     <td>
-                        <input type="checkbox"
-                               name="nolocalsaving" <?php if ($cos_nolocalsaving) { echo 'checked="checked"'; } ?> />
+                        <input type="checkbox" name="nolocalsaving" <?php if ($cos_nolocalsaving) { echo 'checked="checked"'; } ?> />
 
                         <p>建议不勾选</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend>是否删除配置信息</legend>
+                    </th>
+                    <td>
+                        <input type="checkbox" name="delete_options" <?php if ($cos_delete_options) { echo 'checked="checked"'; } ?> />
+
+                        <p>勾选后禁用插件时会删除保存的配置信息</p>
                     </td>
                 </tr>
                 <tr>
