@@ -80,6 +80,9 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 ## 更新记录
 
+2020-03-29
+* 优化deactivation_hook，禁用时可选删除配置和恢复URL前缀
+
 2020-03-27
 * 增加插件禁用事件，可选择是否删除配置
 * 增加上传文件try catch，提示文件上传错误时请打开控制台查看对应请求的Response输出信息

@@ -63,6 +63,10 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 == Changelog ==
 
+= 1.6.6 =
+
+* 优化deactivation_hook，禁用时可选删除配置和恢复URL前缀
+
 = 1.6.5 =
 
 * 增加插件禁用事件，可选择是否删除配置
