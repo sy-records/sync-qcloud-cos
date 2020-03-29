@@ -41,6 +41,12 @@ function cos_stop_option()
 {
     $option = get_option('cos_options');
     if ($option['delete_options'] == "true") {
+        $upload_url_path = get_option('upload_url_path');
+        $cos_upload_url_path = esc_attr($option['upload_url_path']);
+
+        if( $upload_url_path == $cos_upload_url_path ) {
+            update_option('upload_url_path', "" );
+        }
         delete_option("cos_options");
     }
 }
@@ -573,7 +579,7 @@ function cos_setting_page()
                     <td>
                         <input type="checkbox" name="delete_options" <?php if ($cos_delete_options) { echo 'checked="checked"'; } ?> />
 
-                        <p>勾选后禁用插件时会删除保存的配置信息</p>
+                        <p>建议不勾选。勾选后禁用插件时会删除保存的配置信息和恢复默认URL前缀。不勾选卸载插件时也会进行删除和恢复。</p>
                     </td>
                 </tr>
                 <tr>
