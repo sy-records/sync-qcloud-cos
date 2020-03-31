@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 5.3.2
 Requires PHP: 5.6.0
-Stable tag: 1.6.5
+Stable tag: 1.6.7
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
