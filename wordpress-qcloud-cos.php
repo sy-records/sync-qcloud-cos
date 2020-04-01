@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.6.6
+Version: 1.6.7
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -14,7 +14,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', "1.6.6");
+define('COS_VERSION', "1.6.7");
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -32,6 +32,7 @@ function cos_set_options()
         'nolocalsaving' => "false", // 是否保留本地备份
         'delete_options' => "false",
         'upload_url_path' => "", // URL前缀
+        'ci_style' => "",
     );
     add_option('cos_options', $options, '', 'yes');
 }
@@ -389,12 +390,27 @@ function cos_plugin_action_links($links, $file)
 {
     if ($file == plugin_basename(dirname(__FILE__) . '/wordpress-qcloud-cos.php')) {
         $links[] = '<a href="options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php">设置</a>';
-        $links[] = '<a href="https://qq52o.me/sponsor.html" target="_blank">赞赏</a>';
-        $links[] = '<a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">Star支持</a>';
     }
     return $links;
 }
 add_filter('plugin_action_links', 'cos_plugin_action_links', 10, 2);
+
+add_filter('the_content', 'cos_setting_content_ci');
+function cos_setting_content_ci($content)
+{
+    $option = get_option("cos_options");
+    if (!empty($option['ci_style'])) {
+        preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $content, $images);
+        if (!empty($images) && isset($images[1])) {
+            foreach ($images[1] as $item) {
+                if(strpos($item, $option['upload_url_path']) !== false){
+                    $content = str_replace($item, $item . $option['ci_style'], $content);
+                }
+            }
+        }
+    }
+    return $content;
+}
 
 // 在导航栏“设置”中添加条目
 function cos_add_setting_page()
@@ -423,6 +439,8 @@ function cos_setting_page()
 
         //仅用于插件卸载时比较使用
         $options['upload_url_path'] = isset($_POST['upload_url_path']) ? sanitize_text_field(stripslashes($_POST['upload_url_path'])) : '';
+
+        $options['ci_style'] = isset($_POST['ci_style']) ? sanitize_text_field($_POST['ci_style']) : '';
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_all') {
@@ -482,14 +500,15 @@ function cos_setting_page()
 
     $cos_delete_options = esc_attr($cos_options['delete_options']);
     $cos_delete_options = ($cos_delete_options == 'true');
-    
+
+    $cos_ci_style = esc_attr($cos_options['ci_style']);
+
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
     ?>
     <div class="wrap" style="margin: 10px;">
         <h1>腾讯云 COS 设置 <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
-        <p>插件网站： <a href="https://qq52o.me/" target="_blank">沈唁志</a> / <a href="https://qq52o.me/2518.html" target="_blank">Sync QCloud COS发布页面</a> / <a href="https://qq52o.me/2722.html" target="_blank">详细使用教程</a>；</p>
-        <p>优惠促销： <a href="https://qq52o.me/welfare.html#qcloud" target="_blank">腾讯云优惠</a> / <a href="https://qq52o.me/go/qcloud-cos" target="_blank">腾讯云COS资源包优惠</a>；</p>
-        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">Github</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；</p>
+        <p>优惠促销： <a href="https://qq52o.me/welfare.html#qcloud" target="_blank">腾讯云优惠</a> / <a href="https://go.qq52o.me/a/cos" target="_blank">腾讯云COS资源包优惠</a>；</p>
+        <p>限时推广： <a href="https://cloud.tencent.com/developer/support-plan?invite_code=cqidlih5bagj" target="_blank">技术博客可以加入腾讯云云+社区定制周边礼品等你来拿</a> / <a href="//shang.qq.com/wpa/qunwpa?idkey=c7f4fbd7ef84184555dfb6377d8ae087b3d058d8eeae1ff8e2da25c00d53173f" target="_blank">欢迎加入云存储插件交流群,QQ群号:887595381</a>；</p>
         <hr/>
         <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
@@ -609,6 +628,23 @@ function cos_setting_page()
                     </td>
                 </tr>
                 <tr>
+                    <th>
+                        <legend>图片处理样式</legend>
+                    </th>
+                    <td>
+                        <input type="text" name="ci_style" value="<?php echo $cos_ci_style; ?>" size="50" placeholder="请输入图片处理样式，留空表示不处理"/>
+
+                        <p><b>获取样式：</b></p>
+
+                        <p>1）在 <a href="https://console.cloud.tencent.com/cos5/bucket" target="_blank">存储桶列表</a> 中对应桶的 <code>图片处理</code> 处添加。具体样式设置参考<a href="https://cloud.tencent.com/document/product/460/6936" target="_blank">腾讯云文档</a>。</p>
+
+                        <p>2）填写时需要将<code>分隔符</code>和对应的<code>名称</code>或 <code>描述</code>进行拼接，例如：</p>
+
+                        <p><code>分隔符</code>为<code>!</code>(感叹号)，<code>名称</code>为<code>blog</code>，<code>描述</code>为 <code>	imageMogr2/format/webp/interlace/0/quality/100</code></p>
+                        <p>则填写为 <code>!blog</code> 或 <code>?imageMogr2/format/webp/interlace/0/quality/100</code></p>
+                    </td>
+                </tr>
+                <tr>
                     <th><legend>保存/更新选项</legend></th>
                     <td><input type="submit" name="submit" class="button button-primary" value="保存更改"/></td>
                 </tr>
@@ -660,6 +696,9 @@ function cos_setting_page()
                 </tr>
             </table>
         </form>
+        <hr/>
+        <p>插件网站： <a href="https://qq52o.me/" target="_blank">沈唁志</a> / <a href="https://qq52o.me/2518.html" target="_blank">Sync QCloud COS发布页面</a> / <a href="https://qq52o.me/2722.html" target="_blank">详细使用教程</a>；</p>
+        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">Github</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；</p>
     </div>
 <?php
 }
