@@ -20,7 +20,7 @@
 * [x] 支持北京、上海、广州、香港、法兰克福等完整地域使用
 * [x] 支持同步历史附件到 COS
 * [x] 支持验证桶名是否填写正确
-* [ ] 支持数据万象CI
+* [x] 支持腾讯云数据万象 CI 图片处理
 
 ## 安装
 
@@ -58,6 +58,10 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 4. 从媒体库中删除了图片，但是`COS`中还是存在
 
 原因是在配置页面选择了`不在本地保留备份`，因为WordPress机制问题，无法获取对应的文件信息
+
+5. 在插件中应该如何使用腾讯云数据万象CI
+
+参考：[腾讯云对象存储COS + 数据万象CI = 完善的图片解决方案](https://cloud.tencent.com/developer/article/1606153) 或 [腾讯云文档 - 使用图片样式](https://cloud.tencent.com/document/product/436/42214#.E4.BD.BF.E7.94.A8.E5.9B.BE.E7.89.87.E6.A0.B7.E5.BC.8F)
 
 ## 配置指南
 

@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 5.3.2
 Requires PHP: 5.6.0
-Stable tag: 1.6.6
+Stable tag: 1.6.7
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -26,7 +26,8 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 4. 支持替换数据库中旧的资源链接地址
 5. 支持北京、上海、广州、香港、法兰克福等完整地域使用
 6. 支持同步历史附件到 COS
-7. 插件更多详细介绍和安装：[https://github.com/sy-records/wordpress-qcloud-cos](https://github.com/sy-records/wordpress-qcloud-cos)
+7. 支持腾讯云数据万象 CI 图片处理
+8. 插件更多详细介绍和安装：[https://github.com/sy-records/wordpress-qcloud-cos](https://github.com/sy-records/wordpress-qcloud-cos)
 
 ## 作者博客
 
@@ -59,9 +60,17 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 配置的`存储桶名称`填写错误，正确的配置参照[配置指南](https://github.com/sy-records/wordpress-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中`存储桶名称`
 
-`v1.6.1`版本增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
+v1.6.1 版本增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
+
+= 在插件中应该如何使用腾讯云数据万象CI =
+
+参考：[腾讯云对象存储COS + 数据万象CI = 完善的图片解决方案](https://cloud.tencent.com/developer/article/1606153) 或 [腾讯云文档 - 使用图片样式](https://cloud.tencent.com/document/product/436/42214#.E4.BD.BF.E7.94.A8.E5.9B.BE.E7.89.87.E6.A0.B7.E5.BC.8F)
 
 == Changelog ==
+
+= 1.6.7 =
+
+* 增加腾讯云数据万象图片处理
 
 = 1.6.6 =
 
@@ -126,6 +135,10 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 * First version
 
 == Upgrade Notice ==
+
+= 1.6.7 =
+
+更新后请点击一次插件设置中的保存更改按钮。
 
 = 1.6.0 =
 
