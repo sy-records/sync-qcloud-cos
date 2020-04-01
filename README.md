@@ -85,6 +85,9 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 ## 更新记录
 
+2020-04-04
+* 增加腾讯云数据万象图片处理
+
 2020-03-29
 * 优化deactivation_hook，禁用时可选删除配置和恢复URL前缀
 
