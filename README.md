@@ -85,6 +85,10 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 ## 更新记录
 
+2020-04-02
+* 修复勾选不在本地保存图片后媒体库显示默认图片问题
+* 优化删除文件逻辑
+
 2020-04-01
 * 增加腾讯云数据万象图片处理
 
