@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.6.7
+Version: 1.6.8
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -14,7 +14,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', "1.6.7");
+define('COS_VERSION', "1.6.8");
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -134,7 +134,7 @@ function cos_check_bucket($cos_opt)
  * @param  $opt
  * @return bool
  */
-function cos_file_upload($object, $file)
+function cos_file_upload($object, $file, $no_local_file = false)
 {
     //如果文件不存在，直接返回false
     if (!@file_exists($file)) {
@@ -146,6 +146,10 @@ function cos_file_upload($object, $file)
         if ($file) {
             $cosClient = cos_get_client();
             $cosClient->Upload($bucket, $object, $file);
+
+            if ($no_local_file) {
+                cos_delete_local_file($file);
+            }
         } else {
             return false;
         }
@@ -191,15 +195,25 @@ function cos_delete_local_file($file)
 }
 
 /**
- * 删除cos中的文件
+ * 删除cos中的单个文件
  * @param $file
- * @return bool
  */
 function cos_delete_cos_file($file)
 {
     $bucket = cos_get_bucket_name();
     $cosClient = cos_get_client();
     $cosClient->deleteObject(array('Bucket' => $bucket, 'Key' => $file));
+}
+
+/**
+ * 批量删除cos中的文件
+ * @param array $files_key
+ */
+function cos_delete_cos_files(array $files_key)
+{
+    $bucket = cos_get_bucket_name();
+    $cosClient = cos_get_client();
+    $cosClient->deleteObjects(array('Bucket' => $bucket, 'Objects' => $files_key));
 }
 
 /**
@@ -222,12 +236,8 @@ function cos_upload_attachments($metadata)
     $file = get_home_path() . $object; //向上兼容，较早的WordPress版本上$metadata['file']存放的是相对路径
 
     //执行上传操作
-    cos_file_upload('/' . $object, $file);
+    cos_file_upload('/' . $object, $file, cos_is_delete_local_file());
 
-    //如果不在本地保存，则删除本地文件
-    if (cos_is_delete_local_file()) {
-        cos_delete_local_file($file);
-    }
     return $metadata;
 }
 
@@ -247,8 +257,6 @@ function cos_upload_thumbs($metadata)
         $cos_options = get_option('cos_options', true);
         //是否需要上传缩略图
         $nothumb = (esc_attr($cos_options['nothumb']) == 'true');
-        //是否需要删除本地文件
-        $is_delete_local_file = (esc_attr($cos_options['nolocalsaving']) == 'true');
         //如果禁止上传缩略图，就不用继续执行了
         if ($nothumb) {
             return $metadata;
@@ -276,13 +284,7 @@ function cos_upload_thumbs($metadata)
             $file = $file_path . $val['file'];
 
             //执行上传操作
-            cos_file_upload($object, $file);
-
-            //如果不在本地保存，则删除
-            if ($is_delete_local_file) {
-                cos_delete_local_file($file);
-            }
-
+            cos_file_upload($object, $file, (esc_attr($cos_options['nolocalsaving']) == 'true'));
         }
     }
     return $metadata;
@@ -297,29 +299,37 @@ if (substr_count($_SERVER['REQUEST_URI'], '/update.php') <= 0) {
  * 删除远端文件，删除文件时触发
  * @param $post_id
  */
-function cos_delete_remote_attachment($post_id) {
+function cos_delete_remote_attachment($post_id)
+{
     $meta = wp_get_attachment_metadata( $post_id );
 
-    $cos_options = get_option('cos_options', true);
-
     if (isset($meta['file'])) {
+
+        $deleteObjects = [];
+
         // meta['file']的格式为 "2020/01/wp-bg.png"
         $upload_path = get_option('upload_path');
         if ($upload_path == '') {
             $upload_path = 'wp-content/uploads';
         }
         $file_path = $upload_path . '/' . $meta['file'];
-        cos_delete_cos_file(str_replace("\\", '/', $file_path));
+
+        $cos_options = get_option('cos_options', true);
+
+        $deleteObjects[] = ['Key' => str_replace("\\", '/', $file_path)];
+
         $is_nothumb = (esc_attr($cos_options['nothumb']) == 'false');
         if ($is_nothumb) {
             // 删除缩略图
             if (isset($meta['sizes']) && count($meta['sizes']) > 0) {
                 foreach ($meta['sizes'] as $val) {
                     $size_file = dirname($file_path) . '/' . $val['file'];
-                    cos_delete_cos_file(str_replace("\\", '/', $size_file));
+
+                    $deleteObjects[] = ['Key' => str_replace("\\", '/', $size_file)];
                 }
             }
         }
+        cos_delete_cos_files($deleteObjects);
     }
 }
 add_action('delete_attachment', 'cos_delete_remote_attachment');
