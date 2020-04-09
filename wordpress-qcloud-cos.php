@@ -134,21 +134,21 @@ function cos_check_bucket($cos_opt)
  * @param  $opt
  * @return bool
  */
-function cos_file_upload($object, $file, $no_local_file = false)
+function cos_file_upload($object, $filename, $no_local_file = false)
 {
     //如果文件不存在，直接返回false
-    if (!@file_exists($file)) {
+    if (!@file_exists($filename)) {
         return false;
     }
     $bucket = cos_get_bucket_name();
     try {
-        $file = fopen($file, 'rb');
+        $file = fopen($filename, 'rb');
         if ($file) {
             $cosClient = cos_get_client();
             $cosClient->Upload($bucket, $object, $file);
 
             if ($no_local_file) {
-                cos_delete_local_file($file);
+                cos_delete_local_file($filename);
             }
         } else {
             return false;
