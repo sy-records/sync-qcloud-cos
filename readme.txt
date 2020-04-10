@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 5.4
 Requires PHP: 5.6.0
-Stable tag: 1.6.8
+Stable tag: 1.7.0
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -33,7 +33,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 [沈唁志](https://qq52o.me "沈唁志")
 
-接受定制开发 WordPress 插件，如有定制开发需求可以[联系QQ](ttp://wpa.qq.com/msgrd?v=3&uin=85464277&site=qq&menu=yes)。
+欢迎加入沈唁的WordPress云存储全家桶QQ交流群：887595381
 
 == Installation ==
 
@@ -67,6 +67,11 @@ v1.6.1 版本增强了校验，填写错误会给予提示；同时兼容了桶�
 参考：[腾讯云对象存储COS + 数据万象CI = 完善的图片解决方案](https://cloud.tencent.com/developer/article/1606153) 或 [腾讯云文档 - 使用图片样式](https://cloud.tencent.com/document/product/436/42214#.E4.BD.BF.E7.94.A8.E5.9B.BE.E7.89.87.E6.A0.B7.E5.BC.8F)
 
 == Changelog ==
+
+= 1.7.0 =
+
+* 修复勾选不在本地保存图片后媒体库显示默认图片问题
+* 修复删除错误
 
 = 1.6.8 =
 
