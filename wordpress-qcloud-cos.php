@@ -224,19 +224,31 @@ function cos_delete_cos_files(array $files_key)
  */
 function cos_upload_attachments($metadata)
 {
-    //生成object在COS中的存储路径
-    if (get_option('upload_path') == '.') {
-        //如果含有“./”则去除之
-        $metadata['file'] = str_replace("./", '', $metadata['file']);
+    $mime_types = get_allowed_mime_types();
+    $image_mime_types = array(
+        $mime_types['jpg|jpeg|jpe'],
+        $mime_types['gif'],
+        $mime_types['png'],
+        $mime_types['bmp'],
+        $mime_types['tiff|tif'],
+        $mime_types['ico'],
+    );
+    // 例如mp4等格式 上传后根据配置选择是否删除 删除后媒体库会显示默认图片 点开内容是正常的
+    // 图片在缩略图处理
+    if (!in_array($metadata['type'], $image_mime_types)) {
+        //生成object在COS中的存储路径
+        if (get_option('upload_path') == '.') {
+            //如果含有“./”则去除之
+            $metadata['file'] = str_replace("./", '', $metadata['file']);
+        }
+        $object = str_replace("\\", '/', $metadata['file']);
+        $object = str_replace(get_home_path(), '', $object);
+
+        //在本地的存储路径
+        $file = get_home_path() . $object; //向上兼容，较早的WordPress版本上$metadata['file']存放的是相对路径
+        //执行上传操作
+        cos_file_upload('/' . $object, $file, cos_is_delete_local_file());
     }
-    $object = str_replace("\\", '/', $metadata['file']);
-    $object = str_replace(get_home_path(), '', $object);
-
-    //在本地的存储路径
-    $file = get_home_path() . $object; //向上兼容，较早的WordPress版本上$metadata['file']存放的是相对路径
-
-    //执行上传操作
-    cos_file_upload('/' . $object, $file, cos_is_delete_local_file());
 
     return $metadata;
 }
@@ -251,6 +263,15 @@ if (substr_count($_SERVER['REQUEST_URI'], '/update.php') <= 0) {
  */
 function cos_upload_thumbs($metadata)
 {
+    //获取上传路径
+    $wp_uploads = wp_upload_dir();
+    $basedir = $wp_uploads['basedir'];
+    if (isset($metadata['file'])) {
+        // Maybe there is a problem with the old version
+        $object ='/' . get_option('upload_path') . '/' . $metadata['file'];
+        $file = $basedir . '/' . $metadata['file'];
+        cos_file_upload($object, $file, cos_is_delete_local_file());
+    }
     //上传所有缩略图
     if (isset($metadata['sizes']) && count($metadata['sizes']) > 0) {
         //获取COS插件的配置信息
@@ -261,12 +282,8 @@ function cos_upload_thumbs($metadata)
         if ($nothumb) {
             return $metadata;
         }
-        //获取上传路径
-        $wp_uploads = wp_upload_dir();
-        $basedir = $wp_uploads['basedir'];
-        $file_dir = $metadata['file'];
         //得到本地文件夹和远端文件夹
-        $file_path = $basedir . '/' . dirname($file_dir) . '/';
+        $file_path = $basedir . '/' . dirname($metadata['file']) . '/';
         if (get_option('upload_path') == '.') {
             $file_path = str_replace("\\", '/', $file_path);
             $file_path = str_replace(get_home_path() . "./", '', $file_path);
