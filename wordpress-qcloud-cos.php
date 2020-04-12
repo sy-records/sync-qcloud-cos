@@ -354,8 +354,8 @@ add_action('delete_attachment', 'cos_delete_remote_attachment');
 // 当upload_path为根目录时，需要移除URL中出现的“绝对路径”
 function cos_modefiy_img_url($url, $post_id)
 {
-    $home_path = str_replace(array('/', '\\'), array('', ''), get_home_path());
-    $url = str_replace($home_path, '', $url);
+    // 移除 ./ 和 项目根路径
+    $url = str_replace(array('./', get_home_path()), array('', ''), $url);
     return $url;
 }
 
