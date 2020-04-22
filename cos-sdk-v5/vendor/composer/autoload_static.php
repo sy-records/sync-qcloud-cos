@@ -10,10 +10,19 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
+        '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
+        'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
     );
 
     public static $prefixLengthsPsr4 = array (
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Php72\\' => 23,
+            'Symfony\\Polyfill\\Mbstring\\' => 26,
+            'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
+        ),
         'P' => 
         array (
             'Psr\\Http\\Message\\' => 17,
@@ -29,6 +38,18 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
     );
 
     public static $prefixDirsPsr4 = array (
+        'Symfony\\Polyfill\\Php72\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
+        ),
+        'Symfony\\Polyfill\\Mbstring\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
+        ),
+        'Symfony\\Polyfill\\Intl\\Idn\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-idn',
+        ),
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
@@ -176,6 +197,7 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
         'GuzzleHttp\\RetryMiddleware' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/RetryMiddleware.php',
         'GuzzleHttp\\TransferStats' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/TransferStats.php',
         'GuzzleHttp\\UriTemplate' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/UriTemplate.php',
+        'GuzzleHttp\\Utils' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Utils.php',
         'Psr\\Http\\Message\\MessageInterface' => __DIR__ . '/..' . '/psr/http-message/src/MessageInterface.php',
         'Psr\\Http\\Message\\RequestInterface' => __DIR__ . '/..' . '/psr/http-message/src/RequestInterface.php',
         'Psr\\Http\\Message\\ResponseInterface' => __DIR__ . '/..' . '/psr/http-message/src/ResponseInterface.php',
@@ -184,6 +206,7 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
         'Psr\\Http\\Message\\UploadedFileInterface' => __DIR__ . '/..' . '/psr/http-message/src/UploadedFileInterface.php',
         'Psr\\Http\\Message\\UriInterface' => __DIR__ . '/..' . '/psr/http-message/src/UriInterface.php',
         'Qcloud\\Cos\\Client' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Client.php',
+        'Qcloud\\Cos\\CommandToRequestTransformer' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/CommandToRequestTransformer.php',
         'Qcloud\\Cos\\Copy' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Copy.php',
         'Qcloud\\Cos\\CosTransformer' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/CosTransformer.php',
         'Qcloud\\Cos\\ExceptionMiddleware' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ExceptionMiddleware.php',
@@ -192,12 +215,16 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
         'Qcloud\\Cos\\Exception\\ServiceResponseException' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Exception/ServiceResponseException.php',
         'Qcloud\\Cos\\MultipartUpload' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/MultipartUpload.php',
         'Qcloud\\Cos\\Request\\BodyLocation' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Request/BodyLocation.php',
+        'Qcloud\\Cos\\ResultTransformer' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ResultTransformer.php',
         'Qcloud\\Cos\\Serializer' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Serializer.php',
         'Qcloud\\Cos\\Service' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Service.php',
         'Qcloud\\Cos\\Signature' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Signature.php',
         'Qcloud\\Cos\\SignatureMiddleware' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/SignatureMiddleware.php',
         'Qcloud\\Cos\\Tests\\COSTest' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Tests/Test.php',
         'Qcloud\\Cos\\Tests\\TestHelper' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Tests/TestHelper.php',
+        'Symfony\\Polyfill\\Intl\\Idn\\Idn' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Idn.php',
+        'Symfony\\Polyfill\\Mbstring\\Mbstring' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/Mbstring.php',
+        'Symfony\\Polyfill\\Php72\\Php72' => __DIR__ . '/..' . '/symfony/polyfill-php72/Php72.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
