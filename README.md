@@ -85,6 +85,13 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 ## 更新记录
 
+<details>
+<summary>点击查看</summary>
+
+2020-04-22
+* 增加金融云地域
+* 升级SDK至[v2.0.8](https://github.com/tencentyun/cos-php-sdk-v5/releases/tag/v2.0.8)
+
 2020-04-10
 * 修复勾选不在本地保存图片后媒体库显示默认图片问题
 * 修复删除错误
@@ -153,3 +160,5 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 2018-05-22
 * 接手更新，创建仓库
+
+</details>
