@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.7.0
+Version: 1.7.1
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -14,7 +14,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', "1.7.0");
+define('COS_VERSION', "1.7.1");
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -560,6 +560,9 @@ function cos_setting_page()
                             <option value="ap-guangzhou" <?php if ($cos_regional == 'gz' || $cos_regional == 'ap-guangzhou') {echo ' selected="selected"';}?>>广州（华南）</option>
                             <option value="ap-chengdu" <?php if ($cos_regional == 'cd' || $cos_regional == 'ap-chengdu') {echo ' selected="selected"';}?>>成都（西南）</option>
                             <option value="ap-chongqing" <?php if ($cos_regional == 'ap-chongqing') {echo ' selected="selected"';}?>>重庆</option>
+                            <option value="ap-shenzhen-fsi" <?php if ($cos_regional == 'ap-shenzhen-fsi') {echo ' selected="selected"';}?>>深圳金融</option>
+                            <option value="ap-shanghai-fsi" <?php if ($cos_regional == 'ap-shanghai-fsi') {echo ' selected="selected"';}?>>上海金融</option>
+                            <option value="ap-beijing-fsi" <?php if ($cos_regional == 'ap-beijing-fsi') {echo ' selected="selected"';}?>>北京金融</option>
                             <option value="ap-hongkong" <?php if ($cos_regional == 'hk' || $cos_regional == 'ap-hongkong') {echo ' selected="selected"';}?>>中国香港</option>
                             <option value="ap-singapore" <?php if ($cos_regional == 'sgp' || $cos_regional == '	ap-singapore') {echo ' selected="selected"';}?>>新加坡</option>
                             <option value="na-toronto" <?php if ($cos_regional == 'ca' || $cos_regional == 'na-toronto') {echo ' selected="selected"';}?>>多伦多</option>
