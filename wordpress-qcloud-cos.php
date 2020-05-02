@@ -439,6 +439,23 @@ function cos_setting_content_ci($content)
     return $content;
 }
 
+add_filter('post_thumbnail_html', 'cos_setting_post_thumbnail_ci', 10, 3);
+function cos_setting_post_thumbnail_ci( $html, $post_id, $post_image_id )
+{
+    $option = get_option("cos_options");
+    if (!empty($option['ci_style']) && has_post_thumbnail()) {
+        preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $html, $images);
+        if (!empty($images) && isset($images[1])) {
+            foreach ($images[1] as $item) {
+                if(strpos($item, $option['upload_url_path']) !== false){
+                    $html = str_replace($item, $item . $option['ci_style'], $html);
+                }
+            }
+        }
+    }
+    return $html;
+}
+
 // 在导航栏“设置”中添加条目
 function cos_add_setting_page()
 {
