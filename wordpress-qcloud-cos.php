@@ -33,6 +33,7 @@ function cos_set_options()
         'delete_options' => "false",
         'upload_url_path' => "", // URL前缀
         'ci_style' => "",
+        'update_file_name' => "false", // 是否重命名文件名
     );
     add_option('cos_options', $options, '', 'yes');
 }
@@ -363,6 +364,21 @@ if (get_option('upload_path') == '.') {
     add_filter('wp_get_attachment_url', 'cos_modefiy_img_url', 30, 2);
 }
 
+function cos_sanitize_file_name($filename)
+{
+    $cos_options = get_option('cos_options');
+    switch ($cos_options['update_file_name']) {
+        case "md5":
+            return  md5($filename) . "." . pathinfo($filename, PATHINFO_EXTENSION);
+        case "time":
+            return date("YmdHis", current_time('timestamp'))  . mt_rand(100, 999) . "." . pathinfo($filename, PATHINFO_EXTENSION);
+        default:
+            return $filename;
+    }
+}
+
+add_filter( 'sanitize_file_name', 'cos_sanitize_file_name', 10, 1 );
+
 function cos_function_each(&$array)
 {
     $res = array();
@@ -485,6 +501,7 @@ function cos_setting_page()
         $options['upload_url_path'] = isset($_POST['upload_url_path']) ? sanitize_text_field(stripslashes($_POST['upload_url_path'])) : '';
 
         $options['ci_style'] = isset($_POST['ci_style']) ? sanitize_text_field($_POST['ci_style']) : '';
+        $options['update_file_name'] = isset($_POST['update_file_name']) ? sanitize_text_field($_POST['update_file_name']) : 'false';
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_all') {
@@ -546,6 +563,7 @@ function cos_setting_page()
     $cos_delete_options = ($cos_delete_options == 'true');
 
     $cos_ci_style = esc_attr($cos_options['ci_style']);
+    $cos_update_file_name = esc_attr($cos_options['update_file_name']);
 
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
     ?>
@@ -646,6 +664,18 @@ function cos_setting_page()
                         <input type="checkbox" name="delete_options" <?php if ($cos_delete_options) { echo 'checked="checked"'; } ?> />
 
                         <p>建议不勾选。勾选后禁用插件时会删除保存的配置信息和恢复默认URL前缀。不勾选卸载插件时也会进行删除和恢复。</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend>自动重命名文件</legend>
+                    </th>
+                    <td>
+                        <select name="update_file_name">
+                            <option <?php if ($cos_update_file_name == 'false') {echo 'selected="selected"';} ?> value="false">不处理</option>
+                            <option <?php if ($cos_update_file_name == 'md5') {echo 'selected="selected"';} ?> value="md5">MD5</option>
+                            <option <?php if ($cos_update_file_name == 'time') {echo 'selected="selected"';} ?> value="time">时间戳+随机数</option>
+                        </select>
                     </td>
                 </tr>
                 <tr>
