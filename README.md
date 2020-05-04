@@ -21,6 +21,7 @@
 * [x] 支持同步历史附件到 COS
 * [x] 支持验证桶名是否填写正确
 * [x] 支持腾讯云数据万象 CI 图片处理
+* [x] 支持上传文件自动重命名
 
 ## 安装
 
@@ -87,6 +88,11 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 <details>
 <summary>点击查看</summary>
+
+2020-05-04
+
+* 支持上传文件自动重命名
+* 支持特色图片使用图片处理
 
 2020-04-22
 * 增加金融云地域
