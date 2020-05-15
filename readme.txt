@@ -69,6 +69,17 @@ v1.6.1 版本增强了校验，填写错误会给予提示；同时兼容了桶�
 
 参考：[腾讯云对象存储COS + 数据万象CI = 完善的图片解决方案](https://cloud.tencent.com/developer/article/1606153) 或 [腾讯云文档 - 使用图片样式](https://cloud.tencent.com/document/product/436/42214#.E4.BD.BF.E7.94.A8.E5.9B.BE.E7.89.87.E6.A0.B7.E5.BC.8F)
 
+= 保存配置时报错：`您的站点遇到了致命错误，请查看您的站点的管理电子邮箱来获得指引` =
+
+这个问题应该只出现在Windows的机器上，打开`WP_DEBUG`的话会报错：`Fatal error: Uncaught GuzzleHttp\Exception\RequestException: cURL error 60: SSL certificate problem: self signed certificate`，解决方法如下：
+
+1）从 [https://curl.haxx.se/ca/cacert.pem](https://curl.haxx.se/ca/cacert.pem) 下载最新的cacert.pem  
+2）将以下行添加到`php.ini`中，注意修改对应的路径
+
+```ini
+curl.cainfo=/path/to/cacert.pem
+```
+
 == Changelog ==
 
 = 1.8.1 =
