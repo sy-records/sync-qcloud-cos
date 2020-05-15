@@ -516,13 +516,19 @@ function cos_setting_page()
 
     // 替换数据库链接
     if(!empty($_POST) and $_POST['type'] == 'qcloud_cos_replace') {
-        global $wpdb;
-        $table_name = $wpdb->prefix .'posts';
-        $oldurl = esc_url_raw($_POST['old_url']);
-        $newurl = esc_url_raw($_POST['new_url']);
-        $result = $wpdb->query("UPDATE $table_name SET post_content = REPLACE( post_content, '$oldurl', '$newurl') ");
+        $old_url = esc_url_raw($_POST['old_url']);
+        $new_url = esc_url_raw($_POST['new_url']);
 
-        echo '<div class="updated"><p><strong>替换成功！共批量执行'.$result.'条！</strong></p></div>';
+        global $wpdb;
+        $posts_name = $wpdb->prefix .'posts';
+        // 文章内容
+        $posts_result = $wpdb->query("UPDATE $posts_name SET post_content = REPLACE( post_content, '$old_url', '$new_url') ");
+
+        // 修改题图之类的
+        $postmeta_name = $wpdb->prefix .'postmeta';
+        $postmeta_result = $wpdb->query("UPDATE $postmeta_name SET meta_value = REPLACE( meta_value, '$old_url', '$new_url') ");
+
+        echo '<div class="updated"><p><strong>替换成功！共替换文章内链'.$posts_result.'条、题图链接'.$postmeta_result.'条！</strong></p></div>';
     }
 
     // 若$options不为空数组，则更新数据
@@ -626,14 +632,14 @@ function cos_setting_page()
                     <th>
                         <legend>SecretID</legend>
                     </th>
-                    <td><input type="text" name="secret_id" value="<?php echo $cos_secret_id; ?>" size="50" placeholder="secretID"/></td>
+                    <td><input type="text" name="secret_id" value="<?php echo $cos_secret_id; ?>" size="50" placeholder="SecretID"/></td>
                 </tr>
                 <tr>
                     <th>
                         <legend>SecretKey</legend>
                     </th>
                     <td>
-                        <input type="text" name="secret_key" value="<?php echo $cos_secret_key; ?>" size="50" placeholder="secretKey"/>
+                        <input type="text" name="secret_key" value="<?php echo $cos_secret_key; ?>" size="50" placeholder="SecretKey"/>
                     </td>
                 </tr>
                 <tr>
@@ -751,6 +757,7 @@ function cos_setting_page()
                     </th>
                     <td>
                         <input type="text" name="old_url" size="50" placeholder="请输入要替换的旧域名"/>
+                        <p>如：<code>https://qq52o.me</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -759,6 +766,7 @@ function cos_setting_page()
                     </th>
                     <td>
                         <input type="text" name="new_url" size="50" placeholder="请输入要替换的新域名"/>
+                        <p>如：COS访问域名<code>https://bucket-appid.cos.ap-xxx.myqcloud.com</code>或自定义域名<code>https://resources.qq52o.me</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -768,7 +776,7 @@ function cos_setting_page()
                     <input type="hidden" name="type" value="qcloud_cos_replace">
                     <td>
                         <input type="submit" name="submit"  class="button button-secondary" value="开始替换"/>
-                        <p><b>注意：如果是首次替换，请注意备份！此功能只限于替换文章中使用的资源链接</b></p>
+                        <p><b>注意：如果是首次替换，请注意备份！此功能会替换文章以及设置的特色图片（题图）等使用的资源链接</b></p>
                     </td>
                 </tr>
             </table>
