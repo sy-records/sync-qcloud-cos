@@ -76,9 +76,9 @@ v1.6.1 版本增强了校验，填写错误会给予提示；同时兼容了桶�
 1）从 [https://curl.haxx.se/ca/cacert.pem](https://curl.haxx.se/ca/cacert.pem) 下载最新的cacert.pem  
 2）将以下行添加到`php.ini`中，注意修改对应的路径
 
-```ini
+`
 curl.cainfo=/path/to/cacert.pem
-```
+`
 
 == Changelog ==
 
