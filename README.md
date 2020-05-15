@@ -100,8 +100,10 @@ curl.cainfo=/path/to/cacert.pem
 <details>
 <summary>点击查看</summary>
 
-2020-05-04
+2020-05-15
+* 增加替换题图数据库链接
 
+2020-05-04
 * 支持上传文件自动重命名
 * 支持特色图片使用图片处理
 
