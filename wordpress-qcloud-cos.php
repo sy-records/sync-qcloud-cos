@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.8.2
+Version: 1.8.3
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -14,7 +14,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', "1.8.2");
+define('COS_VERSION', "1.8.3");
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -597,6 +597,7 @@ function cos_setting_page()
                     <td><select name="regional">
                             <option value="ap-beijing-1" <?php if ($cos_regional == 'tj' || $cos_regional == 'ap-beijing-1') {echo ' selected="selected"';}?>>北京一区（华北）</option>
                             <option value="ap-beijing" <?php if ($cos_regional == 'bj' || $cos_regional == 'ap-beijing') {echo ' selected="selected"';}?>>北京</option>
+                            <option value="ap-nanjing" <?php if ($cos_regional == 'ap-nanjing') {echo ' selected="selected"';}?>>南京</option>
                             <option value="ap-shanghai" <?php if ($cos_regional == 'sh' || $cos_regional == 'ap-shanghai') {echo ' selected="selected"';}?>>上海（华东）</option>
                             <option value="ap-guangzhou" <?php if ($cos_regional == 'gz' || $cos_regional == 'ap-guangzhou') {echo ' selected="selected"';}?>>广州（华南）</option>
                             <option value="ap-chengdu" <?php if ($cos_regional == 'cd' || $cos_regional == 'ap-chengdu') {echo ' selected="selected"';}?>>成都（西南）</option>
