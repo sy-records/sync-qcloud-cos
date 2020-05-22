@@ -100,6 +100,9 @@ curl.cainfo=/path/to/cacert.pem
 <details>
 <summary>点击查看</summary>
 
+2020-05-22
+* 增加南京地域
+
 2020-05-15
 * 增加替换题图数据库链接
 
