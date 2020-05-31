@@ -75,6 +75,10 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 curl.cainfo=/path/to/cacert.pem
 ```
 
+7. 保存配置时提示：`ErrorCode:xxx, ErrorMessage:xxxx`。如：`ErrorCode:403, ErrorMessage:Request has expired`
+
+这种问题请直接前往腾讯云[对象存储文档](https://cloud.tencent.com/document/product/436)搜索对应的`ErrorMessage`信息即可，或者访问[对象存储错误码列表](https://cloud.tencent.com/document/product/436/7730#.E9.94.99.E8.AF.AF.E7.A0.81.E5.88.97.E8.A1.A8)
+
 ## 配置指南
 
 查看详细教程[https://qq52o.me/2722.html](https://qq52o.me/2722.html)
