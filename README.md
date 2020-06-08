@@ -40,6 +40,12 @@ Github 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 * 方法一：在 WordPress 插件管理页面有设置按钮，进行设置
 * 方法二：在 WordPress 后台管理左侧导航栏`设置`下`腾讯云COS设置`，点击进入设置页面
 
+## Contributors
+
+This project exists thanks to all the people who contribute. [[Contributors](https://github.com/sy-records/wordpress-qcloud-cos/graphs/contributors)].
+
+<a href="https://github.com/sy-records/wordpress-qcloud-cos/graphs/contributors"><img src="https://opencollective.com/cos/contributors.svg?width=890&button=false" /></a>
+
 ## 常见问题
 
 1. 怎么替换文章中之前的旧资源地址链接
