@@ -744,7 +744,7 @@ function cos_setting_page()
                     <input type="hidden" name="type" value="qcloud_cos_all">
                     <td>
                         <input type="submit" name="submit" class="button button-secondary" value="开始同步"/>
-                        <p><b>注意：如果是首次同步，执行时间将会十分十分长（根据你的历史附件数量），有可能会因执行时间过长，页面显示超时或者报错。<br> 所以，建议那些几千上万附件的大神们，考虑官方的 <a target="_blank" rel="nofollow" href="https://www.qcloud.com/document/product/436/7133">同步工具</a></b></p>
+                        <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以，建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/10976">同步工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2755.html">使用腾讯云COS官方工具快速将本地数据迁移至COS</a></b></p>
                     </td>
                 </tr>
             </table>
