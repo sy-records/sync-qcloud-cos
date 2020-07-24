@@ -14,7 +14,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', "1.8.4");
+define('COS_VERSION', '1.8.4');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -42,14 +42,14 @@ function cos_set_options()
 function cos_stop_option()
 {
     $option = get_option('cos_options');
-    if ($option['delete_options'] == "true") {
+    if ($option['delete_options'] == 'true') {
         $upload_url_path = get_option('upload_url_path');
         $cos_upload_url_path = esc_attr($option['upload_url_path']);
 
         if( $upload_url_path == $cos_upload_url_path ) {
-            update_option('upload_url_path', "" );
+            update_option('upload_url_path', '' );
         }
-        delete_option("cos_options");
+        delete_option('cos_options');
     }
 }
 
@@ -62,8 +62,8 @@ function cos_get_client()
                     'region' => esc_attr($cos_opt['regional']),
                     'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http",
                     'credentials' => array(
-                            "secretId" => esc_attr($cos_opt['secret_id']),
-                            "secretKey" => esc_attr($cos_opt['secret_key'])
+                            'secretId' => esc_attr($cos_opt['secret_id']),
+                            'secretKey' => esc_attr($cos_opt['secret_key'])
                     )));
 }
 
@@ -190,7 +190,7 @@ function cos_delete_local_file($file)
         }
 
         return true;
-    } catch (Exception $ex) {
+    } catch (\Exception $ex) {
         return false;
     }
 }
@@ -393,8 +393,13 @@ function cos_function_each(&$array)
     return $res;
 }
 
+/**
+ * @param $dir
+ * @return array
+ */
 function cos_read_dir_queue($dir)
 {
+    $dd = [];
     if (isset($dir)) {
         $files = array();
         $queue = array($dir);
@@ -414,17 +419,14 @@ function cos_read_dir_queue($dir)
             }
             closedir($handle);
         }
-        $i = '';
+        $upload_path = get_option('upload_path');
         foreach ($files as $v) {
-            $i++;
             if (!is_dir($v)) {
-                $dd[$i]['j'] = $v;
-                $dd[$i]['x'] = '/' . get_option('upload_path') . explode(get_option('upload_path'), $v)[1];
+                $dd[] = ['filepath' => $v, 'key' =>  '/' . $upload_path . explode($upload_path, $v)[1]];
             }
         }
-    } else {
-        $dd = '';
     }
+
     return $dd;
 }
 
@@ -505,13 +507,11 @@ function cos_setting_page()
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_all') {
-        $synv = cos_read_dir_queue(get_home_path() . get_option('upload_path'));
-        $i = 0;
-        foreach ($synv as $k) {
-            $i++;
-            cos_file_upload($k['x'], $k['j']);
+        $sync = cos_read_dir_queue(get_home_path() . get_option('upload_path'));
+        foreach ($sync as $k) {
+            cos_file_upload($k['key'], $k['filepath']);
         }
-        echo '<div class="updated"><p><strong>本次操作成功同步' . $i . '个文件</strong></p></div>';
+        echo '<div class="updated"><p><strong>本次操作成功同步' . count($sync) . '个文件</strong></p></div>';
     }
 
     // 替换数据库链接

@@ -8,7 +8,7 @@ $cos_upload_url_path = esc_attr($cos_options['upload_url_path']);
 
 //如果现在使用的是COS的URL，则恢复原状
 if( $upload_url_path == $cos_upload_url_path ) {
-	update_option('upload_url_path', "" );
+    update_option('upload_url_path', '' );
 }
 
 //移除配置
