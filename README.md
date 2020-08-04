@@ -85,18 +85,18 @@ curl.cainfo=/path/to/cacert.pem
 
 7. 保存配置时提示：`ErrorCode:xxx, ErrorMessage:xxxx`。如：`ErrorCode:403, ErrorMessage:Request has expired`
 
-这种问题请直接前往腾讯云[对象存储文档](https://cloud.tencent.com/document/product/436)搜索对应的`ErrorMessage`信息即可，或者访问[对象存储错误码列表](https://cloud.tencent.com/document/product/436/7730#.E9.94.99.E8.AF.AF.E7.A0.81.E5.88.97.E8.A1.A8)
+这种问题请直接前往腾讯云 [对象存储文档](https://cloud.tencent.com/document/product/436) 搜索对应的`ErrorMessage`信息即可，或者访问 [对象存储错误码列表](https://cloud.tencent.com/document/product/436/7730#.E9.94.99.E8.AF.AF.E7.A0.81.E5.88.97.E8.A1.A8)
 
 ## 配置指南
 
 查看详细教程[https://qq52o.me/2722.html](https://qq52o.me/2722.html)
 
 * 存储桶设置
-> 访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/bucket) 创建存储桶，把创建存储桶时要求你填写的**存储桶名称**，把**存储桶名称**填到这里就可以了，没有后面的`-appid`  
+> 访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/bucket) 创建存储桶，把创建存储桶时要求你填写的**存储桶名称**，把**存储桶名称**填到这里就可以了，没有后面的`-appid`。  
 > `examplebucket-1250000000`，其中`examplebucket`为存储桶名称，`1250000000`为 APPID。
 
 * 存储桶地域
-> 选择你创建存储桶时所选的地域即可
+> 选择你创建存储桶时所选的地域即可。  
 > 如果地域选择`全球加速`，则在COS控制台中开启全球加速服务，具体方法和资费问题请查看 [全球加速官方文档](https://cloud.tencent.com/document/product/436/38866)
 
 * APP ID、SecretID、SecretKey
