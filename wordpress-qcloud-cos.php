@@ -615,6 +615,7 @@ function cos_setting_page()
                             <option value="na-ashburn" <?php if ($cos_regional == 'na-ashburn') {echo ' selected="selected"';}?>>弗吉尼亚</option>
                             <option value="ap-bangkok" <?php if ($cos_regional == 'ap-bangkok') {echo ' selected="selected"';}?>>曼谷</option>
                             <option value="eu-moscow" <?php if ($cos_regional == 'eu-moscow') {echo ' selected="selected"';}?>>莫斯科</option>
+                            <option value="accelerate" <?php if ($cos_regional == 'accelerate') {echo ' selected="selected"';}?>>全球加速</option>
                         </select>
                         <p>请选择您创建的<code>存储桶</code>所在地域</p>
                     </td>
