@@ -97,6 +97,7 @@ curl.cainfo=/path/to/cacert.pem
 
 * 存储桶地域
 > 选择你创建存储桶时所选的地域即可
+> 如果地域选择`全球加速`，则在COS控制台中开启全球加速服务，具体方法和资费问题请查看 [全球加速官方文档](https://cloud.tencent.com/document/product/436/38866)
 
 * APP ID、SecretID、SecretKey
 > APP ID 填写上文存储桶设置中所说的`125000000`即可；也可以访问 [腾讯云控制台](https://console.cloud.tencent.com/cos5/key) 获取 APP ID、SecretID、SecretKey
