@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.8.5
+Version: 1.9.0
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -14,7 +14,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', '1.8.5');
+define('COS_VERSION', '1.9.0');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -128,12 +128,9 @@ function cos_check_bucket($cos_opt)
 }
 
 /**
- * 上传函数
- *
- * @param  $object
- * @param  $file
- * @param  $opt
- * @return bool
+ * @param $object
+ * @param $filename
+ * @param false $no_local_file
  */
 function cos_file_upload($object, $filename, $no_local_file = false)
 {
@@ -239,14 +236,14 @@ function cos_upload_attachments($metadata)
     if (!in_array($metadata['type'], $image_mime_types)) {
         //生成object在COS中的存储路径
         if (get_option('upload_path') == '.') {
-            //如果含有“./”则去除之
             $metadata['file'] = str_replace("./", '', $metadata['file']);
         }
         $object = str_replace("\\", '/', $metadata['file']);
-        $object = str_replace(get_home_path(), '', $object);
+        $home_path = get_home_path();
+        $object = str_replace($home_path, '', $object);
 
         //在本地的存储路径
-        $file = get_home_path() . $object; //向上兼容，较早的WordPress版本上$metadata['file']存放的是相对路径
+        $file = $home_path . $object; //向上兼容，较早的WordPress版本上$metadata['file']存放的是相对路径
         //执行上传操作
         cos_file_upload('/' . $object, $file, cos_is_delete_local_file());
     }
@@ -269,8 +266,18 @@ function cos_upload_thumbs($metadata)
     $basedir = $wp_uploads['basedir'];
     if (isset($metadata['file'])) {
         // Maybe there is a problem with the old version
-        $object ='/' . get_option('upload_path') . '/' . $metadata['file'];
         $file = $basedir . '/' . $metadata['file'];
+        $upload_path = get_option('upload_path');
+        if ($upload_path != '.') {
+            $path_array = explode($upload_path, $file);
+            if (isset($path_array[1]) && !empty($path_array[1])) {
+                $object = '/' . $upload_path . $path_array[1];
+            }
+        } else {
+            $object = '/' . $metadata['file'];
+            $file = str_replace('./', '', $file);
+        }
+
         cos_file_upload($object, $file, cos_is_delete_local_file());
     }
     //上传所有缩略图
@@ -285,11 +292,9 @@ function cos_upload_thumbs($metadata)
         }
         //得到本地文件夹和远端文件夹
         $file_path = $basedir . '/' . dirname($metadata['file']) . '/';
-        if (get_option('upload_path') == '.') {
-            $file_path = str_replace("\\", '/', $file_path);
-            $file_path = str_replace(get_home_path() . "./", '', $file_path);
-        } else {
-            $file_path = str_replace("\\", '/', $file_path);
+        $file_path = str_replace("\\", '/', $file_path);
+        if ($upload_path == '.') {
+            $file_path = str_replace('./', '', $file_path);
         }
 
         $object_path = str_replace(get_home_path(), '', $file_path);
