@@ -113,6 +113,10 @@ curl.cainfo=/path/to/cacert.pem
 <details>
 <summary>点击查看</summary>
 
+2020-08-11
+* 修复多站点上传原图失败，缩略图正常问题
+* 优化上传路径获取
+
 2020-07-24
 * 优化同步上传路径获取
 
