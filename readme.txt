@@ -3,7 +3,7 @@ Contributors: shenyanzhi
 Donate link: https://qq52o.me/sponsor.html
 Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
-Tested up to: 5.4
+Tested up to: 5.5
 Requires PHP: 5.6.0
 Stable tag: 1.9.0
 License: Apache 2.0
