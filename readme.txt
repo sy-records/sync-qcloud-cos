@@ -61,9 +61,8 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = 上传图片提示：图像后期处理失败，请将其缩小到2500像素并重新上传 =
 
-1. 配置的`存储桶名称`填写错误，正确的配置参照[配置指南](https://github.com/sy-records/wordpress-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中`存储桶名称`，v1.6.1 版本增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
-
-2. 图片确实像素大于2500px，可以在`functions.php`中加入以下代码禁止大图片裁剪功能
+1）配置的`存储桶名称`填写错误，正确的配置参照[配置指南](https://github.com/sy-records/wordpress-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中的`存储桶名称`，v1.6.1 版本增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
+2）图片确实像素大于2500px，可以在`functions.php`中加入以下代码禁止大图片裁剪功能
 
 `add_filter('big_image_size_threshold', '__return_false');`
 
