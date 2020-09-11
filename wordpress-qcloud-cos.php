@@ -195,6 +195,7 @@ function cos_delete_local_file($file)
 /**
  * 删除cos中的单个文件
  * @param $file
+ * @deprecated
  */
 function cos_delete_cos_file($file)
 {
@@ -373,10 +374,10 @@ function cos_sanitize_file_name($filename)
 {
     $cos_options = get_option('cos_options');
     switch ($cos_options['update_file_name']) {
-        case "md5":
-            return  md5($filename) . "." . pathinfo($filename, PATHINFO_EXTENSION);
-        case "time":
-            return date("YmdHis", current_time('timestamp'))  . mt_rand(100, 999) . "." . pathinfo($filename, PATHINFO_EXTENSION);
+        case 'md5':
+            return  md5($filename) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
+        case 'time':
+            return date('YmdHis', current_time('timestamp'))  . mt_rand(100, 999) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
         default:
             return $filename;
     }
@@ -448,7 +449,7 @@ add_filter('plugin_action_links', 'cos_plugin_action_links', 10, 2);
 add_filter('the_content', 'cos_setting_content_ci');
 function cos_setting_content_ci($content)
 {
-    $option = get_option("cos_options");
+    $option = get_option('cos_options');
     if (!empty($option['ci_style'])) {
         preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $content, $images);
         if (!empty($images) && isset($images[1])) {
@@ -465,7 +466,7 @@ function cos_setting_content_ci($content)
 add_filter('post_thumbnail_html', 'cos_setting_post_thumbnail_ci', 10, 3);
 function cos_setting_post_thumbnail_ci( $html, $post_id, $post_image_id )
 {
-    $option = get_option("cos_options");
+    $option = get_option('cos_options');
     if (!empty($option['ci_style']) && has_post_thumbnail()) {
         preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $html, $images);
         if (!empty($images) && isset($images[1])) {
