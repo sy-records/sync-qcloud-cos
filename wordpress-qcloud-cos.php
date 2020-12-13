@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.9.1
+Version: 1.9.2
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -338,12 +338,12 @@ function cos_delete_remote_attachment($post_id)
         }
         $file_path = $upload_path . '/' . $meta['file'];
 
-        $cos_options = get_option('cos_options', true);
-
         $deleteObjects[] = ['Key' => str_replace("\\", '/', $file_path)];
 
-        $is_nothumb = (esc_attr($cos_options['nothumb']) == 'false');
-        if ($is_nothumb) {
+        // 删除时不管是否开启不上传缩略图，只要有就删除。
+//        $cos_options = get_option('cos_options', true);
+//        $is_nothumb = (esc_attr($cos_options['nothumb']) == 'false');
+//        if ($is_nothumb) {
             // 删除缩略图
             if (isset($meta['sizes']) && count($meta['sizes']) > 0) {
                 foreach ($meta['sizes'] as $val) {
@@ -352,7 +352,7 @@ function cos_delete_remote_attachment($post_id)
                     $deleteObjects[] = ['Key' => str_replace("\\", '/', $size_file)];
                 }
             }
-        }
+//        }
         cos_delete_cos_files($deleteObjects);
     }
 }
