@@ -119,6 +119,7 @@ curl.cainfo=/path/to/cacert.pem
 <summary>点击查看</summary>
 
 2020-12-13
+* 修复勾选不上传缩略图后不会删除云端缩略图
 * 升级 COS SDK 版本
 * 支持 WordPress 5.6 版本
 

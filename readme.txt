@@ -85,6 +85,10 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 == Changelog ==
 
+= 1.9.2 =
+
+* 修复勾选不上传缩略图后不会删除云端缩略图
+
 = 1.9.1 =
 
 * 升级 COS SDK 版本
