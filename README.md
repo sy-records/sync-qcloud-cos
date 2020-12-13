@@ -118,6 +118,10 @@ curl.cainfo=/path/to/cacert.pem
 <details>
 <summary>点击查看</summary>
 
+2020-12-13
+* 升级 COS SDK 版本
+* 支持 WordPress 5.6 版本
+
 2020-08-11
 * 修复多站点上传原图失败，缩略图正常问题
 * 优化上传路径获取
