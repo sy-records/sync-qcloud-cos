@@ -14,14 +14,11 @@ use GuzzleHttp\Command\Guzzle\GuzzleClient;
 use GuzzleHttp\Command\Guzzle\Deserializer;
 use GuzzleHttp\Command\CommandInterface;
 use GuzzleHttp\Command\Exception\CommandException;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7;
-use GuzzleHttp\Pool;
-
 
 class Client extends GuzzleClient {
-    const VERSION = '2.0.8';
+    const VERSION = '2.1.1';
 
     public $httpClient;
     
@@ -46,9 +43,10 @@ class Client extends GuzzleClient {
         $this->cosConfig['connect_timeout'] = isset($cosConfig['connect_timeout']) ? $cosConfig['connect_timeout'] : 3600;
         $this->cosConfig['ip'] = isset($cosConfig['ip']) ? $cosConfig['ip'] : null;
         $this->cosConfig['port'] = isset($cosConfig['port']) ? $cosConfig['port'] : null;
-        $this->cosConfig['endpoint'] = isset($cosConfig['endpoint']) ? $cosConfig['endpoint'] : 'myqcloud.com';
+        $this->cosConfig['endpoint'] = isset($cosConfig['endpoint']) ? $cosConfig['endpoint'] : null;
         $this->cosConfig['domain'] = isset($cosConfig['domain']) ? $cosConfig['domain'] : null;
         $this->cosConfig['proxy'] = isset($cosConfig['proxy']) ? $cosConfig['proxy'] : null;
+        $this->cosConfig['retry'] = isset($cosConfig['retry']) ? $cosConfig['retry'] : 1;
         $this->cosConfig['userAgent'] = isset($cosConfig['userAgent']) ? $cosConfig['userAgent'] : 'cos-php-sdk-v5.'. Client::VERSION;
         $this->cosConfig['pathStyle'] = isset($cosConfig['pathStyle']) ? $cosConfig['pathStyle'] : false;
         
@@ -113,14 +111,20 @@ class Client extends GuzzleClient {
     }
 
     public function __call($method, array $args) {
-        try {
-            return parent::__call(ucfirst($method), $args);
-		} catch (CommandException $e) {
-            $previous = $e->getPrevious();
-			if ($previous !== null) {
-				throw $previous;
-			} else {
-                throw $e;
+        for ($i = 1; $i <= $this->cosConfig['retry']; $i++) {
+            try {
+                return parent::__call(ucfirst($method), $args);
+            } catch (CommandException $e) {
+                if ($i != $this->cosConfig['retry']) {
+                    sleep(1 << ($i-1));
+                    continue;
+                }
+                $previous = $e->getPrevious();
+                if ($previous !== null) {
+                    throw $previous;
+                } else {
+                    throw $e;
+                }
             }
         }
     }
@@ -137,13 +141,13 @@ class Client extends GuzzleClient {
         return $this->signature->createPresignedUrl($request, $expires);
     }
 
-    public function getPresignetUrl($method, $args, $expires = null) {
+    public function getPresignetUrl($method, $args, $expires = "+30 minutes") {
         $command = $this->getCommand($method, $args);
         $request = $this->commandToRequestTransformer($command);
         return $this->createPresignedUrl($request, $expires);
     }
 
-    public function getObjectUrl($bucket, $key, $expires = null, array $args = array()) {
+    public function getObjectUrl($bucket, $key, $expires = "+30 minutes", array $args = array()) {
         $command = $this->getCommand('GetObject', $args + array('Bucket' => $bucket, 'Key' => $key));
         $request = $this->commandToRequestTransformer($command);
         return $this->createPresignedUrl($request, $expires)->__toString();
@@ -151,7 +155,7 @@ class Client extends GuzzleClient {
 
     public function upload($bucket, $key, $body, $options = array()) {
         $body = Psr7\stream_for($body);
-        $options['PartSize'] = isset($options['PartSize']) ? $options['PartSize'] : MultipartUpload::MIN_PART_SIZE;
+        $options['PartSize'] = isset($options['PartSize']) ? $options['PartSize'] : MultipartUpload::DEFAULT_PART_SIZE;
         if ($body->getSize() < $options['PartSize']) {
             $rt = $this->putObject(array(
                     'Bucket' => $bucket,
