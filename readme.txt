@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 5.6
 Requires PHP: 5.6.0
-Stable tag: 1.9.3
+Stable tag: 1.9.4
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -84,6 +84,11 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 这种问题请直接前往腾讯云[对象存储文档](https://cloud.tencent.com/document/product/436)搜索对应的`ErrorMessage`信息即可，或者访问[对象存储错误码列表](https://cloud.tencent.com/document/product/436/7730#.E9.94.99.E8.AF.AF.E7.A0.81.E5.88.97.E8.A1.A8)
 
 == Changelog ==
+
+= 1.9.4 =
+
+* 优化配置校验逻辑
+* 支持删除非图片类型文件
 
 = 1.9.3 =
 

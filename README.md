@@ -118,6 +118,10 @@ curl.cainfo=/path/to/cacert.pem
 <details>
 <summary>点击查看</summary>
 
+2021-01-24
+* 优化配置校验逻辑
+* 支持删除非图片类型文件
+
 2020-12-13
 * 修复版本号
 * 修复勾选不上传缩略图后不会删除云端缩略图
