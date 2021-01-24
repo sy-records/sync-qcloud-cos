@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.9.3
+Version: 1.9.4
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -14,7 +14,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', '1.9.3');
+define('COS_VERSION', '1.9.4');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 // 初始化选项
@@ -23,17 +23,17 @@ register_activation_hook(__FILE__, 'cos_set_options');
 function cos_set_options()
 {
     $options = array(
-        'bucket' => "",
-        'regional' => "ap-beijing",
-        'app_id' => "",
-        'secret_id' => "",
-        'secret_key' => "",
-        'nothumb' => "false", // 是否上传缩略图
-        'nolocalsaving' => "false", // 是否保留本地备份
-        'delete_options' => "false",
-        'upload_url_path' => "", // URL前缀
-        'ci_style' => "",
-        'update_file_name' => "false", // 是否重命名文件名
+        'bucket' => '',
+        'regional' => 'ap-beijing',
+        'app_id' => '',
+        'secret_id' => '',
+        'secret_key' => '',
+        'nothumb' => 'false', // 是否上传缩略图
+        'nolocalsaving' => 'false', // 是否保留本地备份
+        'delete_options' => 'false',
+        'upload_url_path' => '', // URL前缀
+        'ci_style' => '',
+        'update_file_name' => 'false', // 是否重命名文件名
     );
     add_option('cos_options', $options, '', 'yes');
 }
@@ -55,6 +55,9 @@ function cos_stop_option()
 
 register_deactivation_hook(__FILE__, 'cos_stop_option');
 
+/**
+ * @return Client
+ */
 function cos_get_client()
 {
     $cos_opt = get_option('cos_options', true);
@@ -148,8 +151,6 @@ function cos_file_upload($object, $filename, $no_local_file = false)
             if ($no_local_file) {
                 cos_delete_local_file($filename);
             }
-        } else {
-            return false;
         }
     } catch (ServiceResponseException $e) {
         print_r(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode()]);
@@ -195,7 +196,6 @@ function cos_delete_local_file($file)
 /**
  * 删除cos中的单个文件
  * @param $file
- * @deprecated
  */
 function cos_delete_cos_file($file)
 {
@@ -325,6 +325,7 @@ if (substr_count($_SERVER['REQUEST_URI'], '/update.php') <= 0) {
  */
 function cos_delete_remote_attachment($post_id)
 {
+    // 获取图片类附件的meta信息
     $meta = wp_get_attachment_metadata( $post_id );
 
     if (isset($meta['file'])) {
@@ -354,6 +355,25 @@ function cos_delete_remote_attachment($post_id)
             }
 //        }
         cos_delete_cos_files($deleteObjects);
+    } else {
+        // 获取链接删除
+        $link = wp_get_attachment_url($post_id);
+        if ($link) {
+            $upload_path = get_option('upload_path');
+            if ($upload_path != '.') {
+                $file_info = explode($upload_path, $link);
+                if (isset($file_info[1])) {
+                    cos_delete_cos_file($upload_path . $file_info[1]);
+                }
+            } else {
+                $cos_options = get_option('cos_options', true);
+                $cos_upload_url = esc_attr($cos_options['upload_url_path']);
+                $file_info = explode($cos_upload_url, $link);
+                if (isset($file_info[1])) {
+                    cos_delete_cos_file($file_info[1]);
+                }
+            }
+        }
     }
 }
 add_action('delete_attachment', 'cos_delete_remote_attachment');
@@ -540,7 +560,10 @@ function cos_setting_page()
     // 若$options不为空数组，则更新数据
     if ($options !== array()) {
 
-        $check_status = cos_check_bucket($options);
+        $check_status = true;
+        if (!empty($options['bucket']) && !empty($options['app_id']) && !empty($options['secret_id']) && !empty($options['secret_key'])) {
+            $check_status = cos_check_bucket($options);
+        }
 
         if ($check_status) {
             //更新数据库
@@ -582,7 +605,7 @@ function cos_setting_page()
     <div class="wrap" style="margin: 10px;">
         <h1>腾讯云 COS 设置 <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
         <p>插件网站： <a href="https://qq52o.me/" target="_blank">沈唁志</a> / <a href="https://qq52o.me/2518.html" target="_blank">Sync QCloud COS发布页面</a> / <a href="https://qq52o.me/2722.html" target="_blank">详细使用教程</a>；</p>
-        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">Github</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；</p>
+        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；</p>
         <hr/>
         <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
@@ -742,6 +765,7 @@ function cos_setting_page()
             </table>
             <input type="hidden" name="type" value="cos_set">
         </form>
+        <hr>
         <form name="form2" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
             <table class="form-table">
                 <tr>
