@@ -118,6 +118,10 @@ curl.cainfo=/path/to/cacert.pem
 <details>
 <summary>点击查看</summary>
 
+2021-03-17
+* 添加 get_home_path 方法判断
+* 支持 WordPress 5.7 版本
+
 2021-01-24
 * 优化配置校验逻辑
 * 支持删除非图片类型文件
