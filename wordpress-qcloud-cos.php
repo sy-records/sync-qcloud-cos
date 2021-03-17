@@ -17,6 +17,10 @@ use Qcloud\Cos\Exception\ServiceResponseException;
 define('COS_VERSION', '1.9.4');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
+if (!function_exists('get_home_path')) {
+    require_once(ABSPATH . 'wp-admin/includes/file.php');
+}
+
 // 初始化选项
 register_activation_hook(__FILE__, 'cos_set_options');
 // 初始化选项
