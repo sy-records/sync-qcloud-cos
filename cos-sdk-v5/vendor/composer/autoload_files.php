@@ -13,4 +13,5 @@ return array(
     '25072dd6e2470089de65ae7bf11d3109' => $vendorDir . '/symfony/polyfill-php72/bootstrap.php',
     'f598d06aa772fa33d905e87be6398fb1' => $vendorDir . '/symfony/polyfill-intl-idn/bootstrap.php',
     '37a3dc5111fe8f707ab4c132ef1dbc62' => $vendorDir . '/guzzlehttp/guzzle/src/functions_include.php',
+    'f67964341ef83e59f1cc6a3916599312' => $vendorDir . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Common.php',
 );

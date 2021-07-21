@@ -70,7 +70,7 @@ class Signature {
         $headerListArray = [];
         foreach ( $request->getHeaders() as $key => $value ) {
             $key = strtolower( urlencode( $key ) );
-            $value = urlencode( $value[0] );
+            $value = rawurlencode( $value[0] );
             if ( $this->needCheckHeader( $key ) ) {
                 $headerListArray[$key] = $key. '='. $value;
             }
@@ -93,7 +93,7 @@ class Signature {
     public function createPresignedUrl( RequestInterface $request, $expires = '+30 minutes' ) {
         $authorization = $this->createAuthorization( $request, $expires );
         $uri = $request->getUri();
-        $query = 'sign='.urlencode( $authorization );
+        $query = 'sign='.urlencode( $authorization ) . '&' . $uri->getQuery();
         if ( $this->token != null ) {
             $query = $query.'&x-cos-security-token='.$this->token;
         }

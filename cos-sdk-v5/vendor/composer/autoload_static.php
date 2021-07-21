@@ -14,6 +14,7 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
+        'f67964341ef83e59f1cc6a3916599312' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Common.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -22,6 +23,10 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
             'Symfony\\Polyfill\\Php72\\' => 23,
             'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
             'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
+        ),
+        'Q' => 
+        array (
+            'Qcloud\\Cos\\' => 11,
         ),
         'P' => 
         array (
@@ -50,6 +55,10 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-idn',
         ),
+        'Qcloud\\Cos\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos',
+        ),
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
@@ -73,16 +82,6 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
         'GuzzleHttp\\' => 
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
-        ),
-    );
-
-    public static $prefixesPsr0 = array (
-        'Q' => 
-        array (
-            'Qcloud\\Cos\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src',
-            ),
         ),
     );
 
@@ -223,7 +222,18 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
         'Qcloud\\Cos\\ExceptionParser' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ExceptionParser.php',
         'Qcloud\\Cos\\Exception\\CosException' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Exception/CosException.php',
         'Qcloud\\Cos\\Exception\\ServiceResponseException' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Exception/ServiceResponseException.php',
+        'Qcloud\\Cos\\ImageParamTemplate\\BlindWatermarkTemplate' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ImageParamTemplate/BlindWatermarkTemplate.php',
+        'Qcloud\\Cos\\ImageParamTemplate\\CIParamTransformation' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ImageParamTemplate/CIParamTransformation.php',
+        'Qcloud\\Cos\\ImageParamTemplate\\ImageMogrTemplate' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ImageParamTemplate/ImageMogrTemplate.php',
+        'Qcloud\\Cos\\ImageParamTemplate\\ImageQrcodeTemplate' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ImageParamTemplate/ImageQrcodeTemplate.php',
+        'Qcloud\\Cos\\ImageParamTemplate\\ImageStyleTemplate' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ImageParamTemplate/ImageStyleTemplate.php',
+        'Qcloud\\Cos\\ImageParamTemplate\\ImageTemplate' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ImageParamTemplate/ImageTemplate.php',
+        'Qcloud\\Cos\\ImageParamTemplate\\ImageViewTemplate' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ImageParamTemplate/ImageViewTemplate.php',
+        'Qcloud\\Cos\\ImageParamTemplate\\ImageWatermarkTemplate' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ImageParamTemplate/ImageWatermarkTemplate.php',
+        'Qcloud\\Cos\\ImageParamTemplate\\PicOperationsTransformation' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ImageParamTemplate/PicOperationsTransformation.php',
+        'Qcloud\\Cos\\ImageParamTemplate\\TextWatermarkTemplate' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ImageParamTemplate/TextWatermarkTemplate.php',
         'Qcloud\\Cos\\MultipartUpload' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/MultipartUpload.php',
+        'Qcloud\\Cos\\RangeDownload' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/RangeDownload.php',
         'Qcloud\\Cos\\Request\\BodyLocation' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Request/BodyLocation.php',
         'Qcloud\\Cos\\ResultTransformer' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/ResultTransformer.php',
         'Qcloud\\Cos\\Serializer' => __DIR__ . '/..' . '/qcloud/cos-sdk-v5/src/Qcloud/Cos/Serializer.php',
@@ -245,7 +255,6 @@ class ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit0d6baadac89ead58761dd3eaf3868e74::$classMap;
 
         }, null, ClassLoader::class);
