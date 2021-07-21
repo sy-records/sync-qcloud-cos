@@ -118,6 +118,9 @@ curl.cainfo=/path/to/cacert.pem
 <details>
 <summary>点击查看</summary>
 
+2021-07-21
+* 升级 COS SDK
+
 2021-03-17
 * 添加 get_home_path 方法判断
 * 支持 WordPress 5.7 版本
