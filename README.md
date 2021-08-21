@@ -118,6 +118,9 @@ curl.cainfo=/path/to/cacert.pem
 <details>
 <summary>点击查看</summary>
 
+2021-08-21
+* 修复页面引用多次同一图片导致图片处理添加多次
+
 2021-07-21
 * 升级 COS SDK
 
