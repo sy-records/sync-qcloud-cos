@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.9.6
+Version: 1.9.7
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -14,7 +14,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', '1.9.6');
+define('COS_VERSION', '1.9.7');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 if (!function_exists('get_home_path')) {
@@ -477,6 +477,7 @@ function cos_setting_content_ci($content)
     if (!empty($option['ci_style'])) {
         preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $content, $images);
         if (!empty($images) && isset($images[1])) {
+            $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
                 if(strpos($item, $option['upload_url_path']) !== false){
                     $content = str_replace($item, $item . $option['ci_style'], $content);
@@ -494,6 +495,7 @@ function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
     if (!empty($option['ci_style']) && has_post_thumbnail()) {
         preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $html, $images);
         if (!empty($images) && isset($images[1])) {
+            $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
                 if(strpos($item, $option['upload_url_path']) !== false){
                     $html = str_replace($item, $item . $option['ci_style'], $html);
