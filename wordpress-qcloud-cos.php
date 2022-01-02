@@ -676,7 +676,7 @@ function cos_setting_page()
                         <legend>SecretKey</legend>
                     </th>
                     <td>
-                        <input type="text" name="secret_key" value="<?php echo $cos_secret_key; ?>" size="50" placeholder="SecretKey"/>
+                        <input type="password" name="secret_key" value="<?php echo $cos_secret_key; ?>" size="50" placeholder="SecretKey"/>
                     </td>
                 </tr>
                 <tr>
