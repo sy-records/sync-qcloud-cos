@@ -3,18 +3,21 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.9.8
+Version: 1.9.9
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
 */
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 require_once 'cos-sdk-v5/vendor/autoload.php';
 
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', '1.9.8');
+define('COS_VERSION', '1.9.9');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 if (!function_exists('get_home_path')) {
@@ -90,10 +93,10 @@ function cos_check_bucket($cos_opt)
 {
     $client = new Client(array(
                      'region' => esc_attr($cos_opt['regional']),
-                     'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http",
+                     'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http',
                      'credentials' => array(
-                         "secretId" => esc_attr($cos_opt['secret_id']),
-                         "secretKey" => esc_attr($cos_opt['secret_key'])
+                         'secretId' => esc_attr($cos_opt['secret_id']),
+                         'secretKey' => esc_attr($cos_opt['secret_key'])
                      )
                  ));
     try {
@@ -101,14 +104,14 @@ function cos_check_bucket($cos_opt)
         if (isset($buckets_obj['Buckets'][0]['Bucket'])) {
             $cos_bucket = esc_attr($cos_opt['bucket']);
             $cos_app_id = esc_attr($cos_opt['app_id']);
-            $needle = "-".$cos_app_id;
+            $needle = "-{$cos_app_id}";
             if (strpos($cos_bucket, $needle) !== false){
                 $setting_bucket = $cos_bucket;
             } else {
                 $setting_bucket = $cos_bucket . $needle;
             }
 
-            $buckets_msg = "存储桶名称或APPID错误，需要设置的存储桶名称或APPID可能在以下名称中： ";
+            $buckets_msg = '存储桶名称或APPID错误，需要设置的存储桶名称或APPID可能在以下名称中： ';
             if (isset($buckets_obj['Buckets'][0]['Bucket'][0])) {
                 foreach ($buckets_obj['Buckets'][0]['Bucket'] as $bucket) {
                     if ($setting_bucket == $bucket['Name']) {
@@ -269,14 +272,14 @@ function cos_upload_thumbs($metadata)
     //获取上传路径
     $wp_uploads = wp_upload_dir();
     $basedir = $wp_uploads['basedir'];
-    if (isset($metadata['file'])) {
+    if (!empty($metadata['file'])) {
         // Maybe there is a problem with the old version
         $file = $basedir . '/' . $metadata['file'];
         $upload_path = get_option('upload_path');
         if ($upload_path != '.') {
             $path_array = explode($upload_path, $file);
-            if (isset($path_array[1]) && !empty($path_array[1])) {
-                $object = '/' . $upload_path . $path_array[1];
+            if (count($path_array) >= 2) {
+                $object = '/' . $upload_path . end($path_array);
             }
         } else {
             $object = '/' . $metadata['file'];
@@ -286,7 +289,7 @@ function cos_upload_thumbs($metadata)
         cos_file_upload($object, $file, cos_is_delete_local_file());
     }
     //上传所有缩略图
-    if (isset($metadata['sizes']) && count($metadata['sizes']) > 0) {
+    if (!empty($metadata['sizes'])) {
         //获取COS插件的配置信息
         $cos_options = get_option('cos_options', true);
         //是否需要上传缩略图
@@ -332,7 +335,7 @@ function cos_delete_remote_attachment($post_id)
     // 获取图片类附件的meta信息
     $meta = wp_get_attachment_metadata( $post_id );
 
-    if (isset($meta['file'])) {
+    if (!empty($meta['file'])) {
 
         $deleteObjects = [];
 
@@ -350,7 +353,7 @@ function cos_delete_remote_attachment($post_id)
 //        $is_nothumb = (esc_attr($cos_options['nothumb']) == 'false');
 //        if ($is_nothumb) {
             // 删除缩略图
-            if (isset($meta['sizes']) && count($meta['sizes']) > 0) {
+            if (!empty($meta['sizes'])) {
                 foreach ($meta['sizes'] as $val) {
                     $size_file = dirname($file_path) . '/' . $val['file'];
 
@@ -366,15 +369,15 @@ function cos_delete_remote_attachment($post_id)
             $upload_path = get_option('upload_path');
             if ($upload_path != '.') {
                 $file_info = explode($upload_path, $link);
-                if (isset($file_info[1])) {
-                    cos_delete_cos_file($upload_path . $file_info[1]);
+                if (count($file_info) >= 2) {
+                    cos_delete_cos_file($upload_path . end($file_info));
                 }
             } else {
                 $cos_options = get_option('cos_options', true);
                 $cos_upload_url = esc_attr($cos_options['upload_url_path']);
                 $file_info = explode($cos_upload_url, $link);
-                if (isset($file_info[1])) {
-                    cos_delete_cos_file($file_info[1]);
+                if (count($file_info) >= 2) {
+                    cos_delete_cos_file(end($file_info));
                 }
             }
         }
