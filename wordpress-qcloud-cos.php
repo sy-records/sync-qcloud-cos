@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 1.9.9
+Version: 2.0.0
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -17,7 +17,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', '1.9.9');
+define('COS_VERSION', '2.0.0');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 if (!function_exists('get_home_path')) {
@@ -50,7 +50,7 @@ function cos_stop_option()
 {
     $option = get_option('cos_options');
     if ($option['delete_options'] == 'true') {
-        $upload_url_path = get_option('upload_url_path');
+        $upload_url_path = cos_get_option('upload_url_path');
         $cos_upload_url_path = esc_attr($option['upload_url_path']);
 
         if( $upload_url_path == $cos_upload_url_path ) {
@@ -222,6 +222,11 @@ function cos_delete_cos_files(array $files_key)
     $cosClient->deleteObjects(array('Bucket' => $bucket, 'Objects' => $files_key));
 }
 
+function cos_get_option($key)
+{
+    return esc_attr(get_option($key));
+}
+
 /**
  * 上传附件（包括图片的原图）
  *
@@ -243,7 +248,7 @@ function cos_upload_attachments($metadata)
     // 图片在缩略图处理
     if (!in_array($metadata['type'], $image_mime_types)) {
         //生成object在COS中的存储路径
-        if (get_option('upload_path') == '.') {
+        if (cos_get_option('upload_path') == '.') {
             $metadata['file'] = str_replace("./", '', $metadata['file']);
         }
         $object = str_replace("\\", '/', $metadata['file']);
@@ -275,7 +280,7 @@ function cos_upload_thumbs($metadata)
     if (!empty($metadata['file'])) {
         // Maybe there is a problem with the old version
         $file = $basedir . '/' . $metadata['file'];
-        $upload_path = get_option('upload_path');
+        $upload_path = cos_get_option('upload_path');
         if ($upload_path != '.') {
             $path_array = explode($upload_path, $file);
             if (count($path_array) >= 2) {
@@ -340,7 +345,7 @@ function cos_delete_remote_attachment($post_id)
         $deleteObjects = [];
 
         // meta['file']的格式为 "2020/01/wp-bg.png"
-        $upload_path = get_option('upload_path');
+        $upload_path = cos_get_option('upload_path');
         if ($upload_path == '') {
             $upload_path = 'wp-content/uploads';
         }
@@ -366,7 +371,7 @@ function cos_delete_remote_attachment($post_id)
         // 获取链接删除
         $link = wp_get_attachment_url($post_id);
         if ($link) {
-            $upload_path = get_option('upload_path');
+            $upload_path = cos_get_option('upload_path');
             if ($upload_path != '.') {
                 $file_info = explode($upload_path, $link);
                 if (count($file_info) >= 2) {
@@ -393,7 +398,7 @@ function cos_modefiy_img_url($url, $post_id)
     return $url;
 }
 
-if (get_option('upload_path') == '.') {
+if (cos_get_option('upload_path') == '.') {
     add_filter('wp_get_attachment_url', 'cos_modefiy_img_url', 30, 2);
 }
 
@@ -447,12 +452,12 @@ function cos_read_dir_queue($dir)
                     if (is_dir($real_path)) {
                         $queue[] = $real_path;
                     }
-                    //echo explode(get_option('upload_path'),$path)[1];
+                    //echo explode(cos_get_option('upload_path'),$path)[1];
                 }
             }
             closedir($handle);
         }
-        $upload_path = get_option('upload_path');
+        $upload_path = cos_get_option('upload_path');
         foreach ($files as $v) {
             if (!is_dir($v)) {
                 $dd[] = ['filepath' => $v, 'key' =>  '/' . $upload_path . explode($upload_path, $v)[1]];
@@ -477,13 +482,13 @@ add_filter('the_content', 'cos_setting_content_ci');
 function cos_setting_content_ci($content)
 {
     $option = get_option('cos_options');
-    if (!empty($option['ci_style'])) {
+    if (!empty(esc_attr($option['ci_style']))) {
         preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $content, $images);
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
-                if(strpos($item, $option['upload_url_path']) !== false){
-                    $content = str_replace($item, $item . $option['ci_style'], $content);
+                if(strpos($item, esc_attr($option['upload_url_path'])) !== false){
+                    $content = str_replace($item, $item . esc_attr($option['ci_style']), $content);
                 }
             }
         }
@@ -495,13 +500,13 @@ add_filter('post_thumbnail_html', 'cos_setting_post_thumbnail_ci', 10, 3);
 function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
 {
     $option = get_option('cos_options');
-    if (!empty($option['ci_style']) && has_post_thumbnail()) {
+    if (!empty(esc_attr($option['ci_style'])) && has_post_thumbnail()) {
         preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $html, $images);
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
-                if(strpos($item, $option['upload_url_path']) !== false){
-                    $html = str_replace($item, $item . $option['ci_style'], $html);
+                if(strpos($item, esc_attr($option['upload_url_path'])) !== false){
+                    $html = str_replace($item, $item . esc_attr($option['ci_style']), $html);
                 }
             }
         }
@@ -542,7 +547,7 @@ function cos_setting_page()
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_all') {
-        $sync = cos_read_dir_queue(get_home_path() . get_option('upload_path'));
+        $sync = cos_read_dir_queue(get_home_path() . cos_get_option('upload_path'));
         foreach ($sync as $k) {
             cos_file_upload($k['key'], $k['filepath']);
         }
@@ -588,8 +593,8 @@ function cos_setting_page()
     }
 
     $cos_options = get_option('cos_options', true);
-    $upload_path = get_option('upload_path');
-    $upload_url_path = get_option('upload_url_path');
+    $upload_path = cos_get_option('upload_path');
+    $upload_url_path = cos_get_option('upload_url_path');
 
     $cos_bucket = esc_attr($cos_options['bucket']);
     $cos_regional = esc_attr($cos_options['regional']);
