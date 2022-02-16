@@ -593,14 +593,7 @@ function cos_setting_page()
     }
 
     $cos_options = get_option('cos_options', true);
-    $upload_path = cos_get_option('upload_path');
-    $upload_url_path = cos_get_option('upload_url_path');
-
-    $cos_bucket = esc_attr($cos_options['bucket']);
     $cos_regional = esc_attr($cos_options['regional']);
-    $cos_app_id = esc_attr($cos_options['app_id']);
-    $cos_secret_id = esc_attr($cos_options['secret_id']);
-    $cos_secret_key = esc_attr($cos_options['secret_key']);
 
     $cos_nothumb = esc_attr($cos_options['nothumb']);
     $cos_nothumb = ($cos_nothumb == 'true');
@@ -611,7 +604,6 @@ function cos_setting_page()
     $cos_delete_options = esc_attr($cos_options['delete_options']);
     $cos_delete_options = ($cos_delete_options == 'true');
 
-    $cos_ci_style = esc_attr($cos_options['ci_style']);
     $cos_update_file_name = esc_attr($cos_options['update_file_name']);
 
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
@@ -628,7 +620,7 @@ function cos_setting_page()
                         <legend>存储桶名称</legend>
                     </th>
                     <td>
-                        <input type="text" name="bucket" value="<?php echo $cos_bucket; ?>" size="50" placeholder="请填写存储桶名称"/>
+                        <input type="text" name="bucket" value="<?php echo esc_attr($cos_options['bucket']); ?>" size="50" placeholder="请填写存储桶名称"/>
 
                         <p>请先访问 <a href="https://console.cloud.tencent.com/cos5/bucket" target="_blank">腾讯云控制台</a> 创建<code>存储桶</code>，再填写以上内容。</p>
                     </td>
@@ -668,7 +660,7 @@ function cos_setting_page()
                         <legend>APP ID</legend>
                     </th>
                     <td>
-                        <input type="text" name="app_id" value="<?php echo $cos_app_id; ?>" size="50" placeholder="APP ID"/>
+                        <input type="text" name="app_id" value="<?php echo esc_attr($cos_options['app_id']); ?>" size="50" placeholder="APP ID"/>
 
                         <p>请先访问 <a href="https://console.cloud.tencent.com/cos5/key" target="_blank">腾讯云控制台</a> 获取 <code>APP ID、SecretID、SecretKey</code></p>
                     </td>
@@ -677,14 +669,14 @@ function cos_setting_page()
                     <th>
                         <legend>SecretID</legend>
                     </th>
-                    <td><input type="text" name="secret_id" value="<?php echo $cos_secret_id; ?>" size="50" placeholder="SecretID"/></td>
+                    <td><input type="text" name="secret_id" value="<?php echo esc_attr($cos_options['secret_id']); ?>" size="50" placeholder="SecretID"/></td>
                 </tr>
                 <tr>
                     <th>
                         <legend>SecretKey</legend>
                     </th>
                     <td>
-                        <input type="password" name="secret_key" value="<?php echo $cos_secret_key; ?>" size="50" placeholder="SecretKey"/>
+                        <input type="password" name="secret_key" value="<?php echo esc_attr($cos_options['secret_key']); ?>" size="50" placeholder="SecretKey"/>
                     </td>
                 </tr>
                 <tr>
@@ -734,7 +726,7 @@ function cos_setting_page()
                         <legend>本地文件夹</legend>
                     </th>
                     <td>
-                        <input type="text" name="upload_path" value="<?php echo $upload_path; ?>" size="50" placeholder="请输入上传文件夹"/>
+                        <input type="text" name="upload_path" value="<?php echo cos_get_option('upload_path'); ?>" size="50" placeholder="请输入上传文件夹"/>
 
                         <p>附件在服务器上的存储位置，例如： <code>wp-content/uploads</code> （注意不要以“/”开头和结尾），根目录请输入<code>.</code>。</p>
                     </td>
@@ -744,7 +736,7 @@ function cos_setting_page()
                         <legend>URL前缀</legend>
                     </th>
                     <td>
-                        <input type="text" name="upload_url_path" value="<?php echo $upload_url_path; ?>" size="50" placeholder="请输入URL前缀"/>
+                        <input type="text" name="upload_url_path" value="<?php echo cos_get_option('upload_url_path'); ?>" size="50" placeholder="请输入URL前缀"/>
 
                         <p><b>注意：</b></p>
 
@@ -760,7 +752,7 @@ function cos_setting_page()
                         <legend>图片处理样式</legend>
                     </th>
                     <td>
-                        <input type="text" name="ci_style" value="<?php echo $cos_ci_style; ?>" size="50" placeholder="请输入图片处理样式，留空表示不处理"/>
+                        <input type="text" name="ci_style" value="<?php echo esc_attr($cos_options['ci_style']); ?>" size="50" placeholder="请输入图片处理样式，留空表示不处理"/>
 
                         <p><b>获取样式：</b></p>
 
