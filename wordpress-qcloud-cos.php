@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.0.0
+Version: 2.0.1
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -17,7 +17,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', '2.0.0');
+define('COS_VERSION', '2.0.1');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 if (!function_exists('get_home_path')) {
@@ -49,7 +49,7 @@ function cos_set_options()
 function cos_stop_option()
 {
     $option = get_option('cos_options');
-    if ($option['delete_options'] == 'true') {
+    if (esc_attr($option['delete_options']) == 'true') {
         $upload_url_path = cos_get_option('upload_url_path');
         $cos_upload_url_path = esc_attr($option['upload_url_path']);
 
@@ -70,7 +70,7 @@ function cos_get_client()
     $cos_opt = get_option('cos_options', true);
     return new Client(array(
                     'region' => esc_attr($cos_opt['regional']),
-                    'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https" : "http",
+                    'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http',
                     'credentials' => array(
                             'secretId' => esc_attr($cos_opt['secret_id']),
                             'secretKey' => esc_attr($cos_opt['secret_key'])
@@ -82,7 +82,7 @@ function cos_get_bucket_name()
     $cos_options = get_option('cos_options', true);
     $cos_bucket = esc_attr($cos_options['bucket']);
     $cos_app_id = esc_attr($cos_options['app_id']);
-    $needle = "-" . $cos_app_id;
+    $needle = '-' . $cos_app_id;
     if (strpos($cos_bucket, $needle) !== false){
         return $cos_bucket;
     }
@@ -127,12 +127,12 @@ function cos_check_bucket($cos_opt)
                     $buckets_msg .= "<code>{$buckets_obj['Buckets'][0]['Bucket']['Name']}</code> ";
                 }
             }
-            echo '<div class="error"><p><strong>'. $buckets_msg .'</strong></p></div>';
+            echo esc_html('<div class="error"><p><strong>'. $buckets_msg .'</strong></p></div>');
         }
     } catch (ServiceResponseException $e) {
         $errorMessage = $e->getMessage();
         $statusCode = $e->getStatusCode();
-        echo '<div class="error"><p><strong>ErrorCode：'. $statusCode .'，ErrorMessage：'. $errorMessage .'</strong></p></div>';
+        echo esc_html('<div class="error"><p><strong>ErrorCode：'. $statusCode .'，ErrorMessage：'. $errorMessage .'</strong></p></div>');
     }
     return false;
 }
@@ -551,7 +551,7 @@ function cos_setting_page()
         foreach ($sync as $k) {
             cos_file_upload($k['key'], $k['filepath']);
         }
-        echo '<div class="updated"><p><strong>本次操作成功同步' . count($sync) . '个文件</strong></p></div>';
+        echo esc_html('<div class="updated"><p><strong>本次操作成功同步' . count($sync) . '个文件</strong></p></div>');
     }
 
     // 替换数据库链接
@@ -568,7 +568,7 @@ function cos_setting_page()
         $postmeta_name = $wpdb->prefix .'postmeta';
         $postmeta_result = $wpdb->query("UPDATE $postmeta_name SET meta_value = REPLACE( meta_value, '$old_url', '$new_url') ");
 
-        echo '<div class="updated"><p><strong>替换成功！共替换文章内链'.$posts_result.'条、题图链接'.$postmeta_result.'条！</strong></p></div>';
+        echo esc_html('<div class="updated"><p><strong>替换成功！共替换文章内链'.$posts_result.'条、题图链接'.$postmeta_result.'条！</strong></p></div>');
     }
 
     // 若$options不为空数组，则更新数据
