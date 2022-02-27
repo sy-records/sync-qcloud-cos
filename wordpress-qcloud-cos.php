@@ -588,7 +588,7 @@ function cos_setting_page()
             update_option('upload_path', $upload_path);
             $upload_url_path = sanitize_text_field(trim(stripslashes($_POST['upload_url_path']), '/'));
             update_option('upload_url_path', $upload_url_path);
-            echo '<div class="updated"><p><strong>设置已保存！</strong></p></div>';
+            echo esc_html('<div class="updated"><p><strong>设置已保存！</strong></p></div>');
         }
     }
 
