@@ -88,6 +88,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 = 2.0.2 =
 
 * 移除 esc_html
+* 修复 path error
 
 = 2.0.1 =
 

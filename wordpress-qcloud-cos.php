@@ -304,7 +304,8 @@ function cos_upload_thumbs($metadata)
             return $metadata;
         }
         //得到本地文件夹和远端文件夹
-        $file_path = $basedir . '/' . dirname($metadata['file']) . '/';
+        $dirname = dirname($metadata['file']);
+        $file_path = $dirname != '.' ? "{$basedir}/{$dirname}/" : "{$basedir}/";
         $file_path = str_replace("\\", '/', $file_path);
         if ($upload_path == '.') {
             $file_path = str_replace('./', '', $file_path);
