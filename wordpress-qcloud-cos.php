@@ -17,7 +17,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', '2.0.2');
+define('COS_VERSION', '2.0.3');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 if (!function_exists('get_home_path')) {
@@ -267,6 +267,8 @@ function cos_upload_attachments($metadata)
 //避免上传插件/主题时出现同步到COS的情况
 if (substr_count($_SERVER['REQUEST_URI'], '/update.php') <= 0) {
     add_filter('wp_handle_upload', 'cos_upload_attachments', 50);
+    add_filter('wp_generate_attachment_metadata', 'cos_upload_thumbs', 100);
+    add_filter('wp_save_image_editor_file', 'cos_save_image_editor_file', 101);
 }
 
 /**
@@ -327,9 +329,23 @@ function cos_upload_thumbs($metadata)
     return $metadata;
 }
 
-//避免上传插件/主题时出现同步到COS的情况
-if (substr_count($_SERVER['REQUEST_URI'], '/update.php') <= 0) {
-    add_filter('wp_generate_attachment_metadata', 'cos_upload_thumbs', 100);
+/**
+* @param $override
+* @return mixed
+ */
+function cos_save_image_editor_file($override)
+{
+    add_filter('wp_update_attachment_metadata', 'cos_image_editor_file_do');
+    return $override;
+}
+
+/**
+ * @param $metadata
+ * @return mixed
+ */
+function cos_image_editor_file_do($metadata)
+{
+    return cos_upload_thumbs($metadata);
 }
 
 /**
@@ -354,6 +370,8 @@ function cos_delete_remote_attachment($post_id)
 
         $deleteObjects[] = ['Key' => str_replace("\\", '/', $file_path)];
 
+        $dirname = dirname($file_path) . '/';
+
         // 删除时不管是否开启不上传缩略图，只要有就删除。
 //        $cos_options = get_option('cos_options', true);
 //        $is_nothumb = (esc_attr($cos_options['nothumb']) == 'false');
@@ -361,12 +379,20 @@ function cos_delete_remote_attachment($post_id)
             // 删除缩略图
             if (!empty($meta['sizes'])) {
                 foreach ($meta['sizes'] as $val) {
-                    $size_file = dirname($file_path) . '/' . $val['file'];
+                    $size_file = $dirname . $val['file'];
 
                     $deleteObjects[] = ['Key' => str_replace("\\", '/', $size_file)];
                 }
             }
 //        }
+
+        $backup_sizes = get_post_meta($post_id, '_wp_attachment_backup_sizes', true);
+        if (is_array($backup_sizes)) {
+            foreach ($backup_sizes as $size) {
+                $deleteObjects[] = ['Key' => str_replace("\\", '/', $dirname . $size['file'])];
+            }
+        }
+
         cos_delete_cos_files($deleteObjects);
     } else {
         // 获取链接删除
