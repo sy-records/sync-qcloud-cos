@@ -29,7 +29,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 7. 支持验证桶名是否填写正确
 8. 支持腾讯云数据万象 CI 图片处理
 9. 支持上传文件自动重命名
-10. 支持图片裁剪编辑等操作后的上传
+10. 支持媒体库编辑
 
 插件更多详细介绍和安装：[https://github.com/sy-records/wordpress-qcloud-cos](https://github.com/sy-records/wordpress-qcloud-cos)
 
@@ -89,6 +89,10 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 不可同时开启同类插件；类似于腾讯云的官方插件 `tencentcloud-*` 系列；
 
 == Changelog ==
+
+= 2.0.3 =
+
+* 支持媒体库编辑
 
 = 2.0.2 =
 

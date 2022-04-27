@@ -24,7 +24,7 @@
 * [x] 支持验证桶名是否填写正确
 * [x] 支持腾讯云数据万象 CI 图片处理
 * [x] 支持上传文件自动重命名
-* [x] 支持图片裁剪编辑等操作后的上传
+* [x] 支持媒体库编辑
 
 ## 安装
 
@@ -120,8 +120,10 @@ curl.cainfo=/path/to/cacert.pem
 
 ## 更新记录
 
+https://github.com/sy-records/wordpress-qcloud-cos/releases
+
 <details>
-<summary>点击查看</summary>
+<summary>点击查看历史记录</summary>
 
 2021-08-21
 * 修复页面引用多次同一图片导致图片处理添加多次
