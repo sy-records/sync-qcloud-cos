@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.0.3
+Version: 2.0.4
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -17,7 +17,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', '2.0.3');
+define('COS_VERSION', '2.0.4');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 if (!function_exists('get_home_path')) {
@@ -26,7 +26,6 @@ if (!function_exists('get_home_path')) {
 
 // 初始化选项
 register_activation_hook(__FILE__, 'cos_set_options');
-// 初始化选项
 function cos_set_options()
 {
     $options = array(
@@ -68,13 +67,15 @@ register_deactivation_hook(__FILE__, 'cos_stop_option');
 function cos_get_client()
 {
     $cos_opt = get_option('cos_options', true);
-    return new Client(array(
-                    'region' => esc_attr($cos_opt['regional']),
-                    'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http',
-                    'credentials' => array(
-                            'secretId' => esc_attr($cos_opt['secret_id']),
-                            'secretKey' => esc_attr($cos_opt['secret_key'])
-                    )));
+    return new Client([
+                          'region' => esc_attr($cos_opt['regional']),
+                          'schema' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http',
+                          'credentials' => [
+                              'secretId' => esc_attr($cos_opt['secret_id']),
+                              'secretKey' => esc_attr($cos_opt['secret_key'])
+                          ],
+                          'userAgent' => 'WordPress v' . $GLOBALS['wp_version']
+                      ]);
 }
 
 function cos_get_bucket_name()
@@ -91,14 +92,15 @@ function cos_get_bucket_name()
 
 function cos_check_bucket($cos_opt)
 {
-    $client = new Client(array(
+    $client = new Client([
                      'region' => esc_attr($cos_opt['regional']),
                      'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http',
-                     'credentials' => array(
+                     'credentials' => [
                          'secretId' => esc_attr($cos_opt['secret_id']),
                          'secretKey' => esc_attr($cos_opt['secret_key'])
-                     )
-                 ));
+                     ],
+                     'userAgent' => 'WordPress v' . $GLOBALS['wp_version']
+                 ]);
     try {
         $buckets_obj = $client->listBuckets();
         if (isset($buckets_obj['Buckets'][0]['Bucket'])) {

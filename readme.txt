@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 5.9
 Requires PHP: 5.6.0
-Stable tag: 2.0.3
+Stable tag: 2.0.4
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -89,6 +89,10 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 不可同时开启同类插件；类似于腾讯云的官方插件 `tencentcloud-*` 系列；
 
 == Changelog ==
+
+= 2.0.4 =
+
+* 添加UA
 
 = 2.0.3 =
 
