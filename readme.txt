@@ -4,7 +4,7 @@ Donate link: https://qq52o.me/sponsor.html
 Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 6.3
-Requires PHP: 5.6.0
+Requires PHP: 7.0.0
 Stable tag: 2.1.0
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
