@@ -1,0 +1,6 @@
+/.git
+/.github
+/.distignore
+/cos-sdk-v5/vendor/qcloud/cos-sdk-v5/sample
+/cos-sdk-v5/vendor/qcloud/cos-sdk-v5/.github
+/cos-sdk-v5/composer.lock
