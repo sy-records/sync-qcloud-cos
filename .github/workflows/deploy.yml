@@ -16,8 +16,9 @@ jobs:
         php-version: '7.0'
         tools: composer
     - name: Build
-      run:
+      run: |
         composer install -o --no-dev
+      working-directory: cos-sdk-v5
     - name: WordPress Plugin Deploy
       uses: 10up/action-wordpress-plugin-deploy@stable
       with:
