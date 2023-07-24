@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 6.3
 Requires PHP: 5.6.0
-Stable tag: 2.0.5
+Stable tag: 2.1.0
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -90,9 +90,10 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 == Changelog ==
 
-= 2.0.5 =
+= 2.1.0 =
 
 * 支持 WordPress 6.3
+* 升级依赖
 
 = 2.0.4 =
 
