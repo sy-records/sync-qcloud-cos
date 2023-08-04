@@ -4,41 +4,9 @@ on:
   release:
     types: [ published ]
 jobs:
-  tag:
-    name: New release
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.0'
-        tools: composer
-    - name: Build
-      run: |
-        composer install -o --no-dev
+  deploy:
+    uses: sy-records/.github/.github/workflows/wordpress-plugin-deploy.yaml@main
+    with:
+      build: true
       working-directory: cos-sdk-v5
-    - name: Set Version
-      if: github.event_name == 'pull_request'
-      run: |
-        echo "VERSION=ci" >> $GITHUB_ENV
-    - name: WordPress Plugin Deploy
-      id: deploy
-      uses: 10up/action-wordpress-plugin-deploy@stable
-      with:
-        dry-run: ${{ github.event_name == 'pull_request' }}
-        generate-zip: ${{ github.event_name == 'release' }}
-      env:
-        SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-        SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
-        SLUG: sync-qcloud-cos
-    - name: Upload release asset
-      uses: actions/upload-release-asset@v1
-      if: github.event_name == 'release'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ${{ steps.deploy.outputs.zip-path }}
-        asset_name: ${{ github.event.repository.name }}.zip
-        asset_content_type: application/zip
+    secrets: inherit
