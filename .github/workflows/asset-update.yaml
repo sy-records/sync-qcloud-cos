@@ -1,0 +1,10 @@
+name: Plugin asset/readme update
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+jobs:
+  update:
+    uses: sy-records/.github/.github/workflows/wordpress-plugin-asset-update.yaml@main
+    secrets: inherit
