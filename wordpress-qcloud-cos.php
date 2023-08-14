@@ -3,11 +3,12 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.1.0
+Version: 2.2.0
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
 */
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -17,7 +18,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 
-define('COS_VERSION', '2.1.0');
+define('COS_VERSION', '2.2.0');
 define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
 
 if (!function_exists('get_home_path')) {
@@ -52,7 +53,7 @@ function cos_stop_option()
         $upload_url_path = cos_get_option('upload_url_path');
         $cos_upload_url_path = esc_attr($option['upload_url_path']);
 
-        if( $upload_url_path == $cos_upload_url_path ) {
+        if($upload_url_path == $cos_upload_url_path) {
             update_option('upload_url_path', '' );
         }
         delete_option('cos_options');
@@ -62,19 +63,20 @@ function cos_stop_option()
 register_deactivation_hook(__FILE__, 'cos_stop_option');
 
 /**
+ * @param array $cos_options
  * @return Client
  */
-function cos_get_client()
+function cos_get_client($cos_options = null)
 {
-    $cos_opt = get_option('cos_options', true);
+    if ($cos_options === null) $cos_options = get_option('cos_options', true);
     return new Client([
-                          'region' => esc_attr($cos_opt['regional']),
+                          'region' => esc_attr($cos_options['regional']),
                           'schema' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http',
                           'credentials' => [
-                              'secretId' => esc_attr($cos_opt['secret_id']),
-                              'secretKey' => esc_attr($cos_opt['secret_key'])
+                              'secretId' => esc_attr($cos_options['secret_id']),
+                              'secretKey' => esc_attr($cos_options['secret_key'])
                           ],
-                          'userAgent' => 'WordPress v' . $GLOBALS['wp_version']
+                          'userAgent' => 'WordPress v' . $GLOBALS['wp_version'] . '; SyncQCloudCOS v' . COS_VERSION . '; SDK v' . Client::VERSION,
                       ]);
 }
 
@@ -90,22 +92,14 @@ function cos_get_bucket_name()
     return $cos_bucket . $needle;
 }
 
-function cos_check_bucket($cos_opt)
+function cos_check_bucket($cos_options)
 {
-    $client = new Client([
-                     'region' => esc_attr($cos_opt['regional']),
-                     'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http',
-                     'credentials' => [
-                         'secretId' => esc_attr($cos_opt['secret_id']),
-                         'secretKey' => esc_attr($cos_opt['secret_key'])
-                     ],
-                     'userAgent' => 'WordPress v' . $GLOBALS['wp_version']
-                 ]);
+    $client = cos_get_client($cos_options);
     try {
         $buckets_obj = $client->listBuckets();
         if (isset($buckets_obj['Buckets'][0]['Bucket'])) {
-            $cos_bucket = esc_attr($cos_opt['bucket']);
-            $cos_app_id = esc_attr($cos_opt['app_id']);
+            $cos_bucket = esc_attr($cos_options['bucket']);
+            $cos_app_id = esc_attr($cos_options['app_id']);
             $needle = "-{$cos_app_id}";
             if (strpos($cos_bucket, $needle) !== false){
                 $setting_bucket = $cos_bucket;
@@ -132,9 +126,7 @@ function cos_check_bucket($cos_opt)
             echo '<div class="error"><p><strong>'. $buckets_msg .'</strong></p></div>';
         }
     } catch (ServiceResponseException $e) {
-        $errorMessage = $e->getMessage();
-        $statusCode = $e->getStatusCode();
-        echo '<div class="error"><p><strong>ErrorCode：'. $statusCode .'，ErrorMessage：'. $errorMessage .'</strong></p></div>';
+        echo "<div class='error'><p><strong>{$e}</strong></p></div>";
     }
     return false;
 }
@@ -142,7 +134,8 @@ function cos_check_bucket($cos_opt)
 /**
  * @param $object
  * @param $filename
- * @param false $no_local_file
+ * @param bool $no_local_file
+ * @return false|void
  */
 function cos_file_upload($object, $filename, $no_local_file = false)
 {
@@ -162,7 +155,7 @@ function cos_file_upload($object, $filename, $no_local_file = false)
             }
         }
     } catch (ServiceResponseException $e) {
-        print_r(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode()]);
+        WP_DEBUG && print_r(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode(), 'requestId' => $e->getRequestId()]);
     }
 }
 
@@ -233,7 +226,7 @@ function cos_get_option($key)
  * 上传附件（包括图片的原图）
  *
  * @param  $metadata
- * @return array()
+ * @return array
  */
 function cos_upload_attachments($metadata)
 {
@@ -810,7 +803,7 @@ function cos_setting_page()
                     <input type="hidden" name="type" value="qcloud_cos_all">
                     <td>
                         <input type="submit" name="submit" class="button button-secondary" value="开始同步"/>
-                        <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以，建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/10976">同步工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2755.html">使用腾讯云COS官方工具快速将本地数据迁移至COS</a></b></p>
+                        <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以，建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/10976">同步工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2809.html">使用 COSCLI 快速迁移本地数据到 COS</a></b></p>
                     </td>
                 </tr>
             </table>
