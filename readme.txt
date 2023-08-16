@@ -49,6 +49,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 1. screenshot-1.png
 2. screenshot-2.png
+2. screenshot-3.png
 
 == Frequently Asked Questions ==
 
@@ -94,6 +95,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 * 调整 UserAgent
 * 复用部分代码
 * 调整异常信息
+* 支持图片极智压缩
 
 = 2.1.0 =
 
