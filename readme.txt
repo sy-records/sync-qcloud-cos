@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 6.3
 Requires PHP: 7.0.0
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -30,6 +30,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 8. 支持腾讯云数据万象 CI 图片处理
 9. 支持上传文件自动重命名
 10. 支持媒体库编辑
+11. 支持腾讯云数据万象图片极智压缩
 
 插件更多详细介绍和安装：[https://github.com/sy-records/wordpress-qcloud-cos](https://github.com/sy-records/wordpress-qcloud-cos)
 
@@ -49,6 +50,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 1. screenshot-1.png
 2. screenshot-2.png
+2. screenshot-3.png
 
 == Frequently Asked Questions ==
 
@@ -89,6 +91,12 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 不可同时开启同类插件；类似于腾讯云的官方插件 `tencentcloud-*` 系列；
 
 == Changelog ==
+
+= 2.2.0 =
+* 调整 UserAgent
+* 复用部分代码
+* 调整异常信息
+* 支持图片极智压缩
 
 = 2.1.0 =
 

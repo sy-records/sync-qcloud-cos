@@ -26,6 +26,7 @@
 * [x] 支持腾讯云数据万象 CI 图片处理
 * [x] 支持上传文件自动重命名
 * [x] 支持媒体库编辑
+* [x] 支持腾讯云数据万象图片极智压缩
 
 ## 安装
 
@@ -117,7 +118,9 @@ curl.cainfo=/path/to/cacert.pem
 
 ![设置页面](screenshot-1.png)
 
-![update-wordpress-posts-photos.png](screenshot-2.png)
+![数据库链接替换](screenshot-2.png)
+
+![图片极智压缩](screenshot-3.png)
 
 ## 更新记录
 

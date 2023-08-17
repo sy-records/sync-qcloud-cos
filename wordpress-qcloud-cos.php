@@ -3,11 +3,12 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.1.0
+Version: 2.2.0
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
 */
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -16,9 +17,11 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
+use SyncQcloudCos\CI\ImageSlim;
+use SyncQcloudCos\ErrorCode;
 
-define('COS_VERSION', '2.1.0');
-define('COS_BASEFOLDER', plugin_basename(dirname(__FILE__)));
+define('COS_VERSION', '2.2.0');
+define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2Fwordpress-qcloud-cos.php');
 
 if (!function_exists('get_home_path')) {
     require_once(ABSPATH . 'wp-admin/includes/file.php');
@@ -38,8 +41,11 @@ function cos_set_options()
         'nolocalsaving' => 'false', // 是否保留本地备份
         'delete_options' => 'false',
         'upload_url_path' => '', // URL前缀
-        'ci_style' => '',
         'update_file_name' => 'false', // 是否重命名文件名
+        'ci_style' => '',
+        'ci_image_slim' => 'off',
+        'ci_image_slim_mode' => '',
+        'ci_image_slim_suffix' => '',
     );
     add_option('cos_options', $options, '', 'yes');
 }
@@ -52,7 +58,7 @@ function cos_stop_option()
         $upload_url_path = cos_get_option('upload_url_path');
         $cos_upload_url_path = esc_attr($option['upload_url_path']);
 
-        if( $upload_url_path == $cos_upload_url_path ) {
+        if ($upload_url_path == $cos_upload_url_path) {
             update_option('upload_url_path', '' );
         }
         delete_option('cos_options');
@@ -62,25 +68,26 @@ function cos_stop_option()
 register_deactivation_hook(__FILE__, 'cos_stop_option');
 
 /**
+ * @param array $cos_options
  * @return Client
  */
-function cos_get_client()
+function cos_get_client($cos_options = null)
 {
-    $cos_opt = get_option('cos_options', true);
+    if ($cos_options === null) $cos_options = get_option('cos_options', true);
     return new Client([
-                          'region' => esc_attr($cos_opt['regional']),
+                          'region' => esc_attr($cos_options['regional']),
                           'schema' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http',
                           'credentials' => [
-                              'secretId' => esc_attr($cos_opt['secret_id']),
-                              'secretKey' => esc_attr($cos_opt['secret_key'])
+                              'secretId' => esc_attr($cos_options['secret_id']),
+                              'secretKey' => esc_attr($cos_options['secret_key'])
                           ],
-                          'userAgent' => 'WordPress v' . $GLOBALS['wp_version']
+                          'userAgent' => 'WordPress v' . $GLOBALS['wp_version'] . '; SyncQCloudCOS v' . COS_VERSION . '; SDK v' . Client::VERSION,
                       ]);
 }
 
-function cos_get_bucket_name()
+function cos_get_bucket_name($cos_options = null)
 {
-    $cos_options = get_option('cos_options', true);
+    if ($cos_options === null) $cos_options = get_option('cos_options', true);
     $cos_bucket = esc_attr($cos_options['bucket']);
     $cos_app_id = esc_attr($cos_options['app_id']);
     $needle = '-' . $cos_app_id;
@@ -90,24 +97,16 @@ function cos_get_bucket_name()
     return $cos_bucket . $needle;
 }
 
-function cos_check_bucket($cos_opt)
+function cos_check_bucket($cos_options)
 {
-    $client = new Client([
-                     'region' => esc_attr($cos_opt['regional']),
-                     'schema' =>  (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http',
-                     'credentials' => [
-                         'secretId' => esc_attr($cos_opt['secret_id']),
-                         'secretKey' => esc_attr($cos_opt['secret_key'])
-                     ],
-                     'userAgent' => 'WordPress v' . $GLOBALS['wp_version']
-                 ]);
+    $client = cos_get_client($cos_options);
     try {
         $buckets_obj = $client->listBuckets();
         if (isset($buckets_obj['Buckets'][0]['Bucket'])) {
-            $cos_bucket = esc_attr($cos_opt['bucket']);
-            $cos_app_id = esc_attr($cos_opt['app_id']);
+            $cos_bucket = esc_attr($cos_options['bucket']);
+            $cos_app_id = esc_attr($cos_options['app_id']);
             $needle = "-{$cos_app_id}";
-            if (strpos($cos_bucket, $needle) !== false){
+            if (strpos($cos_bucket, $needle) !== false) {
                 $setting_bucket = $cos_bucket;
             } else {
                 $setting_bucket = $cos_bucket . $needle;
@@ -132,9 +131,7 @@ function cos_check_bucket($cos_opt)
             echo '<div class="error"><p><strong>'. $buckets_msg .'</strong></p></div>';
         }
     } catch (ServiceResponseException $e) {
-        $errorMessage = $e->getMessage();
-        $statusCode = $e->getStatusCode();
-        echo '<div class="error"><p><strong>ErrorCode：'. $statusCode .'，ErrorMessage：'. $errorMessage .'</strong></p></div>';
+        echo "<div class='error'><p><strong>{$e}</strong></p></div>";
     }
     return false;
 }
@@ -142,7 +139,8 @@ function cos_check_bucket($cos_opt)
 /**
  * @param $object
  * @param $filename
- * @param false $no_local_file
+ * @param bool $no_local_file
+ * @return false|void
  */
 function cos_file_upload($object, $filename, $no_local_file = false)
 {
@@ -162,7 +160,7 @@ function cos_file_upload($object, $filename, $no_local_file = false)
             }
         }
     } catch (ServiceResponseException $e) {
-        print_r(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode()]);
+        WP_DEBUG && print_r(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode(), 'requestId' => $e->getRequestId()]);
     }
 }
 
@@ -233,7 +231,7 @@ function cos_get_option($key)
  * 上传附件（包括图片的原图）
  *
  * @param  $metadata
- * @return array()
+ * @return array
  */
 function cos_upload_attachments($metadata)
 {
@@ -501,7 +499,7 @@ function cos_read_dir_queue($dir)
 function cos_plugin_action_links($links, $file)
 {
     if ($file == plugin_basename(dirname(__FILE__) . '/wordpress-qcloud-cos.php')) {
-        $links[] = '<a href="options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php">设置</a>';
+        $links[] = '<a href="options-general.php?page=' . COS_PLUGIN_PAGE . '>设置</a>';
     }
     return $links;
 }
@@ -516,7 +514,7 @@ function cos_setting_content_ci($content)
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
-                if(strpos($item, esc_attr($option['upload_url_path'])) !== false){
+                if (strpos($item, esc_attr($option['upload_url_path'])) !== false) {
                     $content = str_replace($item, $item . esc_attr($option['ci_style']), $content);
                 }
             }
@@ -534,7 +532,7 @@ function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
-                if(strpos($item, esc_attr($option['upload_url_path'])) !== false){
+                if (strpos($item, esc_attr($option['upload_url_path'])) !== false) {
                     $html = str_replace($item, $item . esc_attr($option['ci_style']), $html);
                 }
             }
@@ -543,12 +541,252 @@ function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
     return $html;
 }
 
+function cos_append_options($options)
+{
+    $cos_options = get_option('cos_options');
+
+    $options['ci_image_slim'] = $cos_options['ci_image_slim'];
+    $options['ci_image_slim_mode'] = $cos_options['ci_image_slim_mode'];
+    $options['ci_image_slim_suffix'] = $cos_options['ci_image_slim_suffix'];
+
+    return $options;
+}
+
+function cos_get_regional($regional)
+{
+    $options = [
+        'ap-beijing-1' => ['tj', '北京一区（华北）'],
+        'ap-beijing' => ['bj', '北京'],
+        'ap-nanjing' => ['ap-nanjing', '南京'],
+        'ap-shanghai' => ['sh', '上海（华东）'],
+        'ap-guangzhou' => ['gz', '广州（华南）'],
+        'ap-chengdu' => ['cd', '成都（西南）'],
+        'ap-chongqing' => ['ap-chongqing', '重庆'],
+        'ap-shenzhen-fsi' => ['ap-shenzhen-fsi', '深圳金融'],
+        'ap-shanghai-fsi' => ['ap-shanghai-fsi', '上海金融'],
+        'ap-beijing-fsi' => ['ap-beijing-fsi', '北京金融'],
+        'ap-hongkong' => ['hk', '中国香港'],
+        'ap-singapore' => ['sgp', '新加坡'],
+        'na-toronto' => ['ca', '多伦多'],
+        'eu-frankfurt' => ['ger', '法兰克福'],
+        'ap-mumbai' => ['ap-mumbai', '孟买'],
+        'ap-seoul' => ['ap-seoul', '首尔'],
+        'na-siliconvalley' => ['na-siliconvalley', '硅谷'],
+        'na-ashburn' => ['na-ashburn', '弗吉尼亚'],
+        'ap-bangkok' => ['ap-bangkok', '曼谷'],
+        'eu-moscow' => ['eu-moscow', '莫斯科'],
+        'accelerate' => ['accelerate', '全球加速']
+    ];
+
+    foreach ($options as $value => $info) {
+        $selected = ($regional == $info[0] || $regional == $value) ? ' selected="selected"' : '';
+        echo '<option value="' . $value . '"' . $selected . '>' . $info[1] . '</option>';
+    }
+}
+
+function cos_sync_setting_form()
+{
+    return <<<HTML
+        <form method="post">
+            <table class="form-table">
+                <tr>
+                    <th>
+                        <legend>数据库原链接替换</legend>
+                    </th>
+                    <td>
+                        <input type="text" name="old_url" size="50" placeholder="请输入要替换的旧域名"/>
+                        <p>如：<code>https://qq52o.me</code></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend></legend>
+                    </th>
+                    <td>
+                        <input type="text" name="new_url" size="50" placeholder="请输入要替换的新域名"/>
+                        <p>如：COS访问域名<code>https://bucket-appid.cos.ap-xxx.myqcloud.com</code>或自定义域名<code>https://resources.qq52o.me</code></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend></legend>
+                    </th>
+                    <input type="hidden" name="type" value="qcloud_cos_replace">
+                    <td>
+                        <input type="submit" name="submit" class="button button-secondary" value="开始替换"/>
+                        <p><b>注意：如果是首次替换，请注意备份！此功能会替换文章以及设置的特色图片（题图）等使用的资源链接</b></p>
+                    </td>
+                </tr>
+            </table>
+        </form>
+        <form method="post">
+            <table class="form-table">
+                <tr>
+                    <th>
+                        <legend>同步历史附件</legend>
+                    </th>
+                    <input type="hidden" name="type" value="qcloud_cos_all">
+                    <td>
+                        <input type="submit" name="submit" class="button button-secondary" value="开始同步"/>
+                        <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以，建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/10976">同步工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2809.html">使用 COSCLI 快速迁移本地数据到 COS</a></b></p>
+                    </td>
+                </tr>
+            </table>
+        </form>
+HTML;
+}
+
+/**
+ * @param array $content
+ * @return bool
+ */
+function cos_ci_image_slim_setting($content)
+{
+    $cos_options = get_option('cos_options', true);
+    if (empty($cos_options['bucket']) || empty($cos_options['app_id']) || empty($cos_options['secret_id']) || empty($cos_options['secret_key'])) {
+        echo '<div class="error"><p><strong>请先保存存储桶名称、地域、APP ID、SecretID、SecretKey 参数！</strong></p></div>';
+        return false;
+    }
+
+    $slim = !empty($content['ci_image_slim']) ? sanitize_text_field($content['ci_image_slim']) : 'off';
+    $mode = !empty($content['ci_image_slim_mode']) ? implode(',', $content['ci_image_slim_mode']) : '';
+    $suffix = !empty($content['ci_image_slim_suffix']) ? implode(',', $content['ci_image_slim_suffix']) : '';
+
+    if ($slim == 'on') {
+        if (empty($mode)) {
+            echo '<div class="error"><p><strong>图片极智压缩模式不能为空！</strong></p></div>';
+            return false;
+        }
+        if (strpos($mode, 'Auto') !== false && empty($suffix)) {
+            echo '<div class="error"><p><strong>图片极智压缩使用模式包含自动时，图片格式不能为空！</strong></p></div>';
+            return false;
+        }
+    }
+
+    try {
+        $client = cos_get_client($cos_options);
+        $bucket = cos_get_bucket_name($cos_options);
+        ImageSlim::checkStatus($client, $bucket);
+        if ($slim == 'on') {
+            ImageSlim::open($client, $bucket, $mode, $suffix);
+        } else {
+            ImageSlim::close($client, $bucket);
+        }
+    } catch (ServiceResponseException $e) {
+        $msg = (string)$e;
+        if ($e->getExceptionCode() === ErrorCode::NO_BIND_CI) {
+            $msg = "存储桶 {$bucket} 未绑定数据万象，若要开启极智压缩，请先 <a href= 'https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a >";
+        }
+        if ($e->getExceptionCode() === ErrorCode::REGION_UNSUPPORTED) {
+            $msg = "存储桶所在地域 {$cos_options['regional']} 暂不支持图片极智压缩";
+        }
+        echo "<div class='error'><p><strong>{$msg}</strong></p></div>";
+        return false;
+    }
+
+    $cos_options['ci_image_slim'] = $slim;
+    $cos_options['ci_image_slim_mode'] = $mode;
+    $cos_options['ci_image_slim_suffix'] = $suffix;
+
+    update_option('cos_options', $cos_options);
+
+    echo '<div class="updated"><p><strong>图片极智压缩设置已保存！</strong></p></div>';
+    return true;
+}
+
+function cos_ci_image_slim_page($options)
+{
+    $ci_image_slim = esc_attr($options['ci_image_slim']);
+    $checked_ci_image_slim = $ci_image_slim == 'on' ? 'checked="checked"' : '';
+    $ci_image_slim_mode = explode(',', esc_attr($options['ci_image_slim_mode']));
+    $checked_mode_api = in_array('API', $ci_image_slim_mode) ? 'checked="checked"' : '';
+    $checked_mode_auto = in_array('Auto', $ci_image_slim_mode) ? 'checked="checked"' : '';
+    $ci_image_slim_suffix = explode(',', esc_attr($options['ci_image_slim_suffix']));
+    $checked_suffix_jpg = in_array('jpg', $ci_image_slim_suffix) ? 'checked="checked"' : '';
+    $checked_suffix_png = in_array('png', $ci_image_slim_suffix) ? 'checked="checked"' : '';
+
+    $remoteStatus = '';
+    if (!empty($options['bucket']) && !empty($options['app_id']) && !empty($options['secret_id']) && !empty($options['secret_key'])) {
+        try {
+            $bucket = cos_get_bucket_name($options);
+            $status = ImageSlim::checkStatus(cos_get_client($options), $bucket);
+            $remoteStatus = $status == 'on' ? '云端状态：<span class="open">已开启</span>' : '云端状态：<span class="close">已关闭</span>';
+        } catch (ServiceResponseException $e) {
+            $msg = (string)$e;
+            if ($e->getExceptionCode() === ErrorCode::NO_BIND_CI) {
+                $msg = "存储桶 $bucket 未绑定数据万象，若要开启极智压缩，请先 <a href= 'https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a >";
+            }
+            if ($e->getExceptionCode() === ErrorCode::REGION_UNSUPPORTED) {
+                $msg = "存储桶所在地域 '{$options['regional']}' 暂不支持图片极智压缩";
+            }
+            echo "<div class='error'><p><strong>{$msg}</strong></p></div>";
+        }
+    }
+
+    if (empty($options['bucket']) || empty($options['app_id']) || empty($options['secret_id']) || empty($options['secret_key'])) {
+        echo '<div class="error"><p><strong>请先保存存储桶名称、地域、APP ID、SecretID、SecretKey 参数！</strong></p></div>';
+    }
+
+    return <<<EOF
+        <form method="post">
+            <table class="form-table">
+                <tr>
+                    <th>
+                        <legend>简介</legend>
+                    </th>
+                    <td>
+                        <p>图片极智压缩开启后，通过智能判断图片的主观质量进行自动调节，在不改变图片原格式的基础上，使图片体积相比原图有显著的降低，<br> 同时在视觉效果上可以最大程度贴近原图。更多详情请查看：<a href="https://cloud.tencent.com/document/product/460/86438" target="_blank">腾讯云文档</a></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend>是否启用</legend>
+                    </th>
+                    <td>
+                        <input type="checkbox" name="ci_image_slim" {$checked_ci_image_slim} /> <span>{$remoteStatus}</span>
+                        <p>极智压缩支持两种模式自动压缩和API模式，请按需选择。</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend>自动压缩</legend>
+                    </th>
+                    <td>
+                        <input type="checkbox" name="ci_image_slim_mode[]" value="Auto" {$checked_mode_auto} />
+                        <p>开通极智压缩的自动使用方式，开通后无需携带任何参数，存储桶内指定格式的图片将在访问时自动进行极智压缩。</p>
+                        <p>需要选择自动进行压缩的图片格式：</p>
+                        <input type="checkbox" name="ci_image_slim_suffix[]" value="jpg" {$checked_suffix_jpg} /> jpg（包含<code>jpg</code>、<code>jpeg</code>）<br>
+                        <input type="checkbox" name="ci_image_slim_suffix[]" value="png" {$checked_suffix_png} /> png <br>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend>API 模式</legend>
+                    </th>
+                    <td>
+                        <input type="checkbox" name="ci_image_slim_mode[]" value="API" {$checked_mode_api} />
+                        <p>开通极智压缩的 API 使用方式，开通后可在图片时通过极智压缩参数（需要配置配置图片处理样式<code>?imageSlim</code>）对图片进行压缩；</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend></legend>
+                    </th>
+                    <input type="hidden" name="type" value="qcloud_cos_ci_image_slim">
+                    <td>
+                        <input type="submit" name="submit" class="button button-secondary" value="保存"/>
+                    </td>
+                </tr>
+            </table>
+        </form>
+EOF;
+}
+
 // 在导航栏“设置”中添加条目
 function cos_add_setting_page()
 {
     add_options_page('腾讯云COS设置', '腾讯云COS设置', 'manage_options', __FILE__, 'cos_setting_page');
 }
-
 add_action('admin_menu', 'cos_add_setting_page');
 
 // 插件设置页面
@@ -573,6 +811,8 @@ function cos_setting_page()
 
         $options['ci_style'] = isset($_POST['ci_style']) ? sanitize_text_field($_POST['ci_style']) : '';
         $options['update_file_name'] = isset($_POST['update_file_name']) ? sanitize_text_field($_POST['update_file_name']) : 'false';
+
+        $options = cos_append_options($options);
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_all') {
@@ -584,20 +824,24 @@ function cos_setting_page()
     }
 
     // 替换数据库链接
-    if(!empty($_POST) and $_POST['type'] == 'qcloud_cos_replace') {
+    if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_replace') {
         $old_url = esc_url_raw($_POST['old_url']);
         $new_url = esc_url_raw($_POST['new_url']);
 
         global $wpdb;
-        $posts_name = $wpdb->prefix .'posts';
+        $posts_name = $wpdb->prefix . 'posts';
         // 文章内容
-        $posts_result = $wpdb->query("UPDATE $posts_name SET post_content = REPLACE( post_content, '$old_url', '$new_url') ");
+        $posts_result = $wpdb->query("UPDATE $posts_name SET post_content = REPLACE(post_content, '$old_url', '$new_url') ");
 
         // 修改题图之类的
         $postmeta_name = $wpdb->prefix .'postmeta';
-        $postmeta_result = $wpdb->query("UPDATE $postmeta_name SET meta_value = REPLACE( meta_value, '$old_url', '$new_url') ");
+        $postmeta_result = $wpdb->query("UPDATE $postmeta_name SET meta_value = REPLACE(meta_value, '$old_url', '$new_url') ");
 
         echo '<div class="updated"><p><strong>替换成功！共替换文章内链'.$posts_result.'条、题图链接'.$postmeta_result.'条！</strong></p></div>';
+    }
+
+    if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_image_slim') {
+        cos_ci_image_slim_setting($_POST);
     }
 
     // 若$options不为空数组，则更新数据
@@ -635,14 +879,32 @@ function cos_setting_page()
 
     $cos_update_file_name = esc_attr($cos_options['update_file_name']);
 
-    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
+
+    // default to the first tab
+    $current_tab = 'config';
+
+    // check if the tab is set
+    if( isset($_GET['tab']) ) {
+        $current_tab = $_GET['tab'];
+    }
     ?>
+    <style>
+      .new-tab {margin-left: 5px;padding: 3px;border-radius: 10px;font-size: 10px}
+      .open {color: #007017;}
+      .close {color: #b32d2e;}
+    </style>
     <div class="wrap" style="margin: 10px;">
         <h1>腾讯云 COS 设置 <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
         <p>插件网站：<a href="https://qq52o.me/" target="_blank">沈唁志</a> / <a href="https://qq52o.me/2518.html" target="_blank">Sync QCloud COS发布页面</a> / <a href="https://qq52o.me/2722.html" target="_blank">详细使用教程</a>；</p>
-        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；</p>
-        <hr/>
-        <form name="form1" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
+        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；<a href="https://qq52o.me/sponsor.html#sponsor" target="_blank">打赏一杯咖啡或一杯香茗</a></p>
+        <h3 class="nav-tab-wrapper">
+          <a class="nav-tab <?php echo $current_tab == 'config' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=config">配置</a>
+          <a class="nav-tab <?php echo $current_tab == 'sync' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=sync">数据迁移</a>
+          <a class="nav-tab <?php echo $current_tab == 'slim' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=slim">图片极智压缩<span class="wp-ui-notification new-tab">NEW</span></a>
+        </h3>
+        <?php if ($current_tab == 'config'): ?>
+        <form method="post">
             <table class="form-table">
                 <tr>
                     <th>
@@ -658,29 +920,8 @@ function cos_setting_page()
                     <th>
                         <legend>存储桶地域</legend>
                     </th>
-                    <td><select name="regional">
-                            <option value="ap-beijing-1" <?php if ($cos_regional == 'tj' || $cos_regional == 'ap-beijing-1') {echo ' selected="selected"';}?>>北京一区（华北）</option>
-                            <option value="ap-beijing" <?php if ($cos_regional == 'bj' || $cos_regional == 'ap-beijing') {echo ' selected="selected"';}?>>北京</option>
-                            <option value="ap-nanjing" <?php if ($cos_regional == 'ap-nanjing') {echo ' selected="selected"';}?>>南京</option>
-                            <option value="ap-shanghai" <?php if ($cos_regional == 'sh' || $cos_regional == 'ap-shanghai') {echo ' selected="selected"';}?>>上海（华东）</option>
-                            <option value="ap-guangzhou" <?php if ($cos_regional == 'gz' || $cos_regional == 'ap-guangzhou') {echo ' selected="selected"';}?>>广州（华南）</option>
-                            <option value="ap-chengdu" <?php if ($cos_regional == 'cd' || $cos_regional == 'ap-chengdu') {echo ' selected="selected"';}?>>成都（西南）</option>
-                            <option value="ap-chongqing" <?php if ($cos_regional == 'ap-chongqing') {echo ' selected="selected"';}?>>重庆</option>
-                            <option value="ap-shenzhen-fsi" <?php if ($cos_regional == 'ap-shenzhen-fsi') {echo ' selected="selected"';}?>>深圳金融</option>
-                            <option value="ap-shanghai-fsi" <?php if ($cos_regional == 'ap-shanghai-fsi') {echo ' selected="selected"';}?>>上海金融</option>
-                            <option value="ap-beijing-fsi" <?php if ($cos_regional == 'ap-beijing-fsi') {echo ' selected="selected"';}?>>北京金融</option>
-                            <option value="ap-hongkong" <?php if ($cos_regional == 'hk' || $cos_regional == 'ap-hongkong') {echo ' selected="selected"';}?>>中国香港</option>
-                            <option value="ap-singapore" <?php if ($cos_regional == 'sgp' || $cos_regional == '	ap-singapore') {echo ' selected="selected"';}?>>新加坡</option>
-                            <option value="na-toronto" <?php if ($cos_regional == 'ca' || $cos_regional == 'na-toronto') {echo ' selected="selected"';}?>>多伦多</option>
-                            <option value="eu-frankfurt" <?php if ($cos_regional == 'ger' || $cos_regional == 'eu-frankfurt') {echo ' selected="selected"';}?>>法兰克福</option>
-                            <option value="ap-mumbai" <?php if ($cos_regional == 'ap-mumbai') {echo ' selected="selected"';}?>>孟买</option>
-                            <option value="ap-seoul" <?php if ($cos_regional == 'ap-seoul') {echo ' selected="selected"';}?>>首尔</option>
-                            <option value="na-siliconvalley" <?php if ($cos_regional == 'na-siliconvalley') {echo ' selected="selected"';}?>>硅谷</option>
-                            <option value="na-ashburn" <?php if ($cos_regional == 'na-ashburn') {echo ' selected="selected"';}?>>弗吉尼亚</option>
-                            <option value="ap-bangkok" <?php if ($cos_regional == 'ap-bangkok') {echo ' selected="selected"';}?>>曼谷</option>
-                            <option value="eu-moscow" <?php if ($cos_regional == 'eu-moscow') {echo ' selected="selected"';}?>>莫斯科</option>
-                            <option value="accelerate" <?php if ($cos_regional == 'accelerate') {echo ' selected="selected"';}?>>全球加速</option>
-                        </select>
+                    <td>
+                        <select name="regional"><?php cos_get_regional($cos_regional); ?></select>
                         <p>请选择您创建的<code>存储桶</code>所在地域</p>
                     </td>
                 </tr>
@@ -794,61 +1035,18 @@ function cos_setting_page()
                     </td>
                 </tr>
                 <tr>
-                    <th><legend>保存/更新选项</legend></th>
+                    <th></th>
                     <td><input type="submit" name="submit" class="button button-primary" value="保存更改"/></td>
                 </tr>
             </table>
             <input type="hidden" name="type" value="cos_set">
         </form>
+        <?php elseif ($current_tab == 'sync'): ?>
+            <?php echo cos_sync_setting_form(); ?>
+        <?php elseif ($current_tab == 'slim'): ?>
+            <?php echo cos_ci_image_slim_page($cos_options); ?>
+        <?php endif; ?>
         <hr>
-        <form name="form2" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
-            <table class="form-table">
-                <tr>
-                    <th>
-                        <legend>同步历史附件</legend>
-                    </th>
-                    <input type="hidden" name="type" value="qcloud_cos_all">
-                    <td>
-                        <input type="submit" name="submit" class="button button-secondary" value="开始同步"/>
-                        <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以，建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/10976">同步工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2755.html">使用腾讯云COS官方工具快速将本地数据迁移至COS</a></b></p>
-                    </td>
-                </tr>
-            </table>
-        </form>
-        <hr>
-        <form name="form3" method="post" action="<?php echo wp_nonce_url('./options-general.php?page=' . COS_BASEFOLDER . '/wordpress-qcloud-cos.php'); ?>">
-            <table class="form-table">
-                <tr>
-                    <th>
-                        <legend>数据库原链接替换</legend>
-                    </th>
-                    <td>
-                        <input type="text" name="old_url" size="50" placeholder="请输入要替换的旧域名"/>
-                        <p>如：<code>https://qq52o.me</code></p>
-                    </td>
-                </tr>
-                <tr>
-                    <th>
-                        <legend></legend>
-                    </th>
-                    <td>
-                        <input type="text" name="new_url" size="50" placeholder="请输入要替换的新域名"/>
-                        <p>如：COS访问域名<code>https://bucket-appid.cos.ap-xxx.myqcloud.com</code>或自定义域名<code>https://resources.qq52o.me</code></p>
-                    </td>
-                </tr>
-                <tr>
-                    <th>
-                        <legend></legend>
-                    </th>
-                    <input type="hidden" name="type" value="qcloud_cos_replace">
-                    <td>
-                        <input type="submit" name="submit"  class="button button-secondary" value="开始替换"/>
-                        <p><b>注意：如果是首次替换，请注意备份！此功能会替换文章以及设置的特色图片（题图）等使用的资源链接</b></p>
-                    </td>
-                </tr>
-            </table>
-        </form>
-        <hr/>
         <p>优惠活动：<a href="https://qq52o.me/welfare.html#qcloud" target="_blank">腾讯云优惠</a> / <a href="https://go.qq52o.me/a/cos" target="_blank">腾讯云COS资源包优惠</a>；</p>
         <p>限时推广：<a href="https://cloud.tencent.com/developer/support-plan?invite_code=cqidlih5bagj" target="_blank">技术博客可以加入腾讯云云+社区定制周边礼品等你来拿</a> / <a href="https://go.qq52o.me/qm/ccs" target="_blank">欢迎加入云存储插件交流群，QQ群号：887595381</a>；</p>
     </div>
