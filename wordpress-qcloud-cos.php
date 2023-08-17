@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.2.0
+Version: 2.2.1
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -20,7 +20,7 @@ use Qcloud\Cos\Exception\ServiceResponseException;
 use SyncQcloudCos\CI\ImageSlim;
 use SyncQcloudCos\ErrorCode;
 
-define('COS_VERSION', '2.2.0');
+define('COS_VERSION', '2.2.1');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2Fwordpress-qcloud-cos.php');
 
 if (!function_exists('get_home_path')) {
@@ -498,8 +498,9 @@ function cos_read_dir_queue($dir)
 // 在插件列表页添加设置按钮
 function cos_plugin_action_links($links, $file)
 {
-    if ($file == plugin_basename(dirname(__FILE__) . '/wordpress-qcloud-cos.php')) {
-        $links[] = '<a href="options-general.php?page=' . COS_PLUGIN_PAGE . '>设置</a>';
+    $link = urldecode(COS_PLUGIN_PAGE);
+    if ($file == $link) {
+        $links[] = "<a href='options-general.php?page={$link}'>设置</a>";
     }
     return $links;
 }
