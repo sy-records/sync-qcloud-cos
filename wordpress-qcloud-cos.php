@@ -546,9 +546,9 @@ function cos_append_options($options)
 {
     $cos_options = get_option('cos_options');
 
-    $options['ci_image_slim'] = $cos_options['ci_image_slim'];
-    $options['ci_image_slim_mode'] = $cos_options['ci_image_slim_mode'];
-    $options['ci_image_slim_suffix'] = $cos_options['ci_image_slim_suffix'];
+    $options['ci_image_slim'] = $cos_options['ci_image_slim'] ?? 'off';
+    $options['ci_image_slim_mode'] = $cos_options['ci_image_slim_mode'] ?? '';
+    $options['ci_image_slim_suffix'] = $cos_options['ci_image_slim_suffix'] ?? '';
 
     return $options;
 }
