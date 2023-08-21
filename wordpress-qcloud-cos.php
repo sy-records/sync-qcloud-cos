@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.2.1
+Version: 2.2.2
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -19,8 +19,10 @@ use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 use SyncQcloudCos\CI\ImageSlim;
 use SyncQcloudCos\ErrorCode;
+use SyncQcloudCos\Monitor\DataPoints;
+use SyncQcloudCos\Monitor\Charts;
 
-define('COS_VERSION', '2.2.1');
+define('COS_VERSION', '2.2.2');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2Fwordpress-qcloud-cos.php');
 
 if (!function_exists('get_home_path')) {
@@ -891,9 +893,16 @@ function cos_setting_page()
     }
     ?>
     <style>
-      .new-tab {margin-left: 5px;padding: 3px;border-radius: 10px;font-size: 10px}
+      .new-tab {margin-left: 5px;padding: 3px;border-radius: 10px;font-size: 10px;}
       .open {color: #007017;}
       .close {color: #b32d2e;}
+      .charts-container {display: flex;flex-wrap: wrap;margin-top: 10px;}
+      .cos-chart {flex-basis: calc(50% - 20px);}
+      @media (max-width: 600px) {
+          .cos-chart {
+              flex-basis: 100%;
+          }
+      }
     </style>
     <div class="wrap" style="margin: 10px;">
         <h1>腾讯云 COS 设置 <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
@@ -903,6 +912,7 @@ function cos_setting_page()
           <a class="nav-tab <?php echo $current_tab == 'config' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=config">配置</a>
           <a class="nav-tab <?php echo $current_tab == 'sync' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=sync">数据迁移</a>
           <a class="nav-tab <?php echo $current_tab == 'slim' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=slim">图片极智压缩<span class="wp-ui-notification new-tab">NEW</span></a>
+          <a class="nav-tab <?php echo $current_tab == 'metric' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=metric">数据监控</a>
         </h3>
         <?php if ($current_tab == 'config'): ?>
         <form method="post">
@@ -1046,6 +1056,17 @@ function cos_setting_page()
             <?php echo cos_sync_setting_form(); ?>
         <?php elseif ($current_tab == 'slim'): ?>
             <?php echo cos_ci_image_slim_page($cos_options); ?>
+        <?php elseif ($current_tab == 'metric'): ?>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <?php $monitor = new DataPoints(cos_get_bucket_name($cos_options), $cos_options); ?>
+        <div class="charts-container">
+        <?php
+            echo Charts::storage($monitor->getStorage());
+            echo Charts::objectNumber($monitor->getObjectNumber());
+            echo Charts::requests($monitor->getRequests());
+            echo Charts::traffic($monitor->getTraffic());
+        ?>
+        </div>
         <?php endif; ?>
         <hr>
         <p>优惠活动：<a href="https://qq52o.me/welfare.html#qcloud" target="_blank">腾讯云优惠</a> / <a href="https://go.qq52o.me/a/cos" target="_blank">腾讯云COS资源包优惠</a>；</p>

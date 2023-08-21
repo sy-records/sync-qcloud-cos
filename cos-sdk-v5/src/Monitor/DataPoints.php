@@ -1,0 +1,218 @@
+<?php
+
+namespace SyncQcloudCos\Monitor;
+
+use DateTime;
+use DateTimeZone;
+use TencentCloud\Common\Credential;
+use TencentCloud\Common\Exception\TencentCloudSDKException;
+use TencentCloud\Monitor\V20180724\Models\GetMonitorDataRequest;
+use TencentCloud\Monitor\V20180724\MonitorClient;
+
+class DataPoints
+{
+    const NAMESPACE = 'QCE/COS';
+
+    const PERIOD_60 = 60;
+    const PERIOD_300 = 300;
+    const PERIOD_3600 = 3600;
+    const PERIOD_86400 = 86400;
+
+    const METRIC_READ = 'StdReadRequests'; // 标准存储读请求
+    const METRIC_WRITE = 'StdWriteRequests'; // 标准存储写请求
+
+    const METRIC_STORAGE = 'StdStorage'; // 标准存储-存储空间
+    const METRIC_OBJECT_NUMBER = 'StdObjectNumber'; // 标准存储-对象数量
+
+    const METRIC_INTERNET_TRAFFIC = 'InternetTraffic'; // 外网下行流量
+    const METRIC_INTERNAL_TRAFFIC = 'InternalTraffic'; // 内网下行流量
+    const METRIC_CDN_ORIGIN_TRAFFIC = 'CdnOriginTraffic'; // CDN 回源流量
+
+    /**
+     * @var string $bucket
+     */
+    private $bucket;
+
+    /**
+     * @var array $options
+     */
+    private $options;
+
+    /**
+     * @var string $start
+     */
+    private $start;
+
+    /**
+     * @var string $end
+     */
+    private $end;
+
+    /**
+     * @var MonitorClient $client
+     */
+    private $client;
+
+    public function __construct($bucket, $options = [], $start = null, $end = null)
+    {
+        $this->bucket = $bucket;
+        $this->options = $options;
+
+        if (empty($start) || empty($end)) {
+            list($start, $end) = $this->genStartEndTime();
+        }
+        $this->start = $start;
+        $this->end = $end;
+
+        $cred = new Credential($options['secret_id'], $options['secret_key']);
+        $this->client = new MonitorClient($cred, 'ap-guangzhou');
+    }
+
+    protected function getTimezone()
+    {
+        return new DateTimeZone(get_option('timezone_string') ?: date_default_timezone_get());
+    }
+
+    protected function formatTime($date)
+    {
+        $timezone = $this->getTimezone();
+        foreach ($date as $key => $value) {
+            $date[$key] = (new DateTime('@' . $value))->setTimezone($timezone)->format('Y-m-d');
+        }
+        return $date;
+    }
+
+    protected function genStartEndTime()
+    {
+        $timezone = $this->getTimezone();
+
+        $start = (new DateTime('-30 days', $timezone))->format(DateTime::RFC3339);
+        $end = (new DateTime('now', $timezone))->format(DateTime::RFC3339);
+
+        return [$start, $end];
+    }
+
+    /**
+     * @param string $metric
+     * @param string $start
+     * @param string $end
+     * @return array
+     */
+    public function buildParams($metric = self::METRIC_READ, $start = null, $end = null)
+    {
+        $start = $start ?: $this->start;
+        $end = $end ?: $this->end;
+
+        return [
+            'Namespace' => self::NAMESPACE,
+            'MetricName' => $metric,
+            'Period' => self::PERIOD_86400,
+            'StartTime' => $start,
+            'EndTime' => $end,
+            'Instances' => [
+                [
+                    'Dimensions' => [
+                        [
+                            'Name' => 'bucket',
+                            'Value' => $this->bucket
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    public function getRequests()
+    {
+        $params = $this->buildParams(self::METRIC_READ);
+        $read = $this->request($params);
+
+        $date = $this->formatTime($read->Timestamps ?? []);
+
+        $params = $this->buildParams(self::METRIC_WRITE);
+        $write = $this->request($params);
+
+        return [
+            'date' => $date,
+            'read' => $read->Values ?? [],
+            'write' => $write->Values ?? [],
+        ];
+    }
+
+    public function getStorage()
+    {
+        $params = $this->buildParams(self::METRIC_STORAGE);
+        $storage = $this->request($params);
+
+        $date = $this->formatTime($storage->Timestamps ?? []);
+
+        return [
+            'date' => $date,
+            'storage' => $storage->Values ?? [],
+        ];
+    }
+
+    public function getObjectNumber()
+    {
+        $params = $this->buildParams(self::METRIC_OBJECT_NUMBER);
+        $objectNumber = $this->request($params);
+
+        $date = $this->formatTime($objectNumber->Timestamps ?? []);
+
+        return [
+            'date' => $date,
+            'objectNumber' => $objectNumber->Values ?? [],
+        ];
+    }
+
+    public function getTraffic()
+    {
+        $params = $this->buildParams(self::METRIC_INTERNET_TRAFFIC);
+        $internet = $this->request($params);
+
+        $date = $this->formatTime($internet->Timestamps ?? []);
+
+        $params = $this->buildParams(self::METRIC_INTERNAL_TRAFFIC);
+        $internal = $this->request($params);
+
+        $params = $this->buildParams(self::METRIC_CDN_ORIGIN_TRAFFIC);
+        $cdn = $this->request($params);
+
+        return [
+            'date' => $date,
+            'internet' => array_map([$this, 'bytes2MB'], $internet->Values ?? []),
+            'internal' => array_map([$this, 'bytes2MB'], $internal->Values ?? []),
+            'cdn' => array_map([$this, 'bytes2MB'], $cdn->Values ?? []),
+        ];
+    }
+
+    /**
+     * 将字节数转换为兆字节(MB)。
+     * 和腾讯云计算方式保持一致：用1000计算而不是1024。
+     *
+     * @param int $bytes
+     * @return float
+     */
+    private function bytes2MB($bytes)
+    {
+        return round($bytes / 1000 / 1000, 2);
+    }
+
+    /**
+     * @param array $params
+     * @return object
+     */
+    public function request($params)
+    {
+        try {
+            $request = new GetMonitorDataRequest();
+            $request->fromJsonString(json_encode($params));
+
+            $response = $this->client->GetMonitorData($request);
+
+            return $response->getDataPoints()[0] ?? (object)[];
+        } catch (TencentCloudSDKException $e) {
+            return (object)[];
+        }
+    }
+}
