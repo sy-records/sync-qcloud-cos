@@ -33,7 +33,7 @@ if (!function_exists('get_home_path')) {
 register_activation_hook(__FILE__, 'cos_set_options');
 function cos_set_options()
 {
-    $options = array(
+    $options = [
         'bucket' => '',
         'regional' => 'ap-beijing',
         'app_id' => '',
@@ -48,7 +48,7 @@ function cos_set_options()
         'ci_image_slim' => 'off',
         'ci_image_slim_mode' => '',
         'ci_image_slim_suffix' => '',
-    );
+    ];
     add_option('cos_options', $options, '', 'yes');
 }
 
@@ -210,7 +210,7 @@ function cos_delete_cos_file($file)
 {
     $bucket = cos_get_bucket_name();
     $cosClient = cos_get_client();
-    $cosClient->deleteObject(array('Bucket' => $bucket, 'Key' => $file));
+    $cosClient->deleteObject(['Bucket' => $bucket, 'Key' => $file]);
 }
 
 /**
@@ -221,7 +221,7 @@ function cos_delete_cos_files(array $files_key)
 {
     $bucket = cos_get_bucket_name();
     $cosClient = cos_get_client();
-    $cosClient->deleteObjects(array('Bucket' => $bucket, 'Objects' => $files_key));
+    $cosClient->deleteObjects(['Bucket' => $bucket, 'Objects' => $files_key]);
 }
 
 function cos_get_option($key)
@@ -238,14 +238,14 @@ function cos_get_option($key)
 function cos_upload_attachments($metadata)
 {
     $mime_types = get_allowed_mime_types();
-    $image_mime_types = array(
+    $image_mime_types = [
         $mime_types['jpg|jpeg|jpe'],
         $mime_types['gif'],
         $mime_types['png'],
         $mime_types['bmp'],
         $mime_types['tiff|tif'],
         $mime_types['ico'],
-    );
+    ];
     // 例如mp4等格式 上传后根据配置选择是否删除 删除后媒体库会显示默认图片 点开内容是正常的
     // 图片在缩略图处理
     if (!in_array($metadata['type'], $image_mime_types)) {
@@ -423,7 +423,7 @@ add_action('delete_attachment', 'cos_delete_remote_attachment');
 function cos_modefiy_img_url($url, $post_id)
 {
     // 移除 ./ 和 项目根路径
-    $url = str_replace(array('./', get_home_path()), array('', ''), $url);
+    $url = str_replace(['./', get_home_path()], '', $url);
     return $url;
 }
 
@@ -448,7 +448,7 @@ add_filter( 'sanitize_file_name', 'cos_sanitize_file_name', 10, 1 );
 
 function cos_function_each(&$array)
 {
-    $res = array();
+    $res = [];
     $key = key($array);
     if ($key !== null) {
         next($array);
@@ -468,8 +468,8 @@ function cos_read_dir_queue($dir)
 {
     $dd = [];
     if (isset($dir)) {
-        $files = array();
-        $queue = array($dir);
+        $files = [];
+        $queue = [$dir];
         while ($data = cos_function_each($queue)) {
             $path = $data['value'];
             if (is_dir($path) && $handle = opendir($path)) {
@@ -798,7 +798,7 @@ function cos_setting_page()
     if (!current_user_can('manage_options')) {
         wp_die('Insufficient privileges!');
     }
-    $options = array();
+    $options = [];
     if (!empty($_POST) and $_POST['type'] == 'cos_set') {
         $options['bucket'] = isset($_POST['bucket']) ? sanitize_text_field($_POST['bucket']) : '';
         $options['regional'] = isset($_POST['regional']) ? sanitize_text_field($_POST['regional']) : '';
@@ -848,7 +848,7 @@ function cos_setting_page()
     }
 
     // 若$options不为空数组，则更新数据
-    if ($options !== array()) {
+    if ($options !== []) {
 
         $check_status = true;
         if (!empty($options['bucket']) && !empty($options['app_id']) && !empty($options['secret_id']) && !empty($options['secret_key'])) {
