@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 6.3
 Requires PHP: 7.0.0
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -50,7 +50,9 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 1. screenshot-1.png
 2. screenshot-2.png
-2. screenshot-3.png
+3. screenshot-3.png
+4. screenshot-4.png
+5. screenshot-5.png
 
 == Frequently Asked Questions ==
 
@@ -91,6 +93,11 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 不可同时开启同类插件；类似于腾讯云的官方插件 `tencentcloud-*` 系列；
 
 == Changelog ==
+
+= 2.2.2 =
+* 支持文件预览
+* 增加数据监控：存储用量、对象数量、请求数、流量等
+* 使用远程配置覆盖本地配置
 
 = 2.2.1 =
 * 修复插件列表页丢失设置按钮

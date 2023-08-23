@@ -11,7 +11,8 @@ use TencentCloud\Monitor\V20180724\MonitorClient;
 
 class DataPoints
 {
-    const NAMESPACE = 'QCE/COS';
+    const NAMESPACE_COS = 'QCE/COS';
+    const NAMESPACE_CI = 'QCE/CI';
 
     const PERIOD_60 = 60;
     const PERIOD_300 = 300;
@@ -27,6 +28,15 @@ class DataPoints
     const METRIC_INTERNET_TRAFFIC = 'InternetTraffic'; // 外网下行流量
     const METRIC_INTERNAL_TRAFFIC = 'InternalTraffic'; // 内网下行流量
     const METRIC_CDN_ORIGIN_TRAFFIC = 'CdnOriginTraffic'; // CDN 回源流量
+
+    const METRIC_IMAGE_BASICS_REQUESTS = 'ImageBasicsRequests'; // 图片基础处理请求次数
+
+    const METRIC_DOCUMENT_HTML_REQUESTS = 'DocumentHtmlRequests'; // 文档转HTML请求数
+    const METRIC_DOCUMENT_HTML_SUCCESS_REQUESTS = 'DocumentHtmlSuccessRequests'; // 文档转HTML请求成功数
+    const METRIC_DOCUMENT_HTML_FAIL_REQUESTS = 'DocumentHtmlFailRequests'; // 文档转HTML请求失败数
+
+    const METRIC_CI_CDN_ORIGIN_TRAFFIC = 'CdnOriginTraffic'; // CDN回源流量：CI数据从存储桶传输到腾讯云CDN边缘节点产生的流量
+    const METRIC_CI_INTERNET_TRAFFIC_UP = 'InternetTrafficUp'; // 外网出流量：CI数据通过互联网从存储桶下载到客户端产生的流量
 
     /**
      * @var string $bucket
@@ -94,17 +104,18 @@ class DataPoints
 
     /**
      * @param string $metric
+     * @param string $namespace
      * @param string $start
      * @param string $end
      * @return array
      */
-    public function buildParams($metric = self::METRIC_READ, $start = null, $end = null)
+    public function buildParams($metric = self::METRIC_READ, $namespace = self::NAMESPACE_COS, $start = null, $end = null)
     {
         $start = $start ?: $this->start;
         $end = $end ?: $this->end;
 
         return [
-            'Namespace' => self::NAMESPACE,
+            'Namespace' => $namespace,
             'MetricName' => $metric,
             'Period' => self::PERIOD_86400,
             'StartTime' => $start,
@@ -139,6 +150,27 @@ class DataPoints
         ];
     }
 
+    public function getDocumentHtmlRequests()
+    {
+        $params = $this->buildParams(self::METRIC_DOCUMENT_HTML_REQUESTS, self::NAMESPACE_CI);
+        $requests = $this->request($params);
+
+        $date = $this->formatTime($requests->Timestamps ?? []);
+
+        $params = $this->buildParams(self::METRIC_DOCUMENT_HTML_SUCCESS_REQUESTS, self::NAMESPACE_CI);
+        $success = $this->request($params);
+
+        $params = $this->buildParams(self::METRIC_DOCUMENT_HTML_FAIL_REQUESTS, self::NAMESPACE_CI);
+        $fail = $this->request($params);
+
+        return [
+            'date' => $date,
+            'requests' => $requests->Values ?? [],
+            'success' => $success->Values ?? [],
+            'fail' => $fail->Values ?? [],
+        ];
+    }
+
     public function getStorage()
     {
         $params = $this->buildParams(self::METRIC_STORAGE);
@@ -149,6 +181,19 @@ class DataPoints
         return [
             'date' => $date,
             'storage' => $storage->Values ?? [],
+        ];
+    }
+
+    public function getImageBasicsRequests()
+    {
+        $params = $this->buildParams(self::METRIC_IMAGE_BASICS_REQUESTS, self::NAMESPACE_CI);
+        $request = $this->request($params);
+
+        $date = $this->formatTime($request->Timestamps ?? []);
+
+        return [
+            'date' => $date,
+            'request' => $request->Values ?? [],
         ];
     }
 
@@ -183,6 +228,23 @@ class DataPoints
             'internet' => array_map([$this, 'bytes2MB'], $internet->Values ?? []),
             'internal' => array_map([$this, 'bytes2MB'], $internal->Values ?? []),
             'cdn' => array_map([$this, 'bytes2MB'], $cdn->Values ?? []),
+        ];
+    }
+
+    public function getCITraffic()
+    {
+        $params = $this->buildParams(self::METRIC_CI_CDN_ORIGIN_TRAFFIC, self::NAMESPACE_CI);
+        $cdn = $this->request($params);
+
+        $date = $this->formatTime($cdn->Timestamps ?? []);
+
+        $params = $this->buildParams(self::METRIC_CI_INTERNET_TRAFFIC_UP, self::NAMESPACE_CI);
+        $internet = $this->request($params);
+
+        return [
+            'date' => $date,
+            'cdn' => array_map([$this, 'bytes2MB'], $cdn->Values ?? []),
+            'internet' => array_map([$this, 'bytes2MB'], $internet->Values ?? []),
         ];
     }
 
