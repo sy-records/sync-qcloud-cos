@@ -917,7 +917,6 @@ function cos_document_page($options)
         }
     }
 
-
     $disableSubmit = !$status ? 'disabled=disabled' : '';
     $disableMessage = !$status ? "<p>如需使用请先访问 <a href='https://console.cloud.tencent.com/ci/bucket?bucket={$bucket}&region={$options['regional']}&type=document' target='_blank'>腾讯云控制台</a>开启。</p>" : '';
 
