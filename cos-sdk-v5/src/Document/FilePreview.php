@@ -33,7 +33,7 @@ class FilePreview
             'pptx', 'ppt', 'pot','potx', 'pps', 'ppsx', 'dps', 'dpt', 'pptm', 'potm', 'ppsm',
             'doc', 'dot', 'wps', 'wpt', 'docx', 'dotx', 'docm', 'dotm',
             'xls', 'xlt', 'et', 'ett', 'xlsx', 'xltx', 'csv', 'xlsb', 'xlsm', 'xltm', 'ets',
-            'pdf',  'lrc', 'c', 'cpp', 'h', 'asm', 's',  'java', 'asp', 'bat', 'bas', 'prg', 'cmd', 'rtf', 'txt', 'log', 'xml', 'htm', 'html'
+            'pdf', 'lrc', 'c', 'cpp', 'h', 'asm', 's', 'java', 'asp', 'bat', 'bas', 'prg', 'cmd', 'rtf', 'txt', 'log', 'xml', 'htm', 'html'
         ];
         return in_array($extension, $supported);
     }
