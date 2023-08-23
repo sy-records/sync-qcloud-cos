@@ -50,7 +50,9 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 1. screenshot-1.png
 2. screenshot-2.png
-2. screenshot-3.png
+3. screenshot-3.png
+4. screenshot-4.png
+5. screenshot-5.png
 
 == Frequently Asked Questions ==
 
