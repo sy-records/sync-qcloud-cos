@@ -93,4 +93,34 @@ HTML;
 
         return self::generateChartScript('cos-traffic-chart', '流量', $series, $data['date'], 'MB');
     }
+
+    public static function ciStyle($data)
+    {
+        $series = [
+            ['name' => '请求数', 'data' => $data['request']]
+        ];
+
+        return self::generateChartScript('cos-ci-style-chart', '图片基础处理', $series, $data['date'], '次');
+    }
+
+    public static function ciDocumentHtml($data)
+    {
+        $series = [
+            ['name' => '请求数', 'data' => $data['requests']],
+            ['name' => '成功次数', 'data' => $data['success']],
+            ['name' => '失败次数', 'data' => $data['fail']]
+        ];
+
+        return self::generateChartScript('cos-ci-document-html-chart', '文档预览', $series, $data['date'], '次');
+    }
+
+    public static function ciTraffic($data)
+    {
+        $series = [
+            ['name' => 'CDN 回源流量', 'data' => $data['cdn']],
+            ['name' => '外网出流量', 'data' => $data['internet']]
+        ];
+
+        return self::generateChartScript('cos-ci-traffic-chart', 'CI 流量', $series, $data['date'], 'MB');
+    }
 }

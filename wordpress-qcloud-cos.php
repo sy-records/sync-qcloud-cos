@@ -18,6 +18,7 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 use SyncQcloudCos\CI\ImageSlim;
+use SyncQcloudCos\Document\FilePreview;
 use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Monitor\Charts;
@@ -48,6 +49,7 @@ function cos_set_options()
         'ci_image_slim' => 'off',
         'ci_image_slim_mode' => '',
         'ci_image_slim_suffix' => '',
+        'attachment_preview' => 'off'
     ];
     add_option('cos_options', $options, '', 'yes');
 }
@@ -523,6 +525,36 @@ function cos_setting_content_ci($content)
             }
         }
     }
+
+    if (!empty($option['attachment_preview']) && $option['attachment_preview'] == 'on') {
+        $preg = '/<a .*?href="(.*?)".*?>/is';
+        $editorBlocks = [
+            'gutenberg' => [
+                'pattern' => '/<div class=\"wp-block-file\"><a href=\"(http|https):\/\/([\w\d\-_]+[\.\w\d\-_]+)[:\d+]?([\/]?[\u4e00-\u9fa5]+)(.*)\">/u',
+                'iframe' => '<div class="wp-block-file"><iframe src="%urlstring%?ci-process=doc-preview&dstType=html" width="100%" allowFullScreen="true" height="800"></iframe></div>'
+            ],
+            'classic' => [
+                'pattern' => '/<p><a href=\"(http|https):\/\/([\w\d\-_]+[\.\w\d\-_]+)[:\d+]?([\/]?[\u4e00-\u9fa5]+)(.*)\">/u',
+                'iframe' => '<p><iframe src="%urlstring%?ci-process=doc-preview&dstType=html" width="100%" allowFullScreen="true" height="800"></iframe></p>'
+            ]
+        ];
+
+        foreach ($editorBlocks as $editorBlock) {
+            preg_match_all($editorBlock['pattern'], $content, $matches);
+            if (!empty($matches[0]) && is_array($matches[0])) {
+                $replaceUrls = array_unique($matches[0]);
+                foreach ($replaceUrls as $urlString) {
+                    preg_match($preg, $urlString, $match);
+                    if (!empty($match) && FilePreview::isFileExtensionSupported($match[1])) {
+                        $newIframeString = str_replace('%urlstring%', $match[1], $editorBlock['iframe']);
+                        $content = str_replace($urlString, $newIframeString . $urlString, $content);
+                        break 2; // Breaks out of two foreach loops (this one and the outer one) once a replace happens
+                    }
+                }
+            }
+        }
+    }
+
     return $content;
 }
 
@@ -544,6 +576,10 @@ function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
     return $html;
 }
 
+/**
+ * @param array $options
+ * @return array
+ */
 function cos_append_options($options)
 {
     $cos_options = get_option('cos_options');
@@ -552,7 +588,41 @@ function cos_append_options($options)
     $options['ci_image_slim_mode'] = $cos_options['ci_image_slim_mode'] ?? '';
     $options['ci_image_slim_suffix'] = $cos_options['ci_image_slim_suffix'] ?? '';
 
+    $options['attachment_preview'] = $cos_options['attachment_preview'] ?? 'off';
+
     return $options;
+}
+
+/**
+ * @param array $parametersToUpdate
+ * @param array|null $currentParameters
+ * @return array
+ */
+function cos_update_config_parameters($parametersToUpdate, $currentOptions = null)
+{
+    $currentOptions = $currentOptions ?: get_option('cos_options');
+
+    $options = array_merge($currentOptions, $parametersToUpdate);
+
+    update_option('cos_options', $options);
+
+    return $options;
+}
+
+/**
+ * @param array $slimConfigData
+ * @param array $currentOptions
+ * @return array
+ */
+function cos_sync_image_slim_config($slimConfigData, $currentOptions)
+{
+    $sanitizedConfig = [
+        'ci_image_slim' => sanitize_text_field($slimConfigData['Status']),
+        'ci_image_slim_mode' => sanitize_text_field($slimConfigData['SlimMode']),
+        'ci_image_slim_suffix' => implode(',', ($slimConfigData['Suffixs']['Suffix'] ?? []))
+    ];
+
+    return cos_update_config_parameters($sanitizedConfig, $currentOptions);
 }
 
 function cos_get_regional($regional)
@@ -616,7 +686,7 @@ function cos_sync_setting_form()
                     </th>
                     <input type="hidden" name="type" value="qcloud_cos_replace">
                     <td>
-                        <input type="submit" name="submit" class="button button-secondary" value="开始替换"/>
+                        <input type="submit" class="button button-secondary" value="开始替换"/>
                         <p><b>注意：如果是首次替换，请注意备份！此功能会替换文章以及设置的特色图片（题图）等使用的资源链接</b></p>
                     </td>
                 </tr>
@@ -630,7 +700,7 @@ function cos_sync_setting_form()
                     </th>
                     <input type="hidden" name="type" value="qcloud_cos_all">
                     <td>
-                        <input type="submit" name="submit" class="button button-secondary" value="开始同步"/>
+                        <input type="submit" class="button button-secondary" value="开始同步"/>
                         <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以，建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/10976">同步工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2809.html">使用 COSCLI 快速迁移本地数据到 COS</a></b></p>
                     </td>
                 </tr>
@@ -646,10 +716,8 @@ HTML;
 function cos_ci_image_slim_setting($content)
 {
     $cos_options = get_option('cos_options', true);
-    if (empty($cos_options['bucket']) || empty($cos_options['app_id']) || empty($cos_options['secret_id']) || empty($cos_options['secret_key'])) {
-        echo '<div class="error"><p><strong>请先保存存储桶名称、地域、APP ID、SecretID、SecretKey 参数！</strong></p></div>';
-        return false;
-    }
+
+    if(!cos_validate_configuration($cos_options)) return false;
 
     $slim = !empty($content['ci_image_slim']) ? sanitize_text_field($content['ci_image_slim']) : 'off';
     $mode = !empty($content['ci_image_slim_mode']) ? implode(',', $content['ci_image_slim_mode']) : '';
@@ -699,6 +767,8 @@ function cos_ci_image_slim_setting($content)
 
 function cos_ci_image_slim_page($options)
 {
+    cos_validate_configuration($options);
+
     $ci_image_slim = esc_attr($options['ci_image_slim']);
     $checked_ci_image_slim = $ci_image_slim == 'on' ? 'checked="checked"' : '';
     $ci_image_slim_mode = explode(',', esc_attr($options['ci_image_slim_mode']));
@@ -712,22 +782,26 @@ function cos_ci_image_slim_page($options)
     if (!empty($options['bucket']) && !empty($options['app_id']) && !empty($options['secret_id']) && !empty($options['secret_key'])) {
         try {
             $bucket = cos_get_bucket_name($options);
-            $status = ImageSlim::checkStatus(cos_get_client($options), $bucket);
+            $imageSlimResult = ImageSlim::checkStatus(cos_get_client($options), $bucket);
+            cos_sync_image_slim_config($imageSlimResult, $options);
+            $status = $imageSlimResult['Status'];
+
+            $checked_ci_image_slim = $status == 'on' ? 'checked="checked"' : '';
             $remoteStatus = $status == 'on' ? '云端状态：<span class="open">已开启</span>' : '云端状态：<span class="close">已关闭</span>';
+
+            $remoteMode = explode(',', $imageSlimResult['SlimMode']);
+            $checked_mode_api = in_array('API', $remoteMode) ? 'checked="checked"' : '';
+            $checked_mode_auto = in_array('Auto', $remoteMode) ? 'checked="checked"' : '';
         } catch (ServiceResponseException $e) {
             $msg = (string)$e;
             if ($e->getExceptionCode() === ErrorCode::NO_BIND_CI) {
-                $msg = "存储桶 $bucket 未绑定数据万象，若要开启极智压缩，请先 <a href= 'https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a >";
+                $msg = "存储桶 {$bucket} 未绑定数据万象，若要开启极智压缩，请先 <a href='https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a>";
             }
             if ($e->getExceptionCode() === ErrorCode::REGION_UNSUPPORTED) {
                 $msg = "存储桶所在地域 '{$options['regional']}' 暂不支持图片极智压缩";
             }
             echo "<div class='error'><p><strong>{$msg}</strong></p></div>";
         }
-    }
-
-    if (empty($options['bucket']) || empty($options['app_id']) || empty($options['secret_id']) || empty($options['secret_key'])) {
-        echo '<div class="error"><p><strong>请先保存存储桶名称、地域、APP ID、SecretID、SecretKey 参数！</strong></p></div>';
     }
 
     return <<<EOF
@@ -777,7 +851,96 @@ function cos_ci_image_slim_page($options)
                     </th>
                     <input type="hidden" name="type" value="qcloud_cos_ci_image_slim">
                     <td>
-                        <input type="submit" name="submit" class="button button-secondary" value="保存"/>
+                        <input type="submit" class="button button-secondary" value="保存"/>
+                    </td>
+                </tr>
+            </table>
+        </form>
+EOF;
+}
+
+/**
+ * @param array $content
+ * @return bool
+ */
+function cos_ci_attachment_preview_setting($content)
+{
+    $attachment_preview = !empty($content['attachment_preview']) ? sanitize_text_field($content['attachment_preview']) : 'off';
+
+    $cos_options = get_option('cos_options', true);
+    $cos_options['attachment_preview'] = $attachment_preview;
+    update_option('cos_options', $cos_options);
+
+    echo '<div class="updated"><p><strong>文档处理设置已保存！</strong></p></div>';
+    return true;
+}
+
+/**
+ * @param array $options
+ * @return bool
+ */
+function cos_validate_configuration($options)
+{
+    if (empty($options['bucket']) || empty($options['app_id']) || empty($options['secret_id']) || empty($options['secret_key'])) {
+        echo '<div class="error"><p><strong>请先保存存储桶名称、地域、APP ID、SecretID、SecretKey 参数！</strong></p></div>';
+        return false;
+    }
+
+    return true;
+}
+
+function cos_document_page($options)
+{
+    cos_validate_configuration($options);
+
+    $ci_attachment_preview = esc_attr($options['attachment_preview'] ?? 'off');
+    $checked_attachment_preview = $ci_attachment_preview == 'on' ? 'checked="checked"' : '';
+    $bucket = cos_get_bucket_name($options);
+
+    $remoteStatus = '';
+    if (!empty($options['bucket']) && !empty($options['app_id']) && !empty($options['secret_id']) && !empty($options['secret_key'])) {
+        try {
+            $status = FilePreview::checkStatus(cos_get_client($options), $bucket);
+
+            if ($ci_attachment_preview == 'on' && !$status) {
+                cos_update_config_parameters(['attachment_preview' => 'off'], $options);
+                $checked_attachment_preview = '';
+            }
+
+            $remoteStatus = $status ? '云端状态：<span class="open">已开启</span>' : '云端状态：<span class="close">已关闭</span>';
+        } catch (ServiceResponseException $e) {
+            $msg = (string)$e;
+            if ($e->getExceptionCode() === ErrorCode::NO_BIND_CI) {
+                $msg = "存储桶 {$bucket} 未绑定数据万象，若要开启文档处理，请先 <a href='https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a>";
+            }
+            echo "<div class='error'><p><strong>{$msg}</strong></p></div>";
+        }
+    }
+
+
+    $disableSubmit = !$status ? 'disabled=disabled' : '';
+    $disableMessage = !$status ? "<p>如需使用请先访问 <a href='https://console.cloud.tencent.com/ci/bucket?bucket={$bucket}&region={$options['regional']}&type=document' target='_blank'>腾讯云控制台</a>开启。</p>" : '';
+
+    return <<<EOF
+        <form method="post">
+            <table class="form-table">
+                <tr>
+                    <th>
+                        <legend>文档预览</legend>
+                    </th>
+                    <td>
+                        <input type="checkbox" name="attachment_preview" {$checked_attachment_preview} /> <span>{$remoteStatus}</span>
+                        <p>文档预览支持对多种文件类型生成预览，可以解决文档内容的页面展示问题，满足 PC、App 等多个用户端的文档在线浏览需求。更多详情请查看：<a href="https://cloud.tencent.com/document/product/460/47495" target="_blank">腾讯云文档</a></p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend></legend>
+                    </th>
+                    <input type="hidden" name="type" value="qcloud_cos_ci_attachment_preview">
+                    <td>
+                        <input type="submit" class="button button-secondary" {$disableSubmit} value="保存"/>
+                        {$disableMessage}
                     </td>
                 </tr>
             </table>
@@ -847,6 +1010,10 @@ function cos_setting_page()
         cos_ci_image_slim_setting($_POST);
     }
 
+    if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_attachment_preview') {
+        cos_ci_attachment_preview_setting($_POST);
+    }
+
     // 若$options不为空数组，则更新数据
     if ($options !== []) {
 
@@ -909,10 +1076,18 @@ function cos_setting_page()
         <p>插件网站：<a href="https://qq52o.me/" target="_blank">沈唁志</a> / <a href="https://qq52o.me/2518.html" target="_blank">Sync QCloud COS发布页面</a> / <a href="https://qq52o.me/2722.html" target="_blank">详细使用教程</a>；</p>
         <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；<a href="https://qq52o.me/sponsor.html#sponsor" target="_blank">打赏一杯咖啡或一杯香茗</a></p>
         <h3 class="nav-tab-wrapper">
-          <a class="nav-tab <?php echo $current_tab == 'config' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=config">配置</a>
-          <a class="nav-tab <?php echo $current_tab == 'sync' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=sync">数据迁移</a>
-          <a class="nav-tab <?php echo $current_tab == 'slim' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=slim">图片极智压缩<span class="wp-ui-notification new-tab">NEW</span></a>
-          <a class="nav-tab <?php echo $current_tab == 'metric' ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=metric">数据监控</a>
+            <?php
+              $tabs = [
+                  'config' => '配置',
+                  'sync' => '数据迁移',
+                  'slim' => '图片极智压缩<span class="wp-ui-notification new-tab">NEW</span>',
+                  'document' => '文档处理',
+                  'metric' => '数据监控'
+              ];
+            ?>
+            <?php foreach ($tabs as $tab => $label): ?>
+              <a class="nav-tab <?php echo $current_tab == $tab ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=<?php echo $tab;?>"><?php echo $label; ?></a>
+            <?php endforeach; ?>
         </h3>
         <?php if ($current_tab == 'config'): ?>
         <form method="post">
@@ -1047,7 +1222,7 @@ function cos_setting_page()
                 </tr>
                 <tr>
                     <th></th>
-                    <td><input type="submit" name="submit" class="button button-primary" value="保存更改"/></td>
+                    <td><input type="submit" class="button button-primary" value="保存更改"/></td>
                 </tr>
             </table>
             <input type="hidden" name="type" value="cos_set">
@@ -1056,8 +1231,10 @@ function cos_setting_page()
             <?php echo cos_sync_setting_form(); ?>
         <?php elseif ($current_tab == 'slim'): ?>
             <?php echo cos_ci_image_slim_page($cos_options); ?>
+        <?php elseif ($current_tab == 'document'): ?>
+            <?php echo cos_document_page($cos_options); ?>
         <?php elseif ($current_tab == 'metric'): ?>
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/apexcharts/3.41.1/apexcharts.min.js"></script>
         <?php $monitor = new DataPoints(cos_get_bucket_name($cos_options), $cos_options); ?>
         <div class="charts-container">
         <?php
@@ -1065,6 +1242,15 @@ function cos_setting_page()
             echo Charts::objectNumber($monitor->getObjectNumber());
             echo Charts::requests($monitor->getRequests());
             echo Charts::traffic($monitor->getTraffic());
+
+            if (!empty($cos_options['ci_style'])) {
+                echo Charts::ciStyle($monitor->getImageBasicsRequests());
+                echo Charts::ciTraffic($monitor->getCITraffic());
+            }
+
+            if ($cos_options['attachment_preview'] == 'on') {
+                echo Charts::ciDocumentHtml($monitor->getDocumentHtmlRequests());
+            }
         ?>
         </div>
         <?php endif; ?>

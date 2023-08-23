@@ -6,8 +6,7 @@ class ImageSlim
 {
     public static function checkStatus($client, $bucket)
     {
-        $result = $client->getImageSlim(['Bucket' => $bucket]);
-        return $result['Status'];
+        return $client->getImageSlim(['Bucket' => $bucket]);
     }
 
     public static function open($client, $bucket, $mode, $suffix)
