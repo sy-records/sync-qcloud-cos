@@ -123,6 +123,10 @@ curl.cainfo=/path/to/cacert.pem
 
 ![图片极智压缩](screenshot-3.png)
 
+![指标监控](screenshot-4.png)
+
+![文档处理](screenshot-5.png)
+
 ## 更新记录
 
 https://github.com/sy-records/wordpress-qcloud-cos/releases
