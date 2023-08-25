@@ -48,11 +48,11 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 == Screenshots ==
 
-1. screenshot-1.png
-2. screenshot-2.png
-3. screenshot-3.png
-4. screenshot-4.png
-5. screenshot-5.png
+1. 设置页面
+2. 数据库链接替换
+3. 图片极智压缩
+4. 数据监控
+5. 文档处理
 
 == Frequently Asked Questions ==
 

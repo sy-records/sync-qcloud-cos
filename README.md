@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="/wordpress-cos.png" alt="Sync QCloud COS" />
+    <img src=".wordpress-org/wordpress-cos.png" alt="Sync QCloud COS" />
 </p>
 
 # Sync QCloud COS
@@ -117,15 +117,15 @@ curl.cainfo=/path/to/cacert.pem
 
 ## 插件截图
 
-![设置页面](screenshot-1.png)
+![设置页面](.wordpress-org/screenshot-1.png)
 
-![数据库链接替换](screenshot-2.png)
+![数据库链接替换](.wordpress-org/screenshot-2.png)
 
-![图片极智压缩](screenshot-3.png)
+![图片极智压缩](.wordpress-org/screenshot-3.png)
 
-![指标监控](screenshot-4.png)
+![数据监控](.wordpress-org/screenshot-4.png)
 
-![文档处理](screenshot-5.png)
+![文档处理](.wordpress-org/screenshot-5.png)
 
 ## 更新记录
 
