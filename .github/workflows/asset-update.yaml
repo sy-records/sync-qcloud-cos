@@ -7,4 +7,6 @@ on:
 jobs:
   update:
     uses: sy-records/.github/.github/workflows/wordpress-plugin-asset-update.yaml@main
+    with:
+      skip_assets: false
     secrets: inherit

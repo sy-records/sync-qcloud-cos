@@ -48,11 +48,11 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 == Screenshots ==
 
-1. screenshot-1.png
-2. screenshot-2.png
-3. screenshot-3.png
-4. screenshot-4.png
-5. screenshot-5.png
+1. 设置页面
+2. 数据库链接替换
+3. 图片极智压缩
+4. 数据监控
+5. 文档处理
 
 == Frequently Asked Questions ==
 
@@ -94,205 +94,11 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 == Changelog ==
 
-= 2.2.2 =
+= Stable =
 * 支持文件预览
 * 增加数据监控：存储用量、对象数量、请求数、流量等
 * 使用远程配置覆盖本地配置
 
-= 2.2.1 =
-* 修复插件列表页丢失设置按钮
+= Other =
 
-= 2.2.0 =
-* 调整 UserAgent
-* 复用部分代码
-* 调整异常信息
-* 支持图片极智压缩
-
-= 2.1.0 =
-
-* 支持 WordPress 6.3
-* 升级依赖
-
-= 2.0.4 =
-
-* 添加UA
-
-= 2.0.3 =
-
-* 支持媒体库编辑
-
-= 2.0.2 =
-
-* 移除 esc_html
-* 修复 path error
-
-= 2.0.1 =
-
-* 修复安全问题
-
-= 2.0.0 =
-
-* 修复 XSS
-
-= 1.9.9 =
-
-* 优化 isset 判断
-* 优化访问权限
-* 修复存在同名path时截取错误
-
-= 1.9.8 =
-
-* 支持 WordPress 5.9
-* 修改 SecretKey 类型为 password
-
-= 1.9.7 =
-
-* 修复页面引用多次同一图片导致图片处理添加多次
-
-= 1.9.6 =
-
-* 升级 COS SDK
-
-= 1.9.5 =
-
-* 添加 get_home_path 方法判断
-* 支持 WordPress 5.7 版本
-
-= 1.9.4 =
-
-* 优化配置校验逻辑
-* 支持删除非图片类型文件
-
-= 1.9.3 =
-
-* 修复版本号
-
-= 1.9.2 =
-
-* 修复勾选不上传缩略图后不会删除云端缩略图
-
-= 1.9.1 =
-
-* 升级 COS SDK 版本
-* 支持 WordPress 5.6 版本
-
-= 1.9.0 =
-
-* 修复多站点上传原图失败，缩略图正常问题
-* 优化上传路径获取
-
-= 1.8.5 =
-
-* 优化同步上传路径获取
-
-= 1.8.4 =
-
-* 修改常见问题和相关链接
-
-= 1.8.3 =
-
-* 增加南京地域
-
-= 1.8.2 =
-
-* 增加替换题图数据库链接
-
-= 1.8.1 =
-
-* 支持上传文件自动重命名
-* 支持特色图片使用图片处理
-
-= 1.8.0 =
-
-* 修复因svn提交错误导致打包文件缺失问题
-
-= 1.7.1 =
-
-* 增加金融云地域
-* 升级SDK至[v2.0.8](https://github.com/tencentyun/cos-php-sdk-v5/releases/tag/v2.0.8)
-
-= 1.7.0 =
-
-* 修复勾选不在本地保存图片后媒体库显示默认图片问题
-* 修复删除错误
-
-= 1.6.8 =
-
-* 修复勾选不在本地保存图片后媒体库显示默认图片问题
-* 优化删除文件逻辑
-
-= 1.6.7 =
-
-* 增加腾讯云数据万象图片处理
-
-= 1.6.6 =
-
-* 优化deactivation_hook，禁用时可选删除配置和恢复URL前缀
-
-= 1.6.5 =
-
-* 增加插件禁用事件，可选择是否删除配置
-* 增加上传文件try catch，提示文件上传错误时请打开控制台查看对应请求的Response输出信息
-* 修复首尔地域错误，感谢`서대현`反馈
-
-= 1.6.4 =
-
-* 更新腾讯云SDK至[v2.0.7](https://github.com/tencentyun/cos-php-sdk-v5/releases/tag/v2.0.7)版本
-* 修改上个版本插件文件末尾空白符号问题
-
-= 1.6.3 =
-
-* 更新腾讯云SDK至[v2.0.6](https://github.com/tencentyun/cos-php-sdk-v5/releases/tag/v2.0.6)版本
-
-= 1.6.2 =
-
-* 修复腾讯云cos返回数据格式不一致问题
-
-= 1.6.1 =
-
-* 增强存储桶配置验证
-* cos client增加schema
-
-= 1.6.0 =
-
-* 升级sdk为v5版本
-* 修复本地文件夹和URL前缀结尾 / 去除失败
-* 优化URL前缀注意事项提示中的http和https
-
-= 1.5.1 =
-
-* 优化button按钮样式
-* 优化sdk中的代码
-
-= 1.5.0 =
-
-* 修复第一次删除文件失败，报错 ERROR_PROXY_APPID_USERID_NOTMATCH，导致删除文件不完整
-* 优化删除逻辑
-* 移除时区设置
-* 增加发布版本链接
-* 修改 README 中的常见问题
-
-= 1.4.3 =
-* 修复地域选择上海地区跳转华中问题
-
-= 1.4.2 =
-* 修复导致评论时间戳差 8 小时问题
-
-= 1.4 =
-* 增加替换文章中资源链接地址功能
-
-= 1.3 =
-* 添加北京、香港、法兰克福等完整地域使用
-
-= 1.0 =
-* First version
-
-== Upgrade Notice ==
-
-= 1.6.7 =
-
-更新后请点击一次插件设置中的保存更改按钮。
-
-= 1.6.0 =
-
-升级sdk版本至v5。
+see [CHANGELOG.md](https://github.com/sy-records/wordpress-qcloud-cos/blob/master/CHANGELOG.md).
