@@ -31,6 +31,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 9. 支持上传文件自动重命名
 10. 支持媒体库编辑
 11. 支持腾讯云数据万象图片极智压缩
+12. 支持文件预览
 
 插件更多详细介绍和安装：[https://github.com/sy-records/wordpress-qcloud-cos](https://github.com/sy-records/wordpress-qcloud-cos)
 
