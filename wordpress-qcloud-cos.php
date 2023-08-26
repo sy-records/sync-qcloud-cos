@@ -1247,7 +1247,7 @@ function cos_setting_page()
                 echo Charts::ciTraffic($monitor->getCITraffic());
             }
 
-            if ($cos_options['attachment_preview'] == 'on') {
+            if (!empty($cos_options['attachment_preview']) && $cos_options['attachment_preview'] == 'on') {
                 echo Charts::ciDocumentHtml($monitor->getDocumentHtmlRequests());
             }
         ?>
