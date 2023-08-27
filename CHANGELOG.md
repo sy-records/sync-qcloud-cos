@@ -1,6 +1,12 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.2.2...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.2.3...master)
+
+## [v2.2.3](https://github.com/sy-records/sync-qcloud-cos/compare/v2.2.2...v2.2.3) - 2023-08-27
+
+- Optimize assets by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/31
+- Rename wordpress-qcloud-cos to sync-qcloud-cos by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/32
+- Add primary navigation by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/33
 
 ## [v2.2.2](https://github.com/sy-records/sync-qcloud-cos/compare/v2.2.1...v2.2.2) - 2023-08-24
 
@@ -165,6 +171,7 @@
 
 - 优化button按钮样式
 - 优化sdk中的代码
+
 > v4 sdk的最后一个版本，下个版本将支持从WordPress后台下载更新，并切换为v5 sdk
 
 ## [v1.5.0](https://github.com/sy-records/sync-qcloud-cos/compare/v1.4.3...v1.5.0) - 2020-01-09
