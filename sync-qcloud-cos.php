@@ -24,7 +24,8 @@ use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Monitor\Charts;
 
 define('COS_VERSION', '2.2.2');
-define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2Fwordpress-qcloud-cos.php');
+define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
+define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
 if (!function_exists('get_home_path')) {
     require_once(ABSPATH . 'wp-admin/includes/file.php');
@@ -502,9 +503,9 @@ function cos_read_dir_queue($dir)
 // 在插件列表页添加设置按钮
 function cos_plugin_action_links($links, $file)
 {
-    $link = urldecode(COS_PLUGIN_PAGE);
-    if ($file == $link) {
-        $links[] = "<a href='options-general.php?page={$link}'>设置</a>";
+    if ($file == urldecode(COS_PLUGIN_PAGE)) {
+        $page = COS_PLUGIN_SLUG;
+        $links[] = "<a href='admin.php?page={$page}'>设置</a>";
     }
     return $links;
 }
@@ -947,10 +948,49 @@ function cos_document_page($options)
 EOF;
 }
 
+/**
+ * @return string[]
+ */
+function cos_setting_page_tabs()
+{
+    return [
+        'config' => '配置',
+        'sync' => '数据迁移',
+        'slim' => '图片极智压缩<span class="wp-ui-notification new-tab">NEW</span>',
+        'document' => '文档处理',
+        'metric' => '数据监控'
+    ];
+}
+
+/**
+ * @return string
+ */
+function cos_get_current_tab()
+{
+    if (isset($_GET['tab'])) {
+        return $_GET['tab'];
+    }
+
+    global $pagenow;
+    if ($pagenow == 'admin.php' && $_GET['page'] !== COS_PLUGIN_SLUG) {
+        $parts = explode('-', $_GET['page']);
+        return end($parts);
+    }
+
+    return 'config';
+}
+
 // 在导航栏“设置”中添加条目
 function cos_add_setting_page()
 {
-    add_options_page('腾讯云COS设置', '腾讯云COS设置', 'manage_options', __FILE__, 'cos_setting_page');
+    add_options_page('腾讯云 COS', '腾讯云 COS', 'manage_options', __FILE__, 'cos_setting_page');
+
+    add_menu_page('腾讯云 COS', '腾讯云 COS', 'manage_options', COS_PLUGIN_SLUG, 'cos_setting_page', 'dashicons-cloud-upload');
+    foreach (cos_setting_page_tabs() as $tab => $name) {
+        $title = $name;
+        if ($tab == 'slim') $title = '图片极智压缩';
+        add_submenu_page(COS_PLUGIN_SLUG, $title, $name, 'manage_options', COS_PLUGIN_SLUG . "-{$tab}", 'cos_setting_page');
+    }
 }
 add_action('admin_menu', 'cos_add_setting_page');
 
@@ -1050,13 +1090,7 @@ function cos_setting_page()
 
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 
-    // default to the first tab
-    $current_tab = 'config';
-
-    // check if the tab is set
-    if( isset($_GET['tab']) ) {
-        $current_tab = $_GET['tab'];
-    }
+    $current_tab = cos_get_current_tab();
     ?>
     <style>
       .new-tab {margin-left: 5px;padding: 3px;border-radius: 10px;font-size: 10px;}
@@ -1071,21 +1105,14 @@ function cos_setting_page()
       }
     </style>
     <div class="wrap" style="margin: 10px;">
-        <h1>腾讯云 COS 设置 <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
+        <h1>腾讯云 COS <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
         <p>插件网站：<a href="https://qq52o.me/" target="_blank">沈唁志</a> / <a href="https://qq52o.me/2518.html" target="_blank">Sync QCloud COS发布页面</a> / <a href="https://qq52o.me/2722.html" target="_blank">详细使用教程</a>；</p>
-        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/wordpress-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；<a href="https://qq52o.me/sponsor.html#sponsor" target="_blank">打赏一杯咖啡或一杯香茗</a></p>
+        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/sync-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；<a href="https://qq52o.me/sponsor.html#sponsor" target="_blank">打赏一杯咖啡或一杯香茗</a></p>
         <h3 class="nav-tab-wrapper">
-            <?php
-              $tabs = [
-                  'config' => '配置',
-                  'sync' => '数据迁移',
-                  'slim' => '图片极智压缩<span class="wp-ui-notification new-tab">NEW</span>',
-                  'document' => '文档处理',
-                  'metric' => '数据监控'
-              ];
-            ?>
-            <?php foreach ($tabs as $tab => $label): ?>
-              <a class="nav-tab <?php echo $current_tab == $tab ? 'nav-tab-active' : '' ?>" href="?page=<?php echo COS_PLUGIN_PAGE;?>&tab=<?php echo $tab;?>"><?php echo $label; ?></a>
+            <?php global $pagenow; ?>
+            <?php foreach (cos_setting_page_tabs() as $tab => $label): ?>
+              <?php $href = $pagenow === 'admin.php' ? COS_PLUGIN_SLUG . '-' . $tab : COS_PLUGIN_PAGE . '&tab=' . $tab; ?>
+              <a class="nav-tab <?php echo $current_tab == $tab ? 'nav-tab-active' : '' ?>" href="?page=<?php echo $href;?>"><?php echo $label; ?></a>
             <?php endforeach; ?>
         </h3>
         <?php if ($current_tab == 'config'): ?>
