@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 6.3
 Requires PHP: 7.0.0
-Stable tag: 2.2.2
+Stable tag: 2.2.3
 License: Apache 2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -96,9 +96,8 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 == Changelog ==
 
 = Stable =
-* 支持文件预览
-* 增加数据监控：存储用量、对象数量、请求数、流量等
-* 使用远程配置覆盖本地配置
+* 重命名插件 GitHub 存储库名称
+* 增加一级导航
 
 = Other =
 
