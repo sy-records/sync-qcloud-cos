@@ -33,7 +33,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 11. 支持腾讯云数据万象图片极智压缩
 12. 支持文件预览
 
-插件更多详细介绍和安装：[https://github.com/sy-records/wordpress-qcloud-cos](https://github.com/sy-records/wordpress-qcloud-cos)
+插件更多详细介绍和安装：[https://github.com/sy-records/sync-qcloud-cos](https://github.com/sy-records/sync-qcloud-cos)
 
 ## 作者博客
 
@@ -43,7 +43,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 == Installation ==
 
-1. Upload the folder `wordpress-qcloud-cos` or `sync-qcloud-cos` to the `/wp-content/plugins/` directory
+1. Upload the folder `sync-qcloud-cos` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. That's all
 
@@ -63,11 +63,11 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = 使用子账户报错：Cos Error Code: AccessDenied, Status Code: 403 =
 
-可以使用子账户，但是 APPID 需要填写为存储桶创建者的ID，而不是子账户的ID。例如[配置指南](https://github.com/sy-records/wordpress-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中的`1250000000`就是APPID
+可以使用子账户，但是 APPID 需要填写为存储桶创建者的ID，而不是子账户的ID。例如[配置指南](https://github.com/sy-records/sync-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中的`1250000000`就是APPID
 
 = 上传图片提示：图像后期处理失败，请将其缩小到2500像素并重新上传 =
 
-1）配置的`存储桶名称`填写错误，正确的配置参照[配置指南](https://github.com/sy-records/wordpress-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中的`存储桶名称`，v1.6.1 版本增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
+1）配置的`存储桶名称`填写错误，正确的配置参照[配置指南](https://github.com/sy-records/sync-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中的`存储桶名称`，v1.6.1 版本增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
 2）图片确实像素大于2500px，可以在`functions.php`中加入以下代码禁止大图片裁剪功能
 
 `add_filter('big_image_size_threshold', '__return_false');`
@@ -102,4 +102,4 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Other =
 
-see [CHANGELOG.md](https://github.com/sy-records/wordpress-qcloud-cos/blob/master/CHANGELOG.md).
+see [CHANGELOG.md](https://github.com/sy-records/sync-qcloud-cos/blob/master/CHANGELOG.md).

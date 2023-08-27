@@ -6,13 +6,13 @@
 
 使用腾讯云对象存储服务 COS 作为附件存储空间的 WordPress 插件
 
-[![Latest Version](https://img.shields.io/github/release/sy-records/wordpress-qcloud-cos.svg)](https://github.com/sy-records/wordpress-qcloud-cos/releases)
-[![License](https://img.shields.io/github/license/sy-records/wordpress-qcloud-cos?color=red)](LICENSE)
+[![Latest Version](https://img.shields.io/github/release/sy-records/sync-qcloud-cos.svg)](https://github.com/sy-records/sync-qcloud-cos/releases)
+[![License](https://img.shields.io/github/license/sy-records/sync-qcloud-cos?color=red)](LICENSE)
 [![website](https://img.shields.io/badge/website-qq52o.me-blue)](https://qq52o.me)
-[![contributors](https://img.shields.io/github/contributors/sy-records/wordpress-qcloud-cos?color=blue)](https://github.com/sy-records/wordpress-qcloud-cos/graphs/contributors)
+[![contributors](https://img.shields.io/github/contributors/sy-records/sync-qcloud-cos?color=blue)](https://github.com/sy-records/sync-qcloud-cos/graphs/contributors)
 [![plugin stars](https://img.shields.io/wordpress/plugin/stars/sync-qcloud-cos)](https://wordpress.org/plugins/sync-qcloud-cos/)
 [![plugin installs](https://img.shields.io/wordpress/plugin/installs/sync-qcloud-cos)](https://wordpress.org/plugins/sync-qcloud-cos/)
-[![Deploy to WordPress.org](https://github.com/sy-records/wordpress-qcloud-cos/actions/workflows/deploy.yml/badge.svg)](https://github.com/sy-records/wordpress-qcloud-cos/actions/workflows/deploy.yml)
+[![Deploy to WordPress.org](https://github.com/sy-records/sync-qcloud-cos/actions/workflows/deploy.yml/badge.svg)](https://github.com/sy-records/sync-qcloud-cos/actions/workflows/deploy.yml)
 
 ## 插件特色
 
@@ -39,7 +39,7 @@ WordPress 后台安装插件页面搜索`Sync QCloud COS`，点击安装
 
 从 GitHub 下载源码，通过 WordPress 后台上传安装，或者直接将源码上传到 WordPress 插件目录`wp-content/plugins`，然后在后台启用
 
-GitHub 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releases/latest](https://github.com/sy-records/wordpress-qcloud-cos/releases/latest)
+GitHub 下载节点：[https://github.com/sy-records/sync-qcloud-cos/releases/latest](https://github.com/sy-records/sync-qcloud-cos/releases/latest)
 
 ## 修改配置
 
@@ -48,9 +48,9 @@ GitHub 下载节点：[https://github.com/sy-records/wordpress-qcloud-cos/releas
 
 ## Contributors
 
-This project exists thanks to all the people who contribute. [[Contributors](https://github.com/sy-records/wordpress-qcloud-cos/graphs/contributors)].
+This project exists thanks to all the people who contribute. [[Contributors](https://github.com/sy-records/sync-qcloud-cos/graphs/contributors)].
 
-<a href="https://github.com/sy-records/wordpress-qcloud-cos/graphs/contributors"><img src="https://opencollective.com/cos/contributors.svg?width=890&button=false" /></a>
+<a href="https://github.com/sy-records/sync-qcloud-cos/graphs/contributors"><img src="https://opencollective.com/cos/contributors.svg?width=890&button=false" /></a>
 
 ## 常见问题
 
@@ -64,7 +64,7 @@ This project exists thanks to all the people who contribute. [[Contributors](htt
 
 3. 上传图片提示`图像后期处理失败，请将其缩小到2500像素并重新上传`
 
-1）配置的`存储桶名称`填写错误，正确的配置参照 [配置指南](https://github.com/sy-records/wordpress-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97) 中的`存储桶名称`
+1）配置的`存储桶名称`填写错误，正确的配置参照 [配置指南](https://github.com/sy-records/sync-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97) 中的`存储桶名称`
 > v1.6.1 版本增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
 
 2）图片确实像素大于2500px，可以在`functions.php`中加入以下代码禁止大图片裁剪功能
@@ -129,4 +129,4 @@ curl.cainfo=/path/to/cacert.pem
 
 ## 更新记录
 
-[CHANGELOG](https://github.com/sy-records/wordpress-qcloud-cos/blob/master/CHANGELOG.md)
+[CHANGELOG](https://github.com/sy-records/sync-qcloud-cos/blob/master/CHANGELOG.md)
