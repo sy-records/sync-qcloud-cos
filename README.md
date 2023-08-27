@@ -44,7 +44,8 @@ GitHub 下载节点：[https://github.com/sy-records/sync-qcloud-cos/releases/la
 ## 修改配置
 
 * 方法一：在 WordPress 插件管理页面有设置按钮，进行设置
-* 方法二：在 WordPress 后台管理左侧导航栏`设置`下`腾讯云COS设置`，点击进入设置页面
+* 方法二：在 WordPress 后台管理左侧导航栏`设置`下`腾讯云 COS`，点击进入设置页面
+* 方法三：在 WordPress 后台管理左侧一级导航栏`腾讯云 COS`，点击进入设置页面
 
 ## Contributors
 
