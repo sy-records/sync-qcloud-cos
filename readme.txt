@@ -43,7 +43,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 == Installation ==
 
-1. Upload the folder `sync-qcloud-cos` or `sync-qcloud-cos` to the `/wp-content/plugins/` directory
+1. Upload the folder `sync-qcloud-cos` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. That's all
 
