@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.2.3
+Version: 2.2.4
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -23,7 +23,7 @@ use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Monitor\Charts;
 
-define('COS_VERSION', '2.2.3');
+define('COS_VERSION', '2.2.4');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -956,7 +956,7 @@ function cos_setting_page_tabs()
     return [
         'config' => '配置',
         'sync' => '数据迁移',
-        'slim' => '图片极智压缩<span class="wp-ui-notification new-tab">NEW</span>',
+        'slim' => '图片极智压缩',
         'document' => '文档处理',
         'metric' => '数据监控'
     ];
@@ -987,9 +987,7 @@ function cos_add_setting_page()
 
     add_menu_page('腾讯云 COS', '腾讯云 COS', 'manage_options', COS_PLUGIN_SLUG, 'cos_setting_page', 'dashicons-cloud-upload');
     foreach (cos_setting_page_tabs() as $tab => $name) {
-        $title = $name;
-        if ($tab == 'slim') $title = '图片极智压缩';
-        add_submenu_page(COS_PLUGIN_SLUG, $title, $name, 'manage_options', COS_PLUGIN_SLUG . "-{$tab}", 'cos_setting_page');
+        add_submenu_page(COS_PLUGIN_SLUG, $name, $name, 'manage_options', COS_PLUGIN_SLUG . "-{$tab}", 'cos_setting_page');
     }
 }
 add_action('admin_menu', 'cos_add_setting_page');
@@ -1112,6 +1110,7 @@ function cos_setting_page()
             <?php global $pagenow; ?>
             <?php foreach (cos_setting_page_tabs() as $tab => $label): ?>
               <?php $href = $pagenow === 'admin.php' ? COS_PLUGIN_SLUG . '-' . $tab : COS_PLUGIN_PAGE . '&tab=' . $tab; ?>
+              <?php $label = $tab == 'slim' ? $label . '<span class="wp-ui-notification new-tab">NEW</span>' : $label; ?>
               <a class="nav-tab <?php echo $current_tab == $tab ? 'nav-tab-active' : '' ?>" href="?page=<?php echo $href;?>"><?php echo $label; ?></a>
             <?php endforeach; ?>
         </h3>
