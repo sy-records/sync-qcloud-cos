@@ -124,6 +124,10 @@ class DataPoints
                 [
                     'Dimensions' => [
                         [
+                            'Name' => 'appid',
+                            'Value' => $this->options['app_id']
+                        ],
+                        [
                             'Name' => 'bucket',
                             'Value' => $this->bucket
                         ]
