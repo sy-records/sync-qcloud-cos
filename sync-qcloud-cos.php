@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.2.4
+Version: 2.3.0
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -19,11 +19,12 @@ use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 use SyncQcloudCos\CI\ImageSlim;
 use SyncQcloudCos\Document\FilePreview;
+use SyncQcloudCos\Text\Audit;
 use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Monitor\Charts;
 
-define('COS_VERSION', '2.2.4');
+define('COS_VERSION', '2.3.0');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -50,7 +51,11 @@ function cos_set_options()
         'ci_image_slim' => 'off',
         'ci_image_slim_mode' => '',
         'ci_image_slim_suffix' => '',
-        'attachment_preview' => 'off'
+        'attachment_preview' => 'off',
+        'ci_text_comments' => 'off',
+        'skip_comment_validation_on_login' => 'off',
+        'ci_text_comments_strategy' => '',
+        'ci_text_comments_check_roles' => ''
     ];
     add_option('cos_options', $options, '', 'yes');
 }
@@ -177,7 +182,7 @@ function cos_file_upload($object, $filename, $no_local_file = false)
 function cos_is_delete_local_file()
 {
     $cos_options = get_option('cos_options', true);
-    return (esc_attr($cos_options['nolocalsaving']) == 'true');
+    return esc_attr($cos_options['nolocalsaving']) == 'true';
 }
 
 /**
@@ -591,6 +596,11 @@ function cos_append_options($options)
 
     $options['attachment_preview'] = $cos_options['attachment_preview'] ?? 'off';
 
+    $options['ci_text_comments'] = $cos_options['ci_text_comments'] ?? 'off';
+    $options['skip_comment_validation_on_login'] = $cos_options['skip_comment_validation_on_login'] ?? 'off';
+    $options['ci_text_comments_strategy'] = $cos_options['ci_text_comments_strategy'] ?? '';
+    $options['ci_text_comments_check_roles'] = $cos_options['ci_text_comments_check_roles'] ?? '';
+
     return $options;
 }
 
@@ -718,7 +728,7 @@ function cos_ci_image_slim_setting($content)
 {
     $cos_options = get_option('cos_options', true);
 
-    if(!cos_validate_configuration($cos_options)) return false;
+    if (!cos_validate_configuration($cos_options)) return false;
 
     $slim = !empty($content['ci_image_slim']) ? sanitize_text_field($content['ci_image_slim']) : 'off';
     $mode = !empty($content['ci_image_slim_mode']) ? implode(',', $content['ci_image_slim_mode']) : '';
@@ -821,7 +831,11 @@ function cos_ci_image_slim_page($options)
                         <legend>是否启用</legend>
                     </th>
                     <td>
-                        <input type="checkbox" name="ci_image_slim" {$checked_ci_image_slim} /> <span>{$remoteStatus}</span>
+                        <label class="switch">
+                            <input type="checkbox" name="ci_image_slim" {$checked_ci_image_slim} />
+                            <span class="slider round"></span>
+                        </label>
+                        <p>{$remoteStatus}</p>
                         <p>极智压缩支持两种模式自动压缩和API模式，请按需选择。</p>
                     </td>
                 </tr>
@@ -830,7 +844,11 @@ function cos_ci_image_slim_page($options)
                         <legend>自动压缩</legend>
                     </th>
                     <td>
-                        <input type="checkbox" name="ci_image_slim_mode[]" value="Auto" {$checked_mode_auto} />
+                        <label class="switch">
+                          <input type="checkbox" name="ci_image_slim_mode[]" value="Auto" {$checked_mode_auto} />
+                          <span class="slider round"></span>
+                        </label>
+
                         <p>开通极智压缩的自动使用方式，开通后无需携带任何参数，存储桶内指定格式的图片将在访问时自动进行极智压缩。</p>
                         <p>需要选择自动进行压缩的图片格式：</p>
                         <input type="checkbox" name="ci_image_slim_suffix[]" value="jpg" {$checked_suffix_jpg} /> jpg（包含<code>jpg</code>、<code>jpeg</code>）<br>
@@ -842,22 +860,180 @@ function cos_ci_image_slim_page($options)
                         <legend>API 模式</legend>
                     </th>
                     <td>
-                        <input type="checkbox" name="ci_image_slim_mode[]" value="API" {$checked_mode_api} />
+                        <label class="switch">
+                          <input type="checkbox" name="ci_image_slim_mode[]" value="API" {$checked_mode_api} />
+                          <span class="slider round"></span>
+                        </label>
                         <p>开通极智压缩的 API 使用方式，开通后可在图片时通过极智压缩参数（需要配置配置图片处理样式<code>?imageSlim</code>）对图片进行压缩；</p>
                     </td>
                 </tr>
                 <tr>
-                    <th>
-                        <legend></legend>
-                    </th>
+                    <th></th>
                     <input type="hidden" name="type" value="qcloud_cos_ci_image_slim">
-                    <td>
-                        <input type="submit" class="button button-secondary" value="保存"/>
-                    </td>
+                    <td><input type="submit" class="button button-primary" value="保存"/></td>
                 </tr>
             </table>
         </form>
 EOF;
+}
+
+function cos_get_user_roles()
+{
+    $result = [];
+
+    $editable_roles = array_reverse(get_editable_roles());
+    foreach ($editable_roles as $role => $details) {
+        $result[$role] = translate_user_role($details['name']);
+    }
+
+    return $result;
+}
+
+function cos_ci_text_page($options)
+{
+    cos_validate_configuration($options);
+
+    $checked_skip_comment_validation_on_login = esc_attr($options['skip_comment_validation_on_login'] ?? 'off') !== 'off' ? 'checked="checked"' : '';
+    $checked_text_comments = esc_attr($options['ci_text_comments'] ?? 'off') !== 'off' ? 'checked="checked"' : '';
+    $ci_text_comments_strategy = esc_attr($options['ci_text_comments_strategy'] ?? '');
+
+    $roles = cos_get_user_roles();
+    $check_roles = explode(',', esc_attr($options['ci_text_comments_check_roles'] ?? ''));
+    $select_roles = '';
+    foreach ($roles as $role => $name) {
+        $check = '';
+        if (in_array($role, $check_roles)) {
+            $check = 'checked="checked"';
+        }
+        $select_roles .= '<input type="checkbox" name="ci_text_comments_check_roles[]" value="' . $role . '" ' . $check . '>' . $name . '<br>';
+    }
+
+    return <<<EOF
+        <form method="post">
+            <table class="form-table">
+                <tr>
+                    <th>
+                        <legend>评论审核</legend>
+                    </th>
+                    <td>
+                        <label class="switch">
+                          <input type="checkbox" name="ci_text_comments" {$checked_text_comments} />
+                          <span class="slider round"></span>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend>评论审核策略</legend>
+                    </th>
+                    <td>
+                        <input type="text" name="ci_text_comments_strategy" value="{$ci_text_comments_strategy}" size="50" placeholder="请填写对应的 Biztype 名称" />
+                        <p>填写需要使用的文本审核策略 <code>Biztype</code> 名称，为空时使用默认策略，详情查看 <a href="https://cloud.tencent.com/document/product/436/55206" target="_blank">设置审核策略</a>。</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend>跳过登录态验证</legend>
+                    </th>
+                    <td>
+                        <label class="switch">
+                          <input type="checkbox" name="skip_comment_validation_on_login" {$checked_skip_comment_validation_on_login} />
+                          <span class="slider round"></span>
+                        </label>
+                        <p>勾选后如果是登录态则会跳过该用户评论内容，不去验证。</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <legend>需要验证的登录角色</legend>
+                    </th>
+                    <td>
+                        {$select_roles}
+                        <p>选择需要在登录态下验证的角色，选择后即使选择了<strong>跳过登录态验证</strong>，属于该角色的用户评论也会进行验证。</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th></th>
+                    <input type="hidden" name="type" value="qcloud_cos_ci_text">
+                    <td><input type="submit" class="button button-primary" value="保存"/></td>
+                </tr>
+            </table>
+        </form>
+EOF;
+}
+
+function qcloud_cos_ci_text_setting($content)
+{
+    $cos_options = get_option('cos_options', true);
+    if (!cos_validate_configuration($cos_options)) return false;
+
+    $ci_text_comments = isset($_POST['ci_text_comments']) ? sanitize_text_field($_POST['ci_text_comments']) : 'off';
+    $skip_comment_validation_on_login = isset($_POST['skip_comment_validation_on_login']) ? sanitize_text_field($_POST['skip_comment_validation_on_login']) : 'off';
+    $ci_text_comments_strategy = isset($_POST['ci_text_comments_strategy']) ? sanitize_text_field($_POST['ci_text_comments_strategy']) : '';
+    $ci_text_comments_check_roles = isset($_POST['ci_text_comments_check_roles']) ? implode(',', $_POST['ci_text_comments_check_roles']) : '';
+
+    $cos_options['ci_text_comments'] = $ci_text_comments;
+    $cos_options['skip_comment_validation_on_login'] = $skip_comment_validation_on_login;
+    $cos_options['ci_text_comments_strategy'] = $ci_text_comments_strategy;
+    $cos_options['ci_text_comments_check_roles'] = $ci_text_comments_check_roles;
+    update_option('cos_options', $cos_options);
+
+    echo '<div class="updated"><p><strong>文本审核设置已保存！</strong></p></div>';
+    return true;
+}
+
+if (!function_exists('is_user_logged_in')) {
+    require_once(ABSPATH . WPINC . '/pluggable.php');
+}
+
+function cos_process_comments($comment_data)
+{
+    $options = get_option('cos_options', true);
+
+    // If CI text for comments is not enabled
+    if (($options['ci_text_comments'] ?? 'off') !== 'on') {
+        return $comment_data;
+    }
+
+    // If 'skip_comment_validation_on_login' option is not enabled
+    if (($options['skip_comment_validation_on_login'] ?? 'off') !== 'on') {
+        cos_request_txt_check($options, $comment_data['comment_content']);
+        return $comment_data;
+    }
+
+    // If User is not logged in
+    if (!is_user_logged_in()) {
+        cos_request_txt_check($options, $comment_data['comment_content']);
+        return $comment_data;
+    }
+
+    $roles = explode(',', $options['ci_text_comments_check_roles'] ?? '');
+    global $current_user;
+    // Check if one of the user roles is in the defined roles
+    foreach ($roles as $role) {
+        if (in_array($role, $current_user->roles)) {
+            cos_request_txt_check($options, $comment_data['comment_content']);
+            break;
+        }
+    }
+
+    return $comment_data;
+}
+add_filter('preprocess_comment', 'cos_process_comments');
+
+function cos_request_txt_check($options, $comment)
+{
+    $client = cos_get_client($options);
+    $bucket = cos_get_bucket_name($options);
+    $result = Audit::comment($client, $bucket, $comment, $options['ci_text_comments_strategy'] ?? '');
+    if (!$result['state'] || $result['result'] === 2) {
+        // 人工审核
+        add_filter('pre_comment_approved' , '__return_zero');
+    }
+
+    if ($result['state'] && $result['result'] === 1) {
+        wp_die("评论内容{$result['message']}涉嫌违规，请重新评论", 409);
+    }
 }
 
 /**
@@ -866,9 +1042,11 @@ EOF;
  */
 function cos_ci_attachment_preview_setting($content)
 {
+    $cos_options = get_option('cos_options', true);
+    if (!cos_validate_configuration($cos_options)) return false;
+
     $attachment_preview = !empty($content['attachment_preview']) ? sanitize_text_field($content['attachment_preview']) : 'off';
 
-    $cos_options = get_option('cos_options', true);
     $cos_options['attachment_preview'] = $attachment_preview;
     update_option('cos_options', $cos_options);
 
@@ -929,17 +1107,19 @@ function cos_document_page($options)
                         <legend>文档预览</legend>
                     </th>
                     <td>
-                        <input type="checkbox" name="attachment_preview" {$checked_attachment_preview} /> <span>{$remoteStatus}</span>
+                        <label class="switch">
+                          <input type="checkbox" name="attachment_preview" {$checked_attachment_preview} />
+                          <span class="slider round"></span>
+                        </label>
+                        <p>{$remoteStatus}</p>
                         <p>文档预览支持对多种文件类型生成预览，可以解决文档内容的页面展示问题，满足 PC、App 等多个用户端的文档在线浏览需求。更多详情请查看：<a href="https://cloud.tencent.com/document/product/460/47495" target="_blank">腾讯云文档</a></p>
                     </td>
                 </tr>
                 <tr>
-                    <th>
-                        <legend></legend>
-                    </th>
+                    <th></th>
                     <input type="hidden" name="type" value="qcloud_cos_ci_attachment_preview">
                     <td>
-                        <input type="submit" class="button button-secondary" {$disableSubmit} value="保存"/>
+                        <input type="submit" class="button button-primary" {$disableSubmit} value="保存"/>
                         {$disableMessage}
                     </td>
                 </tr>
@@ -958,6 +1138,7 @@ function cos_setting_page_tabs()
         'sync' => '数据迁移',
         'slim' => '图片极智压缩',
         'document' => '文档处理',
+        'text' => '文本审核',
         'metric' => '数据监控'
     ];
 }
@@ -978,6 +1159,21 @@ function cos_get_current_tab()
     }
 
     return 'config';
+}
+
+function cos_get_user_color_scheme() {
+    // Get the user data
+    $user_info = get_userdata(get_current_user_id());
+
+    // Get the admin color scheme name
+    $color_scheme_name = $user_info->admin_color;
+
+    // Get the admin color scheme object
+    global $_wp_admin_css_colors;
+    $color_scheme = $_wp_admin_css_colors[$color_scheme_name];
+
+    // Return the color scheme
+    return $color_scheme;
 }
 
 // 在导航栏“设置”中添加条目
@@ -1019,11 +1215,13 @@ function cos_setting_page()
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_all') {
-        $sync = cos_read_dir_queue(get_home_path() . cos_get_option('upload_path'));
-        foreach ($sync as $k) {
-            cos_file_upload($k['key'], $k['filepath']);
+        if (cos_validate_configuration(get_option('cos_options', true))) {
+            $sync = cos_read_dir_queue(get_home_path() . cos_get_option('upload_path'));
+            foreach ($sync as $k) {
+                cos_file_upload($k['key'], $k['filepath']);
+            }
+            echo '<div class="updated"><p><strong>本次操作成功同步' . count($sync) . '个文件</strong></p></div>';
         }
-        echo '<div class="updated"><p><strong>本次操作成功同步' . count($sync) . '个文件</strong></p></div>';
     }
 
     // 替换数据库链接
@@ -1045,6 +1243,10 @@ function cos_setting_page()
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_image_slim') {
         cos_ci_image_slim_setting($_POST);
+    }
+
+    if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_text') {
+        qcloud_cos_ci_text_setting($_POST);
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_attachment_preview') {
@@ -1076,31 +1278,37 @@ function cos_setting_page()
     $cos_regional = esc_attr($cos_options['regional']);
 
     $cos_nothumb = esc_attr($cos_options['nothumb']);
-    $cos_nothumb = ($cos_nothumb == 'true');
+    $check_nothumb = $cos_nothumb == 'true' ? 'checked="checked"' : '';
 
     $cos_nolocalsaving = esc_attr($cos_options['nolocalsaving']);
-    $cos_nolocalsaving = ($cos_nolocalsaving == 'true');
+    $check_nolocalsaving = $cos_nolocalsaving == 'true' ? 'checked="checked"' : '';
 
     $cos_delete_options = esc_attr($cos_options['delete_options']);
-    $cos_delete_options = ($cos_delete_options == 'true');
+    $check_delete_options = $cos_delete_options == 'true' ? 'checked="checked"' : '';
 
     $cos_update_file_name = esc_attr($cos_options['update_file_name']);
 
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
 
     $current_tab = cos_get_current_tab();
+
+    $color_scheme = cos_get_user_color_scheme();
     ?>
     <style>
-      .new-tab {margin-left: 5px;padding: 3px;border-radius: 10px;font-size: 10px;}
-      .open {color: #007017;}
-      .close {color: #b32d2e;}
-      .charts-container {display: flex;flex-wrap: wrap;margin-top: 10px;}
-      .cos-chart {flex-basis: calc(50% - 20px);}
-      @media (max-width: 600px) {
-          .cos-chart {
-              flex-basis: 100%;
-          }
-      }
+      .new-tab{margin-left: 5px;padding: 3px;border-radius: 10px;font-size: 10px;}
+      .open{color: #007017;}
+      .close{color: #b32d2e;}
+      .charts-container{display: flex;flex-wrap: wrap;margin-top: 10px;}
+      .cos-chart{flex-basis: calc(50% - 20px);}
+      @media(max-width:600px){.cos-chart{flex-basis:100%}}
+      .switch{position:relative;display:inline-block;width:60px;height:30px}
+      .switch input{opacity:0;width:0;height:0}
+      .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;transition:.4s}
+      .slider:before{position:absolute;content:"";height:25px;width:25px;left:4px;bottom:2.5px;background-color:white;transition:.4s}
+      input:checked+.slider{background-color: <?php echo $color_scheme->colors[2]; ?>;}
+      input:checked+.slider:before{transform:translateX(25px)}
+      .slider.round{border-radius:30px}
+      .slider.round:before{border-radius:50%}
     </style>
     <div class="wrap" style="margin: 10px;">
         <h1>腾讯云 COS <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
@@ -1133,7 +1341,7 @@ function cos_setting_page()
                     </th>
                     <td>
                         <select name="regional"><?php cos_get_regional($cos_regional); ?></select>
-                        <p>请选择您创建的<code>存储桶</code>所在地域</p>
+                        <p>请选择您创建的<code>存储桶</code>所在地域。</p>
                     </td>
                 </tr>
                 <tr>
@@ -1143,7 +1351,7 @@ function cos_setting_page()
                     <td>
                         <input type="text" name="app_id" value="<?php echo esc_attr($cos_options['app_id']); ?>" size="50" placeholder="APP ID"/>
 
-                        <p>请先访问 <a href="https://console.cloud.tencent.com/cos5/key" target="_blank">腾讯云控制台</a> 获取 <code>APP ID、SecretID、SecretKey</code></p>
+                        <p>请先访问 <a href="https://console.cloud.tencent.com/cos5/key" target="_blank">腾讯云控制台</a> 获取 <code>APP ID、SecretID、SecretKey</code>。</p>
                     </td>
                 </tr>
                 <tr>
@@ -1165,9 +1373,12 @@ function cos_setting_page()
                         <legend>不上传缩略图</legend>
                     </th>
                     <td>
-                        <input type="checkbox" name="nothumb" <?php if ($cos_nothumb) { echo 'checked="checked"'; } ?> />
+                        <label class="switch">
+                          <input type="checkbox" name="nothumb" <?php echo $check_nothumb; ?> />
+                          <span class="slider round"></span>
+                        </label>
 
-                        <p>建议不勾选</p>
+                        <p>建议不启用。</p>
                     </td>
                 </tr>
                 <tr>
@@ -1175,9 +1386,12 @@ function cos_setting_page()
                         <legend>不在本地保留备份</legend>
                     </th>
                     <td>
-                        <input type="checkbox" name="nolocalsaving" <?php if ($cos_nolocalsaving) { echo 'checked="checked"'; } ?> />
+                        <label class="switch">
+                          <input type="checkbox" name="nolocalsaving" <?php echo $check_nolocalsaving; ?> />
+                          <span class="slider round"></span>
+                        </label>
 
-                        <p>建议不勾选</p>
+                        <p>建议不启用。</p>
                     </td>
                 </tr>
                 <tr>
@@ -1185,7 +1399,10 @@ function cos_setting_page()
                         <legend>是否删除配置信息</legend>
                     </th>
                     <td>
-                        <input type="checkbox" name="delete_options" <?php if ($cos_delete_options) { echo 'checked="checked"'; } ?> />
+                        <label class="switch">
+                          <input type="checkbox" name="delete_options" <?php echo $check_delete_options; ?> />
+                          <span class="slider round"></span>
+                        </label>
 
                         <p>建议不勾选。勾选后禁用插件时会删除保存的配置信息和恢复默认URL前缀。不勾选卸载插件时也会进行删除和恢复。</p>
                     </td>
@@ -1258,11 +1475,14 @@ function cos_setting_page()
             <?php echo cos_ci_image_slim_page($cos_options); ?>
         <?php elseif ($current_tab == 'document'): ?>
             <?php echo cos_document_page($cos_options); ?>
+        <?php elseif ($current_tab == 'text'): ?>
+            <?php echo cos_ci_text_page($cos_options); ?>
         <?php elseif ($current_tab == 'metric'): ?>
         <script src="//cdnjs.cloudflare.com/ajax/libs/apexcharts/3.41.1/apexcharts.min.js"></script>
         <?php $monitor = new DataPoints(cos_get_bucket_name($cos_options), $cos_options); ?>
         <div class="charts-container">
         <?php
+            Charts::setColors($color_scheme->colors);
             echo Charts::storage($monitor->getStorage());
             echo Charts::objectNumber($monitor->getObjectNumber());
             echo Charts::requests($monitor->getRequests());

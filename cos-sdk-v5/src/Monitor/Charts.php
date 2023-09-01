@@ -4,10 +4,18 @@ namespace SyncQcloudCos\Monitor;
 
 class Charts
 {
+    static $colors;
+
+    public static function setColors($value)
+    {
+        self::$colors = $value;
+    }
+
     private static function generateChartScript($elementId, $title, $series, $xaxis, $yaxisUnit = '')
     {
         $seriesData = json_encode($series);
         $xaxisData = json_encode($xaxis);
+        $colors = json_encode(self::$colors);
 
         return <<<HTML
 <div id="{$elementId}" class="cos-chart"></div>
@@ -16,6 +24,7 @@ class Charts
         title: {
             text: '{$title}'
         },
+        colors: {$colors},
         series: {$seriesData},
         chart: {
             height: 350,
