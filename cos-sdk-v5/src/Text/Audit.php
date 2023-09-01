@@ -17,8 +17,8 @@ class Audit
                                       ]);
 
         $response = [];
-        $response['state'] = $result['JobsDetail']['State'] === 'Success';
-        $response['result'] = (int)$result['JobsDetail']['Result'];
+        $response['state'] = ($result['JobsDetail']['State'] ?? '') === 'Success';
+        $response['result'] = (int)($result['JobsDetail']['Result'] ?? 2);
         $response['message'] = $result['JobsDetail']['Message'] ?? '';
 
         if ($response['state'] && empty($response['message'])) {
