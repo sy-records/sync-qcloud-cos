@@ -1496,6 +1496,10 @@ function cos_setting_page()
             if (!empty($cos_options['attachment_preview']) && $cos_options['attachment_preview'] == 'on') {
                 echo Charts::ciDocumentHtml($monitor->getDocumentHtmlRequests());
             }
+
+            if (!empty($cos_options['ci_text_comments']) && $cos_options['ci_text_comments'] == 'on') {
+                echo Charts::ciTextAuditing($monitor->getTextAuditing());
+            }
         ?>
         </div>
         <?php endif; ?>

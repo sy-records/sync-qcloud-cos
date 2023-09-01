@@ -101,6 +101,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 * 支持文本内容审核
 * 移除导航栏中的 NEW 标签
 * 优化开关图标、图表颜色
+* 修复数据万象指标获取失败
 
 = Other =
 

@@ -38,6 +38,10 @@ class DataPoints
     const METRIC_CI_CDN_ORIGIN_TRAFFIC = 'CdnOriginTraffic'; // CDN回源流量：CI数据从存储桶传输到腾讯云CDN边缘节点产生的流量
     const METRIC_CI_INTERNET_TRAFFIC_UP = 'InternetTrafficUp'; // 外网出流量：CI数据通过互联网从存储桶下载到客户端产生的流量
 
+    const METRIC_TEXT_AUDITING_TASKS = 'TextAuditingTasks'; // 文本审核任务数
+    const METRIC_TEXT_AUDITING_SUCCESS_TASKS = 'TextAuditingSuccessTasks'; // 文本审核任务成功数
+    const METRIC_TEXT_AUDITING_FAIL_TASKS = 'TextAuditingFailTasks'; // 文本审核任务失败数
+
     /**
      * @var string $bucket
      */
@@ -165,6 +169,27 @@ class DataPoints
         $success = $this->request($params);
 
         $params = $this->buildParams(self::METRIC_DOCUMENT_HTML_FAIL_REQUESTS, self::NAMESPACE_CI);
+        $fail = $this->request($params);
+
+        return [
+            'date' => $date,
+            'requests' => $requests->Values ?? [],
+            'success' => $success->Values ?? [],
+            'fail' => $fail->Values ?? [],
+        ];
+    }
+
+    public function getTextAuditing()
+    {
+        $params = $this->buildParams(self::METRIC_TEXT_AUDITING_TASKS, self::NAMESPACE_CI);
+        $requests = $this->request($params);
+
+        $date = $this->formatTime($requests->Timestamps ?? []);
+
+        $params = $this->buildParams(self::METRIC_TEXT_AUDITING_SUCCESS_TASKS, self::NAMESPACE_CI);
+        $success = $this->request($params);
+
+        $params = $this->buildParams(self::METRIC_TEXT_AUDITING_FAIL_TASKS, self::NAMESPACE_CI);
         $fail = $this->request($params);
 
         return [

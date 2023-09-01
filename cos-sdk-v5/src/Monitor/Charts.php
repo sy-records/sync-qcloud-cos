@@ -123,6 +123,17 @@ HTML;
         return self::generateChartScript('cos-ci-document-html-chart', '文档预览', $series, $data['date'], '次');
     }
 
+    public static function ciTextAuditing($data)
+    {
+        $series = [
+            ['name' => '请求数', 'data' => $data['requests']],
+            ['name' => '成功次数', 'data' => $data['success']],
+            ['name' => '失败次数', 'data' => $data['fail']]
+        ];
+
+        return self::generateChartScript('cos-ci-text-auditing-chart', '文本审核', $series, $data['date'], '次');
+    }
+
     public static function ciTraffic($data)
     {
         $series = [
