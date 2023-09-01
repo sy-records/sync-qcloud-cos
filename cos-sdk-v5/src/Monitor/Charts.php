@@ -4,10 +4,18 @@ namespace SyncQcloudCos\Monitor;
 
 class Charts
 {
+    static $colors;
+
+    public static function setColors($value)
+    {
+        self::$colors = $value;
+    }
+
     private static function generateChartScript($elementId, $title, $series, $xaxis, $yaxisUnit = '')
     {
         $seriesData = json_encode($series);
         $xaxisData = json_encode($xaxis);
+        $colors = json_encode(self::$colors);
 
         return <<<HTML
 <div id="{$elementId}" class="cos-chart"></div>
@@ -16,6 +24,7 @@ class Charts
         title: {
             text: '{$title}'
         },
+        colors: {$colors},
         series: {$seriesData},
         chart: {
             height: 350,
@@ -112,6 +121,17 @@ HTML;
         ];
 
         return self::generateChartScript('cos-ci-document-html-chart', '文档预览', $series, $data['date'], '次');
+    }
+
+    public static function ciTextAuditing($data)
+    {
+        $series = [
+            ['name' => '请求数', 'data' => $data['requests']],
+            ['name' => '成功次数', 'data' => $data['success']],
+            ['name' => '失败次数', 'data' => $data['fail']]
+        ];
+
+        return self::generateChartScript('cos-ci-text-auditing-chart', '文本审核', $series, $data['date'], '次');
     }
 
     public static function ciTraffic($data)
