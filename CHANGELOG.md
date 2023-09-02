@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.0...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.1...master)
+
+## [v2.3.1](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.0...v2.3.1) - 2023-09-02
+
+- Fix missing check CiService by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/36
 
 ## [v2.3.0](https://github.com/sy-records/sync-qcloud-cos/compare/v2.2.3...v2.3.0) - 2023-09-01
 
