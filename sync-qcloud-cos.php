@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.3.0
+Version: 2.3.1
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -18,13 +18,14 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
 use SyncQcloudCos\CI\ImageSlim;
+use SyncQcloudCos\CI\Service;
 use SyncQcloudCos\Document\FilePreview;
 use SyncQcloudCos\Text\Audit;
 use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Monitor\Charts;
 
-define('COS_VERSION', '2.3.0');
+define('COS_VERSION', '2.3.1');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -966,6 +967,14 @@ function qcloud_cos_ci_text_setting($content)
 {
     $cos_options = get_option('cos_options', true);
     if (!cos_validate_configuration($cos_options)) return false;
+
+    $client = cos_get_client($cos_options);
+    $bucket = cos_get_bucket_name($cos_options);
+    $ciService = Service::checkStatus($client, $bucket);
+    if (!$ciService) {
+        echo "<div class='error'><p><strong>存储桶 {$bucket} 未绑定数据万象，若要开启文本审核，请先 <a href= 'https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a ></strong></p></div>";
+        return false;
+    }
 
     $ci_text_comments = isset($_POST['ci_text_comments']) ? sanitize_text_field($_POST['ci_text_comments']) : 'off';
     $skip_comment_validation_on_login = isset($_POST['skip_comment_validation_on_login']) ? sanitize_text_field($_POST['skip_comment_validation_on_login']) : 'off';
