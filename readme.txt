@@ -98,10 +98,8 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 == Changelog ==
 
 = Stable =
-* 支持文本内容审核
-* 移除导航栏中的 NEW 标签
-* 优化开关图标、图表颜色
-* 修复数据万象指标获取失败
+* 优化检测存储桶代码
+* 修复文档处理页面的未定义变量
 
 = Other =
 
