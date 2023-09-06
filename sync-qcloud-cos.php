@@ -110,39 +110,21 @@ function cos_get_bucket_name($cos_options = null)
 
 function cos_check_bucket($cos_options)
 {
-    $client = cos_get_client($cos_options);
     try {
-        $buckets_obj = $client->listBuckets();
-        if (isset($buckets_obj['Buckets'][0]['Bucket'])) {
-            $cos_bucket = esc_attr($cos_options['bucket']);
-            $cos_app_id = esc_attr($cos_options['app_id']);
-            $needle = "-{$cos_app_id}";
-            if (strpos($cos_bucket, $needle) !== false) {
-                $setting_bucket = $cos_bucket;
-            } else {
-                $setting_bucket = $cos_bucket . $needle;
-            }
+        $client = cos_get_client($cos_options);
+        $bucket = cos_get_bucket_name($cos_options);
+        $client->HeadBucket(['Bucket' => $bucket]);
 
-            $buckets_msg = '存储桶名称或APPID错误，需要设置的存储桶名称或APPID可能在以下名称中： ';
-            if (isset($buckets_obj['Buckets'][0]['Bucket'][0])) {
-                foreach ($buckets_obj['Buckets'][0]['Bucket'] as $bucket) {
-                    if ($setting_bucket == $bucket['Name']) {
-                        return true;
-                    } else {
-                        $buckets_msg .= "<code>{$bucket['Name']}</code> ";
-                    }
-                }
-            } else {
-                if ($setting_bucket == $buckets_obj['Buckets'][0]['Bucket']['Name']) {
-                    return true;
-                } else {
-                    $buckets_msg .= "<code>{$buckets_obj['Buckets'][0]['Bucket']['Name']}</code> ";
-                }
-            }
-            echo '<div class="error"><p><strong>'. $buckets_msg .'</strong></p></div>';
-        }
+        return true;
     } catch (ServiceResponseException $e) {
-        echo "<div class='error'><p><strong>{$e}</strong></p></div>";
+        $message = (string)$e;
+        $errorCode = $e->getCosErrorCode();
+        if ($errorCode == ErrorCode::NO_SUCH_BUCKET) {
+            $message = '<code>Bucket</code> 不存在，请检查存储桶名称和 <code>APP ID</code> 参数！';
+        } elseif ($errorCode == ErrorCode::ACCESS_DENIED) {
+            $message = '<code>SecretID</code> 或 <code>SecretKey</code> 有误，请检查配置信息！';
+        }
+        echo "<div class='error'><p><strong>{$message}</strong></p></div>";
     }
     return false;
 }
@@ -1351,7 +1333,7 @@ function cos_setting_page()
                     </th>
                     <td>
                         <select name="regional"><?php cos_get_regional($cos_regional); ?></select>
-                        <p>请选择您创建的<code>存储桶</code>所在地域。</p>
+                        <p>请选择<code>存储桶</code>对应的所在地域。</p>
                     </td>
                 </tr>
                 <tr>
