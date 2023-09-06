@@ -1,6 +1,6 @@
 <?php
 
-namespace SyncQcloudCos\Document;
+namespace SyncQcloudCos\CI;
 
 class FilePreview
 {

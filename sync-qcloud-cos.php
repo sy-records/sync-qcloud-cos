@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.3.1
+Version: 2.3.2
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache 2.0
@@ -17,15 +17,15 @@ require_once 'cos-sdk-v5/vendor/autoload.php';
 
 use Qcloud\Cos\Client;
 use Qcloud\Cos\Exception\ServiceResponseException;
+use SyncQcloudCos\CI\Audit;
+use SyncQcloudCos\CI\FilePreview;
 use SyncQcloudCos\CI\ImageSlim;
 use SyncQcloudCos\CI\Service;
-use SyncQcloudCos\Document\FilePreview;
-use SyncQcloudCos\Text\Audit;
 use SyncQcloudCos\ErrorCode;
-use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Monitor\Charts;
+use SyncQcloudCos\Monitor\DataPoints;
 
-define('COS_VERSION', '2.3.1');
+define('COS_VERSION', '2.3.2');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -1086,6 +1086,7 @@ function cos_document_page($options)
     $bucket = cos_get_bucket_name($options);
 
     $remoteStatus = '';
+    $status = false;
     if (!empty($options['bucket']) && !empty($options['app_id']) && !empty($options['secret_id']) && !empty($options['secret_key'])) {
         try {
             $status = FilePreview::checkStatus(cos_get_client($options), $bucket);
