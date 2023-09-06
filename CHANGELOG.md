@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.1...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.2...master)
+
+## [v2.3.2](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.1...v2.3.2) - 2023-09-06
+
+- Optimize cos_check_bucket code by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/37
 
 ## [v2.3.1](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.0...v2.3.1) - 2023-09-02
 
