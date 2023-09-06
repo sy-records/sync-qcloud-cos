@@ -1,6 +1,6 @@
 <?php
 
-namespace SyncQcloudCos\Text;
+namespace SyncQcloudCos\CI;
 
 class Audit
 {
