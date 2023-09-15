@@ -87,7 +87,7 @@ function cos_get_client($cos_options = null)
     if ($cos_options === null) $cos_options = get_option('cos_options', true);
     return new Client([
                           'region' => esc_attr($cos_options['regional']),
-                          'schema' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https' : 'http',
+                          'scheme' => cos_get_url_scheme(''),
                           'credentials' => [
                               'secretId' => esc_attr($cos_options['secret_id']),
                               'secretKey' => esc_attr($cos_options['secret_key'])
@@ -651,18 +651,42 @@ function cos_get_regional($regional)
     }
 }
 
-function cos_sync_setting_form()
+/**
+ * Generate URL scheme
+ *
+ * Decides whether 'http' or 'https' should be used based on the server configuration.
+ *
+ * @param string $separator separator used between the schema and the rest of the URL.
+ * @return string 'http' or 'https' followed by the separator.
+ */
+function cos_get_url_scheme($separator = '://')
 {
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
+    $scheme = $isHttps ? 'https' : 'http';
+
+    return $scheme . $separator;
+}
+
+function cos_sync_setting_form($cos_options)
+{
+    $protocol = cos_get_url_scheme();
+
+    $upload_path = cos_get_option('upload_path');
+    $upload_path = $upload_path == '.' ? '' : $upload_path;
+
+    $old_url = "{$protocol}{$_SERVER['HTTP_HOST']}/{$upload_path}";
+    $new_url = $cos_options['upload_url_path'];
     return <<<HTML
         <form method="post">
             <table class="form-table">
                 <tr>
                     <th>
-                        <legend>数据库原链接替换</legend>
+                        <legend>数据库内容替换</legend>
                     </th>
                     <td>
-                        <input type="text" name="old_url" size="50" placeholder="请输入要替换的旧域名"/>
-                        <p>如：<code>https://qq52o.me</code></p>
+                        <input type="text" name="old_url" size="50" placeholder="请输入要替换的内容"/>
+                        <p><b>可能会填入：<code>{$old_url}</code></b></p>
+                        <p>例如：<code>https://qq52o.me</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -670,8 +694,9 @@ function cos_sync_setting_form()
                         <legend></legend>
                     </th>
                     <td>
-                        <input type="text" name="new_url" size="50" placeholder="请输入要替换的新域名"/>
-                        <p>如：COS访问域名<code>https://bucket-appid.cos.ap-xxx.myqcloud.com</code>或自定义域名<code>https://resources.qq52o.me</code></p>
+                        <input type="text" name="new_url" size="50" placeholder="请输入要替换为的内容"/>
+                        <p><b>可能会填入：<code>{$new_url}</code></b></p>
+                        <p>例如：COS访问域名<code>https://bucket-appid.cos.ap-xxx.myqcloud.com</code>或自定义域名<code>https://resources.qq52o.me</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -681,7 +706,7 @@ function cos_sync_setting_form()
                     <input type="hidden" name="type" value="qcloud_cos_replace">
                     <td>
                         <input type="submit" class="button button-secondary" value="开始替换"/>
-                        <p><b>注意：如果是首次替换，请注意备份！此功能会替换文章以及设置的特色图片（题图）等使用的资源链接</b></p>
+                        <p><b>注意：如果是首次替换，请注意备份！此功能会替换文章以及设置的特色图片（题图）等使用的资源链接，也可用于其他需要替换文章内容的场景。</b></p>
                     </td>
                 </tr>
             </table>
@@ -1280,7 +1305,7 @@ function cos_setting_page()
 
     $cos_update_file_name = esc_attr($cos_options['update_file_name']);
 
-    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? 'https://' : 'http://';
+    $protocol = cos_get_url_scheme();
 
     $current_tab = cos_get_current_tab();
 
@@ -1462,7 +1487,7 @@ function cos_setting_page()
             <input type="hidden" name="type" value="cos_set">
         </form>
         <?php elseif ($current_tab == 'sync'): ?>
-            <?php echo cos_sync_setting_form(); ?>
+            <?php echo cos_sync_setting_form($cos_options); ?>
         <?php elseif ($current_tab == 'slim'): ?>
             <?php echo cos_ci_image_slim_page($cos_options); ?>
         <?php elseif ($current_tab == 'document'): ?>

@@ -11,7 +11,7 @@ class FilePreview
      */
     public static function checkStatus($client, $bucket)
     {
-        $client->setCosConfig('schema', 'https');
+        $client->setCosConfig('scheme', 'https');
         $result = $client->describeDocProcessBuckets(['Bucket' => $bucket]);
 
         return $result['TotalCount'] === '1';

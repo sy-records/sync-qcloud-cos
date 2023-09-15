@@ -6,7 +6,7 @@ class Audit
 {
     public static function comment($client, $bucket, $comment, $bizType = '')
     {
-        $client->setCosConfig('schema', 'https');
+        $client->setCosConfig('scheme', 'https');
         $result = $client->detectText([
                                           'Bucket' => $bucket,
                                           'Input' => [
