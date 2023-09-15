@@ -87,7 +87,7 @@ function cos_get_client($cos_options = null)
     if ($cos_options === null) $cos_options = get_option('cos_options', true);
     return new Client([
                           'region' => esc_attr($cos_options['regional']),
-                          'schema' => cos_get_url_scheme(''),
+                          'scheme' => cos_get_url_scheme(''),
                           'credentials' => [
                               'secretId' => esc_attr($cos_options['secret_id']),
                               'secretKey' => esc_attr($cos_options['secret_key'])
