@@ -434,8 +434,7 @@ function cos_sanitize_file_name($filename)
             return $filename;
     }
 }
-
-add_filter( 'sanitize_file_name', 'cos_sanitize_file_name', 10, 1 );
+add_filter('sanitize_file_name', 'cos_sanitize_file_name', 10, 1);
 
 function cos_function_each(&$array)
 {
@@ -1283,7 +1282,7 @@ function cos_setting_page()
             update_option('cos_options', $options);
 
             $upload_path = sanitize_text_field(trim(stripslashes($_POST['upload_path']), '/'));
-            $upload_path = ($upload_path == '') ? ('wp-content/uploads') : ($upload_path);
+            $upload_path = $upload_path == '' ? 'wp-content/uploads' : $upload_path;
             update_option('upload_path', $upload_path);
             $upload_url_path = sanitize_text_field(trim(stripslashes($_POST['upload_url_path']), '/'));
             update_option('upload_url_path', $upload_url_path);
@@ -1430,9 +1429,9 @@ function cos_setting_page()
                     </th>
                     <td>
                         <select name="update_file_name">
-                            <option <?php if ($cos_update_file_name == 'false') {echo 'selected="selected"';} ?> value="false">不处理</option>
-                            <option <?php if ($cos_update_file_name == 'md5') {echo 'selected="selected"';} ?> value="md5">MD5</option>
-                            <option <?php if ($cos_update_file_name == 'time') {echo 'selected="selected"';} ?> value="time">时间戳+随机数</option>
+                            <option <?php echo $cos_update_file_name == 'false' ? 'selected="selected"' : '';?> value="false">不处理</option>
+                            <option <?php echo $cos_update_file_name == 'md5' ? 'selected="selected"' : '';?> value="md5">MD5</option>
+                            <option <?php echo $cos_update_file_name == 'time' ? 'selected="selected"' : '';?> value="time">时间戳+随机数</option>
                         </select>
                     </td>
                 </tr>
@@ -1443,7 +1442,7 @@ function cos_setting_page()
                     <td>
                         <input type="text" name="upload_path" value="<?php echo cos_get_option('upload_path'); ?>" size="50" placeholder="请输入上传文件夹"/>
 
-                        <p>附件在服务器上的存储位置，例如： <code>wp-content/uploads</code> （注意不要以“/”开头和结尾），根目录请输入<code>.</code>。</p>
+                        <p>附件在服务器上的存储位置，例如：<code>wp-content/uploads</code>（注意不要以“/”开头和结尾），根目录请输入<code>.</code>。</p>
                     </td>
                 </tr>
                 <tr>
