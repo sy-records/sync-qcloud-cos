@@ -102,7 +102,7 @@ function cos_get_bucket_name($cos_options = null)
     $cos_bucket = esc_attr($cos_options['bucket']);
     $cos_app_id = esc_attr($cos_options['app_id']);
     $needle = '-' . $cos_app_id;
-    if (strpos($cos_bucket, $needle) !== false){
+    if (strpos($cos_bucket, $needle) !== false) {
         return $cos_bucket;
     }
     return $cos_bucket . $needle;
@@ -969,7 +969,7 @@ function cos_ci_text_page($options)
 EOF;
 }
 
-function qcloud_cos_ci_text_setting($content)
+function cos_ci_text_setting($content)
 {
     $cos_options = get_option('cos_options', true);
     if (!cos_validate_configuration($cos_options)) return false;
@@ -982,10 +982,10 @@ function qcloud_cos_ci_text_setting($content)
         return false;
     }
 
-    $ci_text_comments = isset($_POST['ci_text_comments']) ? sanitize_text_field($_POST['ci_text_comments']) : 'off';
-    $skip_comment_validation_on_login = isset($_POST['skip_comment_validation_on_login']) ? sanitize_text_field($_POST['skip_comment_validation_on_login']) : 'off';
-    $ci_text_comments_strategy = isset($_POST['ci_text_comments_strategy']) ? sanitize_text_field($_POST['ci_text_comments_strategy']) : '';
-    $ci_text_comments_check_roles = isset($_POST['ci_text_comments_check_roles']) ? implode(',', $_POST['ci_text_comments_check_roles']) : '';
+    $ci_text_comments = isset($content['ci_text_comments']) ? sanitize_text_field($content['ci_text_comments']) : 'off';
+    $skip_comment_validation_on_login = isset($content['skip_comment_validation_on_login']) ? sanitize_text_field($content['skip_comment_validation_on_login']) : 'off';
+    $ci_text_comments_strategy = isset($content['ci_text_comments_strategy']) ? sanitize_text_field($content['ci_text_comments_strategy']) : '';
+    $ci_text_comments_check_roles = isset($content['ci_text_comments_check_roles']) ? implode(',', $content['ci_text_comments_check_roles']) : '';
 
     $cos_options['ci_text_comments'] = $ci_text_comments;
     $cos_options['skip_comment_validation_on_login'] = $skip_comment_validation_on_login;
@@ -1262,7 +1262,7 @@ function cos_setting_page()
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_text') {
-        qcloud_cos_ci_text_setting($_POST);
+        cos_ci_text_setting($_POST);
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_attachment_preview') {
