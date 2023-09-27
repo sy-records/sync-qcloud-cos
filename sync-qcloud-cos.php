@@ -997,6 +997,28 @@ function cos_ci_text_setting($content)
     return true;
 }
 
+function cos_contact_page()
+{
+    echo <<<EOF
+    <table class="form-table">
+      <tbody>
+        <tr>
+          <th>GitHub</th>
+          <td><a href="https://github.com/sy-records" target="_blank">@sy-records</a></td>
+        </tr>
+        <tr>
+          <th>QQ 群</th>
+          <td>887595381 <a href="https://go.qq52o.me/qm/ccs" target="_blank">点击加入</a></td>
+        </tr>
+        <tr>
+          <th>微信公众号</th>
+          <td><img src="https://open.weixin.qq.com/qr/code?username=sy-records" alt="鲁飞"></td>
+        </tr>
+      </tbody>
+    </table>
+EOF;
+}
+
 if (!function_exists('is_user_logged_in')) {
     require_once(ABSPATH . WPINC . '/pluggable.php');
 }
@@ -1155,7 +1177,8 @@ function cos_setting_page_tabs()
         'slim' => '图片极智压缩',
         'document' => '文档处理',
         'text' => '文本审核',
-        'metric' => '数据监控'
+        'metric' => '数据监控',
+        'contact' => '联系作者'
     ];
 }
 
@@ -1518,10 +1541,12 @@ function cos_setting_page()
             }
         ?>
         </div>
+        <?php elseif ($current_tab == 'contact'): ?>
+            <?php echo cos_contact_page(); ?>
         <?php endif; ?>
         <hr>
         <p>优惠活动：<a href="https://qq52o.me/welfare.html#qcloud" target="_blank">腾讯云优惠</a> / <a href="https://go.qq52o.me/a/cos" target="_blank">腾讯云COS资源包优惠</a>；</p>
-        <p>限时推广：<a href="https://cloud.tencent.com/developer/support-plan?invite_code=cqidlih5bagj" target="_blank">技术博客可以加入腾讯云云+社区定制周边礼品等你来拿</a> / <a href="https://go.qq52o.me/qm/ccs" target="_blank">欢迎加入云存储插件交流群，QQ群号：887595381</a>；</p>
+        <p>限时推广：<a href="https://cloud.tencent.com/developer/support-plan?invite_code=cqidlih5bagj" target="_blank">技术博客可以加入腾讯云云+社区定制周边礼品等你来拿</a>；</p>
     </div>
 <?php
 }
