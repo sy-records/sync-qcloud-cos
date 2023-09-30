@@ -515,29 +515,13 @@ function cos_setting_content_ci($content)
     }
 
     if (!empty($option['attachment_preview']) && $option['attachment_preview'] == 'on') {
-        $preg = '/<a .*?href="(.*?)".*?>/is';
-        $editorBlocks = [
-            'gutenberg' => [
-                'pattern' => '/<div class=\"wp-block-file\"><a href=\"(http|https):\/\/([\w\d\-_]+[\.\w\d\-_]+)[:\d+]?([\/]?[\u4e00-\u9fa5]+)(.*)\">/u',
-                'iframe' => '<div class="wp-block-file"><iframe src="%urlstring%?ci-process=doc-preview&dstType=html" width="100%" allowFullScreen="true" height="800"></iframe></div>'
-            ],
-            'classic' => [
-                'pattern' => '/<p><a href=\"(http|https):\/\/([\w\d\-_]+[\.\w\d\-_]+)[:\d+]?([\/]?[\u4e00-\u9fa5]+)(.*)\">/u',
-                'iframe' => '<p><iframe src="%urlstring%?ci-process=doc-preview&dstType=html" width="100%" allowFullScreen="true" height="800"></iframe></p>'
-            ]
-        ];
-
-        foreach ($editorBlocks as $editorBlock) {
-            preg_match_all($editorBlock['pattern'], $content, $matches);
-            if (!empty($matches[0]) && is_array($matches[0])) {
-                $replaceUrls = array_unique($matches[0]);
-                foreach ($replaceUrls as $urlString) {
-                    preg_match($preg, $urlString, $match);
-                    if (!empty($match) && FilePreview::isFileExtensionSupported($match[1])) {
-                        $newIframeString = str_replace('%urlstring%', $match[1], $editorBlock['iframe']);
-                        $content = str_replace($urlString, $newIframeString . $urlString, $content);
-                        break 2; // Breaks out of two foreach loops (this one and the outer one) once a replace happens
-                    }
+        preg_match_all('/<a.*?href="(.*?)".*?\/a>/is', $content, $matches);
+        if (!empty($matches)) {
+            [$tags, $links] = $matches;
+            foreach ($links as $index => $link) {
+                if (FilePreview::isFileExtensionSupported($link)) {
+                    $iframe = '<iframe src="' . $link . '?ci-process=doc-preview&dstType=html" width="100%" allowFullScreen="true" height="800"></iframe>';
+                    $content = str_replace($tags[$index], $iframe, $content);
                 }
             }
         }
