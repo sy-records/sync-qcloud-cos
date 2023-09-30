@@ -14,7 +14,13 @@ class FilePreview
         $client->setCosConfig('scheme', 'https');
         $result = $client->describeDocProcessBuckets(['Bucket' => $bucket]);
 
-        return $result['TotalCount'] === '1';
+        if (empty($result['TotalCount']) && !isset($result['DocBucketList'])) {
+            return false;
+        }
+
+        $buckets = array_column($result['DocBucketList'], 'Name');
+
+        return in_array($bucket, $buckets);
     }
 
     /**
