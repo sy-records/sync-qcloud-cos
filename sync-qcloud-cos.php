@@ -70,7 +70,7 @@ function cos_stop_option()
         $cos_upload_url_path = esc_attr($option['upload_url_path']);
 
         if ($upload_url_path == $cos_upload_url_path) {
-            update_option('upload_url_path', '' );
+            update_option('upload_url_path', '');
         }
         delete_option('cos_options');
     }
@@ -84,7 +84,9 @@ register_deactivation_hook(__FILE__, 'cos_stop_option');
  */
 function cos_get_client($cos_options = null)
 {
-    if ($cos_options === null) $cos_options = get_option('cos_options', true);
+    if ($cos_options === null) {
+        $cos_options = get_option('cos_options', true);
+    }
     return new Client([
                           'region' => esc_attr($cos_options['regional']),
                           'scheme' => cos_get_url_scheme(''),
@@ -98,7 +100,9 @@ function cos_get_client($cos_options = null)
 
 function cos_get_bucket_name($cos_options = null)
 {
-    if ($cos_options === null) $cos_options = get_option('cos_options', true);
+    if ($cos_options === null) {
+        $cos_options = get_option('cos_options', true);
+    }
     $cos_bucket = esc_attr($cos_options['bucket']);
     $cos_app_id = esc_attr($cos_options['app_id']);
     $needle = '-' . $cos_app_id;
@@ -153,7 +157,10 @@ function cos_file_upload($object, $filename, $no_local_file = false)
             }
         }
     } catch (ServiceResponseException $e) {
-        WP_DEBUG && print_r(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode(), 'requestId' => $e->getRequestId()]);
+        if (WP_DEBUG) {
+            echo json_encode(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode(), 'requestId' => $e->getRequestId()]);
+            exit();
+        }
     }
 }
 
@@ -188,7 +195,7 @@ function cos_delete_local_file($file)
         }
 
         return true;
-    } catch (\Exception $ex) {
+    } catch (Exception $ex) {
         return false;
     }
 }
@@ -325,8 +332,8 @@ function cos_upload_thumbs($metadata)
 }
 
 /**
-* @param $override
-* @return mixed
+ * @param $override
+ * @return mixed
  */
 function cos_save_image_editor_file($override)
 {
@@ -350,10 +357,9 @@ function cos_image_editor_file_do($metadata)
 function cos_delete_remote_attachment($post_id)
 {
     // 获取图片类附件的meta信息
-    $meta = wp_get_attachment_metadata( $post_id );
+    $meta = wp_get_attachment_metadata($post_id);
 
     if (!empty($meta['file'])) {
-
         $deleteObjects = [];
 
         // meta['file']的格式为 "2020/01/wp-bg.png"
@@ -367,19 +373,14 @@ function cos_delete_remote_attachment($post_id)
 
         $dirname = dirname($file_path) . '/';
 
-        // 删除时不管是否开启不上传缩略图，只要有就删除。
-//        $cos_options = get_option('cos_options', true);
-//        $is_nothumb = (esc_attr($cos_options['nothumb']) == 'false');
-//        if ($is_nothumb) {
-            // 删除缩略图
-            if (!empty($meta['sizes'])) {
-                foreach ($meta['sizes'] as $val) {
-                    $size_file = $dirname . $val['file'];
+        // 删除缩略图
+        if (!empty($meta['sizes'])) {
+            foreach ($meta['sizes'] as $val) {
+                $size_file = $dirname . $val['file'];
 
-                    $deleteObjects[] = ['Key' => str_replace("\\", '/', $size_file)];
-                }
+                $deleteObjects[] = ['Key' => str_replace("\\", '/', $size_file)];
             }
-//        }
+        }
 
         $backup_sizes = get_post_meta($post_id, '_wp_attachment_backup_sizes', true);
         if (is_array($backup_sizes)) {
@@ -410,6 +411,7 @@ function cos_delete_remote_attachment($post_id)
         }
     }
 }
+
 add_action('delete_attachment', 'cos_delete_remote_attachment');
 
 // 当upload_path为根目录时，需要移除URL中出现的“绝对路径”
@@ -429,13 +431,17 @@ function cos_sanitize_file_name($filename)
     $cos_options = get_option('cos_options');
     switch ($cos_options['update_file_name']) {
         case 'md5':
-            return  md5($filename) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
+            return md5($filename) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
         case 'time':
-            return date('YmdHis', current_time('timestamp'))  . mt_rand(100, 999) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
+            return date('YmdHis', current_time('timestamp')) . mt_rand(100, 999) . '.' . pathinfo(
+                    $filename,
+                    PATHINFO_EXTENSION
+                );
         default:
             return $filename;
     }
 }
+
 add_filter('sanitize_file_name', 'cos_sanitize_file_name', 10, 1);
 
 function cos_function_each(&$array)
@@ -481,7 +487,7 @@ function cos_read_dir_queue($dir)
         $upload_path = cos_get_option('upload_path');
         foreach ($files as $v) {
             if (!is_dir($v)) {
-                $dd[] = ['filepath' => $v, 'key' =>  '/' . $upload_path . explode($upload_path, $v)[1]];
+                $dd[] = ['filepath' => $v, 'key' => '/' . $upload_path . explode($upload_path, $v)[1]];
             }
         }
     }
@@ -498,6 +504,7 @@ function cos_plugin_action_links($links, $file)
     }
     return $links;
 }
+
 add_filter('plugin_action_links', 'cos_plugin_action_links', 10, 2);
 
 add_filter('the_content', 'cos_setting_content_ci');
@@ -505,7 +512,11 @@ function cos_setting_content_ci($content)
 {
     $option = get_option('cos_options');
     if (!empty(esc_attr($option['ci_style']))) {
-        preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $content, $images);
+        preg_match_all(
+            '/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim',
+            $content,
+            $images
+        );
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
@@ -537,7 +548,11 @@ function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
 {
     $option = get_option('cos_options');
     if (!empty(esc_attr($option['ci_style'])) && has_post_thumbnail()) {
-        preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $html, $images);
+        preg_match_all(
+            '/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim',
+            $html,
+            $images
+        );
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
@@ -721,7 +736,9 @@ function cos_ci_image_slim_setting($content)
 {
     $cos_options = get_option('cos_options', true);
 
-    if (!cos_validate_configuration($cos_options)) return false;
+    if (!cos_validate_configuration($cos_options)) {
+        return false;
+    }
 
     $slim = !empty($content['ci_image_slim']) ? sanitize_text_field($content['ci_image_slim']) : 'off';
     $mode = !empty($content['ci_image_slim_mode']) ? implode(',', $content['ci_image_slim_mode']) : '';
@@ -958,7 +975,9 @@ EOF;
 function cos_ci_text_setting($content)
 {
     $cos_options = get_option('cos_options', true);
-    if (!cos_validate_configuration($cos_options)) return false;
+    if (!cos_validate_configuration($cos_options)) {
+        return false;
+    }
 
     $client = cos_get_client($cos_options);
     $bucket = cos_get_bucket_name($cos_options);
@@ -1042,6 +1061,7 @@ function cos_process_comments($comment_data)
 
     return $comment_data;
 }
+
 add_filter('preprocess_comment', 'cos_process_comments');
 
 function cos_request_txt_check($options, $comment)
@@ -1051,7 +1071,7 @@ function cos_request_txt_check($options, $comment)
     $result = Audit::comment($client, $bucket, $comment, $options['ci_text_comments_strategy'] ?? '');
     if (!$result['state'] || $result['result'] === 2) {
         // 人工审核
-        add_filter('pre_comment_approved' , '__return_zero');
+        add_filter('pre_comment_approved', '__return_zero');
     }
 
     if ($result['state'] && $result['result'] === 1) {
@@ -1066,7 +1086,9 @@ function cos_request_txt_check($options, $comment)
 function cos_ci_attachment_preview_setting($content)
 {
     $cos_options = get_option('cos_options', true);
-    if (!cos_validate_configuration($cos_options)) return false;
+    if (!cos_validate_configuration($cos_options)) {
+        return false;
+    }
 
     $attachment_preview = !empty($content['attachment_preview']) ? sanitize_text_field($content['attachment_preview']) : 'off';
 
@@ -1186,7 +1208,8 @@ function cos_get_current_tab()
     return 'config';
 }
 
-function cos_get_user_color_scheme() {
+function cos_get_user_color_scheme()
+{
     // Get the user data
     $user_info = get_userdata(get_current_user_id());
 
@@ -1211,6 +1234,7 @@ function cos_add_setting_page()
         add_submenu_page(COS_PLUGIN_SLUG, $name, $name, 'manage_options', COS_PLUGIN_SLUG . "-{$tab}", 'cos_setting_page');
     }
 }
+
 add_action('admin_menu', 'cos_add_setting_page');
 
 // 插件设置页面
@@ -1257,13 +1281,17 @@ function cos_setting_page()
         global $wpdb;
         $posts_name = $wpdb->prefix . 'posts';
         // 文章内容
-        $posts_result = $wpdb->query("UPDATE $posts_name SET post_content = REPLACE(post_content, '$old_url', '$new_url') ");
+        $posts_result = $wpdb->query(
+            "UPDATE $posts_name SET post_content = REPLACE(post_content, '$old_url', '$new_url')"
+        );
 
         // 修改题图之类的
-        $postmeta_name = $wpdb->prefix .'postmeta';
-        $postmeta_result = $wpdb->query("UPDATE $postmeta_name SET meta_value = REPLACE(meta_value, '$old_url', '$new_url') ");
+        $postmeta_name = $wpdb->prefix . 'postmeta';
+        $postmeta_result = $wpdb->query(
+            "UPDATE $postmeta_name SET meta_value = REPLACE(meta_value, '$old_url', '$new_url')"
+        );
 
-        echo '<div class="updated"><p><strong>替换成功！共替换文章内链'.$posts_result.'条、题图链接'.$postmeta_result.'条！</strong></p></div>';
+        echo '<div class="updated"><p><strong>替换成功！共替换文章内链' . $posts_result . '条、题图链接' . $postmeta_result . '条！</strong></p></div>';
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_image_slim') {
@@ -1280,7 +1308,6 @@ function cos_setting_page()
 
     // 若$options不为空数组，则更新数据
     if ($options !== []) {
-
         $check_status = true;
         if (!empty($options['bucket']) && !empty($options['app_id']) && !empty($options['secret_id']) && !empty($options['secret_key'])) {
             $check_status = cos_check_bucket($options);
