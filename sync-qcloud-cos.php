@@ -1017,7 +1017,11 @@ function cos_contact_page()
         </tr>
         <tr>
           <th>微信公众号</th>
-          <td><img src="https://open.weixin.qq.com/qr/code?username=sy-records" alt="鲁飞"></td>
+          <td><img width="150px" src="https://open.weixin.qq.com/qr/code?username=sy-records" alt="鲁飞"></td>
+        </tr>
+        <tr>
+          <th>打赏一杯咖啡或一杯香茗</th>
+          <td><img height="290px" src="https://cdn.jsdelivr.net/gh/sy-records/staticfile@master/images/donate.png"></td>
         </tr>
       </tbody>
     </table>
@@ -1365,12 +1369,12 @@ function cos_setting_page()
     <div class="wrap" style="margin: 10px;">
         <h1>腾讯云 COS <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
         <p>插件网站：<a href="https://qq52o.me/" target="_blank">沈唁志</a> / <a href="https://qq52o.me/2518.html" target="_blank">Sync QCloud COS发布页面</a> / <a href="https://qq52o.me/2722.html" target="_blank">详细使用教程</a>；</p>
-        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/sync-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；<a href="https://qq52o.me/sponsor.html#sponsor" target="_blank">打赏一杯咖啡或一杯香茗</a></p>
+        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/sync-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；<a href="?page=sync-qcloud-cos-contact">打赏一杯咖啡或一杯香茗</a></p>
         <h3 class="nav-tab-wrapper">
             <?php global $pagenow; ?>
             <?php foreach (cos_setting_page_tabs() as $tab => $label): ?>
               <?php $href = $pagenow === 'admin.php' ? COS_PLUGIN_SLUG . '-' . $tab : COS_PLUGIN_PAGE . '&tab=' . $tab; ?>
-              <?php $label = $tab == 'slim' ? $label . '<span class="wp-ui-notification new-tab">NEW</span>' : $label; ?>
+              <?php $label = $tab == 'contact' ? $label . '<span class="wp-ui-notification new-tab">NEW</span>' : $label; ?>
               <a class="nav-tab <?php echo $current_tab == $tab ? 'nav-tab-active' : '' ?>" href="?page=<?php echo $href;?>"><?php echo $label; ?></a>
             <?php endforeach; ?>
         </h3>
