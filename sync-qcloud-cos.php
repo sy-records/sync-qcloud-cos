@@ -152,6 +152,8 @@ function cos_file_upload($object, $filename, $no_local_file = false)
             $cosClient = cos_get_client();
             $cosClient->Upload($bucket, $object, $file);
 
+            fclose($file);
+
             if ($no_local_file) {
                 cos_delete_local_file($filename);
             }
@@ -444,55 +446,42 @@ function cos_sanitize_file_name($filename)
 
 add_filter('sanitize_file_name', 'cos_sanitize_file_name', 10, 1);
 
-function cos_function_each(&$array)
-{
-    $res = [];
-    $key = key($array);
-    if ($key !== null) {
-        next($array);
-        $res[1] = $res['value'] = $array[$key];
-        $res[0] = $res['key'] = $key;
-    } else {
-        $res = false;
-    }
-    return $res;
-}
-
 /**
- * @param $dir
+ * @param string $homePath
+ * @param string $uploadPath
  * @return array
  */
-function cos_read_dir_queue($dir)
+function cos_read_dir_queue($homePath, $uploadPath)
 {
-    $dd = [];
-    if (isset($dir)) {
-        $files = [];
-        $queue = [$dir];
-        while ($data = cos_function_each($queue)) {
-            $path = $data['value'];
-            if (is_dir($path) && $handle = opendir($path)) {
-                while ($file = readdir($handle)) {
-                    if ($file == '.' || $file == '..') {
-                        continue;
-                    }
-                    $files[] = $real_path = $path . '/' . $file;
-                    if (is_dir($real_path)) {
-                        $queue[] = $real_path;
-                    }
-                    //echo explode(cos_get_option('upload_path'),$path)[1];
-                }
-            }
-            closedir($handle);
-        }
-        $upload_path = cos_get_option('upload_path');
-        foreach ($files as $v) {
-            if (!is_dir($v)) {
-                $dd[] = ['filepath' => $v, 'key' => '/' . $upload_path . explode($upload_path, $v)[1]];
+    $dir = $homePath . $uploadPath;
+    $dirsToProcess = new SplQueue();
+    $dirsToProcess->enqueue([$dir, '']);
+    $foundFiles = [];
+
+    while (!$dirsToProcess->isEmpty()) {
+        [$currentDir, $relativeDir] = $dirsToProcess->dequeue();
+
+        foreach (new DirectoryIterator($currentDir) as $fileInfo) {
+            if ($fileInfo->isDot()) continue;
+
+            $filepath = $fileInfo->getRealPath();
+
+            // Compute the relative path of the file/directory with respect to upload path
+            $currentRelativeDir = "{$relativeDir}/{$fileInfo->getFilename()}";
+
+            if ($fileInfo->isDir()) {
+                $dirsToProcess->enqueue([$filepath, $currentRelativeDir]);
+            } else {
+                // Add file path and key to the result array
+                $foundFiles[] = [
+                    'filepath' => $filepath,
+                    'key' => '/' . $uploadPath . $currentRelativeDir
+                ];
             }
         }
     }
 
-    return $dd;
+    return $foundFiles;
 }
 
 // 在插件列表页添加设置按钮
@@ -1269,11 +1258,11 @@ function cos_setting_page()
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_all') {
         if (cos_validate_configuration(get_option('cos_options', true))) {
-            $sync = cos_read_dir_queue(get_home_path() . cos_get_option('upload_path'));
-            foreach ($sync as $k) {
-                cos_file_upload($k['key'], $k['filepath']);
+            $files = cos_read_dir_queue(get_home_path(), cos_get_option('upload_path'));
+            foreach ($files as $file) {
+                cos_file_upload($file['key'], $file['filepath']);
             }
-            echo '<div class="updated"><p><strong>本次操作成功同步' . count($sync) . '个文件</strong></p></div>';
+            echo '<div class="updated"><p><strong>本次操作成功同步' . count($files) . '个文件</strong></p></div>';
         }
     }
 
