@@ -420,8 +420,7 @@ add_action('delete_attachment', 'cos_delete_remote_attachment');
 function cos_modefiy_img_url($url, $post_id)
 {
     // 移除 ./ 和 项目根路径
-    $url = str_replace(['./', get_home_path()], '', $url);
-    return $url;
+    return str_replace(['./', get_home_path()], '', $url);
 }
 
 if (cos_get_option('upload_path') == '.') {
@@ -435,10 +434,7 @@ function cos_sanitize_file_name($filename)
         case 'md5':
             return md5($filename) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
         case 'time':
-            return date('YmdHis', current_time('timestamp')) . mt_rand(100, 999) . '.' . pathinfo(
-                    $filename,
-                    PATHINFO_EXTENSION
-                );
+            return date('YmdHis', current_time('timestamp')) . mt_rand(100, 999) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
         default:
             return $filename;
     }
