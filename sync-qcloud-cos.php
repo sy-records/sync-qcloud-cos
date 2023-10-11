@@ -6,7 +6,7 @@ Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。�
 Version: 2.3.2
 Author: 沈唁
 Author URI: https://qq52o.me
-License: Apache 2.0
+License: Apache2.0
 */
 
 if (!defined('ABSPATH')) {
