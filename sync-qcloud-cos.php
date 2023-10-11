@@ -434,7 +434,7 @@ function cos_sanitize_file_name($filename)
         case 'md5':
             return md5($filename) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
         case 'time':
-            return date('YmdHis', current_time('timestamp')) . mt_rand(100, 999) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
+            return gmdate('YmdHis', current_time('timestamp')) . wp_rand(100, 999) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
         default:
             return $filename;
     }
