@@ -13,9 +13,9 @@ class Charts
 
     private static function generateChartScript($elementId, $title, $series, $xaxis, $yaxisUnit = '')
     {
-        $seriesData = json_encode($series);
-        $xaxisData = json_encode($xaxis);
-        $colors = json_encode(self::$colors);
+        $seriesData = wp_json_encode($series);
+        $xaxisData = wp_json_encode($xaxis);
+        $colors = wp_json_encode(self::$colors);
 
         return <<<HTML
 <div id="{$elementId}" class="cos-chart"></div>

@@ -297,7 +297,7 @@ class DataPoints
     {
         try {
             $request = new GetMonitorDataRequest();
-            $request->fromJsonString(json_encode($params));
+            $request->fromJsonString(wp_json_encode($params));
 
             $response = $this->client->GetMonitorData($request);
 
