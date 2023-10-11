@@ -6,7 +6,7 @@ Requires at least: 4.2
 Tested up to: 6.3
 Requires PHP: 7.0.0
 Stable tag: 2.3.2
-License: Apache 2.0
+License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
