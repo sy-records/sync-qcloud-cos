@@ -152,7 +152,9 @@ function cos_file_upload($object, $filename, $no_local_file = false)
             $cosClient = cos_get_client();
             $cosClient->Upload($bucket, $object, $file);
 
-            fclose($file);
+            if (is_resource($file)) {
+                fclose($file);
+            }
 
             if ($no_local_file) {
                 cos_delete_local_file($filename);
@@ -283,6 +285,11 @@ function cos_upload_thumbs($metadata)
     //获取上传路径
     $wp_uploads = wp_upload_dir();
     $basedir = $wp_uploads['basedir'];
+
+    $cos_options = get_option('cos_options', true);
+    $no_local_file = esc_attr($cos_options['nolocalsaving']) == 'true';
+    $no_thumb = esc_attr($cos_options['nothumb']) == 'true';
+
     if (!empty($metadata['file'])) {
         // Maybe there is a problem with the old version
         $file = $basedir . '/' . $metadata['file'];
@@ -297,28 +304,29 @@ function cos_upload_thumbs($metadata)
             $file = str_replace('./', '', $file);
         }
 
-        cos_file_upload($object, $file, cos_is_delete_local_file());
+        cos_file_upload($object, $file, $no_local_file);
     }
+
+    //得到本地文件夹和远端文件夹
+    $dirname = dirname($metadata['file']);
+    $file_path = $dirname != '.' ? "{$basedir}/{$dirname}/" : "{$basedir}/";
+    $file_path = str_replace("\\", '/', $file_path);
+    if ($upload_path == '.') {
+        $file_path = str_replace('./', '', $file_path);
+    }
+    $object_path = str_replace(get_home_path(), '', $file_path);
+
+    if (!empty($metadata['original_image'])) {
+        cos_file_upload("/{$object_path}{$metadata['original_image']}", "{$file_path}{$metadata['original_image']}", $no_local_file);
+    }
+
+    //如果禁止上传缩略图，就不用继续执行了
+    if ($no_thumb) {
+        return $metadata;
+    }
+
     //上传所有缩略图
     if (!empty($metadata['sizes'])) {
-        //获取COS插件的配置信息
-        $cos_options = get_option('cos_options', true);
-        //是否需要上传缩略图
-        $nothumb = (esc_attr($cos_options['nothumb']) == 'true');
-        //如果禁止上传缩略图，就不用继续执行了
-        if ($nothumb) {
-            return $metadata;
-        }
-        //得到本地文件夹和远端文件夹
-        $dirname = dirname($metadata['file']);
-        $file_path = $dirname != '.' ? "{$basedir}/{$dirname}/" : "{$basedir}/";
-        $file_path = str_replace("\\", '/', $file_path);
-        if ($upload_path == '.') {
-            $file_path = str_replace('./', '', $file_path);
-        }
-
-        $object_path = str_replace(get_home_path(), '', $file_path);
-
         //there may be duplicated filenames,so ....
         foreach ($metadata['sizes'] as $val) {
             //生成object在COS中的存储路径
@@ -326,10 +334,10 @@ function cos_upload_thumbs($metadata)
             //生成本地存储路径
             $file = $file_path . $val['file'];
 
-            //执行上传操作
-            cos_file_upload($object, $file, (esc_attr($cos_options['nolocalsaving']) == 'true'));
+            cos_file_upload($object, $file, $keep_local_file);
         }
     }
+
     return $metadata;
 }
 
