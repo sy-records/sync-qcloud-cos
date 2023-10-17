@@ -153,7 +153,7 @@ function cos_file_upload($object, $filename, $no_local_file = false)
             $cosClient->Upload($bucket, $object, $file);
 
             if (is_resource($file)) {
-              fclose($file);
+                fclose($file);
             }
 
             if ($no_local_file) {
