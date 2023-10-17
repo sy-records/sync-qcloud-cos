@@ -287,7 +287,7 @@ function cos_upload_thumbs($metadata)
     $basedir = $wp_uploads['basedir'];
 
     $cos_options = get_option('cos_options', true);
-    $keep_local_file = esc_attr($cos_options['nolocalsaving']) == 'true';
+    $no_local_file = esc_attr($cos_options['nolocalsaving']) == 'true';
     $no_thumb = esc_attr($cos_options['nothumb']) == 'true';
 
     if (!empty($metadata['file'])) {
@@ -304,7 +304,7 @@ function cos_upload_thumbs($metadata)
             $file = str_replace('./', '', $file);
         }
 
-        cos_file_upload($object, $file, $keep_local_file);
+        cos_file_upload($object, $file, $no_local_file);
     }
 
     //得到本地文件夹和远端文件夹
@@ -317,7 +317,7 @@ function cos_upload_thumbs($metadata)
     $object_path = str_replace(get_home_path(), '', $file_path);
 
     if (!empty($metadata['original_image'])) {
-        cos_file_upload("/{$object_path}{$metadata['original_image']}", "{$file_path}{$metadata['original_image']}", $keep_local_file);
+        cos_file_upload("/{$object_path}{$metadata['original_image']}", "{$file_path}{$metadata['original_image']}", $no_local_file);
     }
 
     //如果禁止上传缩略图，就不用继续执行了
