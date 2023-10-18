@@ -334,7 +334,7 @@ function cos_upload_thumbs($metadata)
             //生成本地存储路径
             $file = $file_path . $val['file'];
 
-            cos_file_upload($object, $file, $keep_local_file);
+            cos_file_upload($object, $file, $no_local_file);
         }
     }
 
@@ -382,6 +382,11 @@ function cos_delete_remote_attachment($post_id)
         $deleteObjects[] = ['Key' => str_replace("\\", '/', $file_path)];
 
         $dirname = dirname($file_path) . '/';
+
+        // 超大图原图
+        if (!empty($meta['original_image'])) {
+            $deleteObjects[] = ['Key' => str_replace("\\", '/', $dirname . $meta['original_image'])];
+        }
 
         // 删除缩略图
         if (!empty($meta['sizes'])) {
