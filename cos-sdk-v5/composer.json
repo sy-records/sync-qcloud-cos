@@ -13,8 +13,8 @@
         "sort-packages": true
     },
     "scripts": {
-        "pre-autoload-dump": [
-            "find vendor/tencentcloud/monitor/src/TencentCloud/Monitor/V20180724/Models -type f ! -name 'GetMonitorDataRequest.php' -delete"
+        "post-autoload-dump": [
+            "SyncQcloudCos\\Installer::postAutoloadDump"
         ]
     }
 }
