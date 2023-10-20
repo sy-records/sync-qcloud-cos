@@ -1,6 +1,16 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.2...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.3...master)
+
+## [v2.3.3](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.2...v2.3.3) - 2023-10-20
+
+- Optimize get scheme code by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/38
+- Refactor file preview by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/39
+- Optimize code by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/40
+- Optimize sync code by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/41
+- Apply fixes from Plugin Check by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/42
+- Fix missing upload original image for big image by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/44
+- Fix upload and file preview error by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/45
 
 ## [v2.3.2](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.1...v2.3.2) - 2023-09-06
 
