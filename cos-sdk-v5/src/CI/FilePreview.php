@@ -27,14 +27,20 @@ class FilePreview
      * 判断是否支持文件预览
      *
      * @param string $fileUrl
+     * @param string $urlPrefix
      * @return bool
      */
-    public static function isFileExtensionSupported($fileUrl)
+    public static function isFileExtensionSupported($fileUrl, $urlPrefix = '')
     {
         $extension = pathinfo($fileUrl, PATHINFO_EXTENSION);
         if (empty($extension)) {
             return false;
         }
+
+        if (!empty($urlPrefix) && strpos($fileUrl, $urlPrefix) === false) {
+            return false;
+        }
+
         $supported = [
             'pptx', 'ppt', 'pot','potx', 'pps', 'ppsx', 'dps', 'dpt', 'pptm', 'potm', 'ppsm',
             'doc', 'dot', 'wps', 'wpt', 'docx', 'dotx', 'docm', 'dotm',
