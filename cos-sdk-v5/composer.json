@@ -13,8 +13,16 @@
         "sort-packages": true
     },
     "scripts": {
-        "post-autoload-dump": [
-            "SyncQcloudCos\\Installer::postAutoloadDump"
+        "post-install-cmd": "SyncQcloudCos\\Composer::removeUnusedModels",
+        "post-update-cmd": "SyncQcloudCos\\Composer::removeUnusedModels"
+    },
+    "extra": {
+        "tencentcloud/monitor": [
+            "GetMonitorDataRequest.php",
+            "Instance.php",
+            "Dimension.php",
+            "GetMonitorDataResponse.php",
+            "DataPoint.php"
         ]
     }
 }
