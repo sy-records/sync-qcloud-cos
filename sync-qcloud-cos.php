@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.3.2
+Version: 2.3.3
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -25,7 +25,7 @@ use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 
-define('COS_VERSION', '2.3.2');
+define('COS_VERSION', '2.3.3');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -282,30 +282,32 @@ if (substr_count($_SERVER['REQUEST_URI'], '/update.php') <= 0) {
  */
 function cos_upload_thumbs($metadata)
 {
+    if (empty($metadata['file'])) {
+        return $metadata;
+    }
+
     //获取上传路径
     $wp_uploads = wp_upload_dir();
     $basedir = $wp_uploads['basedir'];
+    $upload_path = cos_get_option('upload_path');
 
     $cos_options = get_option('cos_options', true);
     $no_local_file = esc_attr($cos_options['nolocalsaving']) == 'true';
     $no_thumb = esc_attr($cos_options['nothumb']) == 'true';
 
-    if (!empty($metadata['file'])) {
-        // Maybe there is a problem with the old version
-        $file = $basedir . '/' . $metadata['file'];
-        $upload_path = cos_get_option('upload_path');
-        if ($upload_path != '.') {
-            $path_array = explode($upload_path, $file);
-            if (count($path_array) >= 2) {
-                $object = '/' . $upload_path . end($path_array);
-            }
-        } else {
-            $object = '/' . $metadata['file'];
-            $file = str_replace('./', '', $file);
+    // Maybe there is a problem with the old version
+    $file = $basedir . '/' . $metadata['file'];
+    if ($upload_path != '.') {
+        $path_array = explode($upload_path, $file);
+        if (count($path_array) >= 2) {
+            $object = '/' . $upload_path . end($path_array);
         }
-
-        cos_file_upload($object, $file, $no_local_file);
+    } else {
+        $object = '/' . $metadata['file'];
+        $file = str_replace('./', '', $file);
     }
+
+    cos_file_upload($object, $file, $no_local_file);
 
     //得到本地文件夹和远端文件夹
     $dirname = dirname($metadata['file']);
@@ -468,7 +470,7 @@ function cos_read_dir_queue($homePath, $uploadPath)
     $foundFiles = [];
 
     while (!$dirsToProcess->isEmpty()) {
-        [$currentDir, $relativeDir] = $dirsToProcess->dequeue();
+        list($currentDir, $relativeDir) = $dirsToProcess->dequeue();
 
         foreach (new DirectoryIterator($currentDir) as $fileInfo) {
             if ($fileInfo->isDot()) continue;
@@ -506,15 +508,13 @@ function cos_plugin_action_links($links, $file)
 add_filter('plugin_action_links', 'cos_plugin_action_links', 10, 2);
 
 add_filter('the_content', 'cos_setting_content_ci');
+add_filter('post_thumbnail_html', 'cos_setting_post_thumbnail_ci', 10, 3);
+
 function cos_setting_content_ci($content)
 {
     $option = get_option('cos_options');
     if (!empty(esc_attr($option['ci_style']))) {
-        preg_match_all(
-            '/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim',
-            $content,
-            $images
-        );
+        preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $content, $images);
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
@@ -528,11 +528,17 @@ function cos_setting_content_ci($content)
     if (!empty($option['attachment_preview']) && $option['attachment_preview'] == 'on') {
         preg_match_all('/<a.*?href="(.*?)".*?\/a>/is', $content, $matches);
         if (!empty($matches)) {
-            [$tags, $links] = $matches;
+            list($tags, $links) = $matches;
+            $handledLinks = [];
             foreach ($links as $index => $link) {
-                if (FilePreview::isFileExtensionSupported($link)) {
+                if (in_array($link, $handledLinks)) {
+                    continue;
+                }
+
+                if (FilePreview::isFileExtensionSupported($link, $option['upload_url_path'])) {
                     $iframe = '<iframe src="' . $link . '?ci-process=doc-preview&dstType=html" width="100%" allowFullScreen="true" height="800"></iframe>';
                     $content = str_replace($tags[$index], $iframe, $content);
+                    $handledLinks[] = $link;
                 }
             }
         }
@@ -541,16 +547,11 @@ function cos_setting_content_ci($content)
     return $content;
 }
 
-add_filter('post_thumbnail_html', 'cos_setting_post_thumbnail_ci', 10, 3);
 function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
 {
     $option = get_option('cos_options');
     if (!empty(esc_attr($option['ci_style'])) && has_post_thumbnail()) {
-        preg_match_all(
-            '/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim',
-            $html,
-            $images
-        );
+        preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $html, $images);
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {

@@ -4,8 +4,8 @@ Donate link: https://qq52o.me/sponsor.html
 Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 6.3
-Requires PHP: 7.0.0
-Stable tag: 2.3.2
+Requires PHP: 7.0
+Stable tag: 2.3.3
 License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -15,8 +15,8 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
 
-* 依赖腾讯云COS服务：https://cloud.tencent.com/product/cos
-* 使用说明：https://cloud.tencent.com/product/cos/details
+- 依赖腾讯云 COS 服务：https://cloud.tencent.com/product/cos
+- 使用说明：https://cloud.tencent.com/product/cos/details
 
 ## 插件特点
 
@@ -40,7 +40,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 [沈唁志](https://qq52o.me "沈唁志")
 
-欢迎加入沈唁的WordPress云存储全家桶QQ交流群：887595381
+欢迎加入沈唁的 WordPress 云存储全家桶 QQ 交流群：887595381
 
 == Installation ==
 
@@ -65,24 +65,24 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = 使用子账户报错：Cos Error Code: AccessDenied, Status Code: 403 =
 
-可以使用子账户，但是 APPID 需要填写为存储桶创建者的ID，而不是子账户的ID。例如[配置指南](https://github.com/sy-records/sync-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中的`1250000000`就是APPID
+可以使用子账户，但是 APPID 需要填写为存储桶创建者的 ID，而不是子账户的 ID。例如[配置指南](https://github.com/sy-records/sync-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中的`1250000000`就是 APPID
 
-= 上传图片提示：图像后期处理失败，请将其缩小到2500像素并重新上传 =
+= 上传图片提示：图像后期处理失败，请将其缩小到 2500 像素并重新上传 =
 
 1）配置的`存储桶名称`填写错误，正确的配置参照[配置指南](https://github.com/sy-records/sync-qcloud-cos#%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97)中的`存储桶名称`，v1.6.1 版本增强了校验，填写错误会给予提示；同时兼容了桶名称附带`APPID`的情况
-2）图片确实像素大于2500px，可以在`functions.php`中加入以下代码禁止大图片裁剪功能
+2）图片确实像素大于 2500px，可以在`functions.php`中加入以下代码禁止大图片裁剪功能
 
 `add_filter('big_image_size_threshold', '__return_false');`
 
-= 在插件中应该如何使用腾讯云数据万象CI =
+= 在插件中应该如何使用腾讯云数据万象 CI =
 
-参考：[腾讯云对象存储COS + 数据万象CI = 完善的图片解决方案](https://cloud.tencent.com/developer/article/1606153) 或 [腾讯云文档 - 使用图片样式](https://cloud.tencent.com/document/product/436/42214#.E4.BD.BF.E7.94.A8.E5.9B.BE.E7.89.87.E6.A0.B7.E5.BC.8F)
+参考：[腾讯云对象存储 COS + 数据万象 CI = 完善的图片解决方案](https://cloud.tencent.com/developer/article/1606153) 或 [腾讯云文档 - 使用图片样式](https://cloud.tencent.com/document/product/436/42214#.E4.BD.BF.E7.94.A8.E5.9B.BE.E7.89.87.E6.A0.B7.E5.BC.8F)
 
 = 保存配置时报错：您的站点遇到了致命错误，请查看您的站点的管理电子邮箱来获得指引 =
 
-这个问题应该只出现在Windows的机器上，打开`WP_DEBUG`的话会报错：`Fatal error: Uncaught GuzzleHttp\Exception\RequestException: cURL error 60: SSL certificate problem: self signed certificate`，解决方法如下：
+这个问题应该只出现在 Windows 的机器上，打开`WP_DEBUG`的话会报错：`Fatal error: Uncaught GuzzleHttp\Exception\RequestException: cURL error 60: SSL certificate problem: self signed certificate`，解决方法如下：
 
-1）从 [https://curl.haxx.se/ca/cacert.pem](https://curl.haxx.se/ca/cacert.pem) 下载最新的cacert.pem  
+1）从 [https://curl.haxx.se/ca/cacert.pem](https://curl.haxx.se/ca/cacert.pem) 下载最新的 cacert.pem
 2）将以下行添加到`php.ini`中，注意修改对应的路径
 
 `curl.cainfo=/path/to/cacert.pem`
@@ -98,8 +98,14 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 == Changelog ==
 
 = Stable =
-* 优化检测存储桶代码
-* 修复文档处理页面的未定义变量
+
+- 增加联系作者页面
+- 重构文件预览实现
+- 优化同步历史附件代码
+- 修复超大图片原图未上传问题
+- 修复上传 PDF 等文件格式时的错误
+- 修复文件预览页面有重复链接时的错误
+- 优化部分代码
 
 = Other =
 
