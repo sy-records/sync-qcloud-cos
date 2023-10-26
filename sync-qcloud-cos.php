@@ -45,7 +45,7 @@ function cos_set_options()
         'secret_key' => '',
         'nothumb' => 'false', // 是否上传缩略图
         'nolocalsaving' => 'false', // 是否保留本地备份
-        'delete_options' => 'false',
+        'delete_options' => 'true',
         'upload_url_path' => '', // URL前缀
         'update_file_name' => 'false', // 是否重命名文件名
         'ci_style' => '',
@@ -932,7 +932,7 @@ function cos_ci_text_page($options)
                           <input type="checkbox" name="skip_comment_validation_on_login" {$checked_skip_comment_validation_on_login} />
                           <span class="slider round"></span>
                         </label>
-                        <p>勾选后如果是登录态则会跳过该用户评论内容，不去验证。</p>
+                        <p>启用后如果是登录态则会跳过该用户评论内容，不去验证。</p>
                     </td>
                 </tr>
                 <tr>
@@ -1442,7 +1442,8 @@ function cos_setting_page()
                           <span class="slider round"></span>
                         </label>
 
-                        <p>建议不勾选。默认删除时会重置URL前缀，勾选后会删除当前配置信息。</p>
+                        <p>默认启用，删除插件时会删除当前配置信息。</p>
+                        <p>如果不启用，删除插件时只会重置URL前缀为空，保留当前配置信息。</p>
                     </td>
                 </tr>
                 <tr>
