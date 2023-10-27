@@ -12,4 +12,7 @@ if ($upload_url_path == $cos_upload_url_path) {
     update_option('upload_url_path', '');
 }
 
-delete_option('cos_options');
+$cos_delete_options = esc_attr($cos_options['delete_options']);
+if ($cos_delete_options == 'true') {
+    delete_option('cos_options');
+}

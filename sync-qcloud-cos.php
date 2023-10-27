@@ -45,7 +45,7 @@ function cos_set_options()
         'secret_key' => '',
         'nothumb' => 'false', // 是否上传缩略图
         'nolocalsaving' => 'false', // 是否保留本地备份
-        'delete_options' => 'false',
+        'delete_options' => 'true',
         'upload_url_path' => '', // URL前缀
         'update_file_name' => 'false', // 是否重命名文件名
         'ci_style' => '',
@@ -60,23 +60,6 @@ function cos_set_options()
     ];
     add_option('cos_options', $options, '', 'yes');
 }
-
-// stop plugin
-function cos_stop_option()
-{
-    $option = get_option('cos_options');
-    if (esc_attr($option['delete_options']) == 'true') {
-        $upload_url_path = cos_get_option('upload_url_path');
-        $cos_upload_url_path = esc_attr($option['upload_url_path']);
-
-        if ($upload_url_path == $cos_upload_url_path) {
-            update_option('upload_url_path', '');
-        }
-        delete_option('cos_options');
-    }
-}
-
-register_deactivation_hook(__FILE__, 'cos_stop_option');
 
 /**
  * @param array $cos_options
@@ -949,7 +932,7 @@ function cos_ci_text_page($options)
                           <input type="checkbox" name="skip_comment_validation_on_login" {$checked_skip_comment_validation_on_login} />
                           <span class="slider round"></span>
                         </label>
-                        <p>勾选后如果是登录态则会跳过该用户评论内容，不去验证。</p>
+                        <p>启用后如果是登录态则会跳过该用户评论内容，不去验证。</p>
                     </td>
                 </tr>
                 <tr>
@@ -1451,7 +1434,7 @@ function cos_setting_page()
                 </tr>
                 <tr>
                     <th>
-                        <legend>是否删除配置信息</legend>
+                        <legend>删除配置信息</legend>
                     </th>
                     <td>
                         <label class="switch">
@@ -1459,7 +1442,8 @@ function cos_setting_page()
                           <span class="slider round"></span>
                         </label>
 
-                        <p>建议不勾选。勾选后禁用插件时会删除保存的配置信息和恢复默认URL前缀。不勾选卸载插件时也会进行删除和恢复。</p>
+                        <p>默认启用，删除插件时会删除当前配置信息。</p>
+                        <p>如果不启用，删除插件时只会重置URL前缀为空，保留当前配置信息。</p>
                     </td>
                 </tr>
                 <tr>
