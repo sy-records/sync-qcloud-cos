@@ -3,9 +3,9 @@ Contributors: shenyanzhi
 Donate link: https://qq52o.me/sponsor.html
 Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
-Tested up to: 6.3
+Tested up to: 6.4
 Requires PHP: 7.0
-Stable tag: 2.3.3
+Stable tag: 2.3.4
 License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -99,13 +99,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Stable =
 
-- 增加联系作者页面
-- 重构文件预览实现
-- 优化同步历史附件代码
-- 修复超大图片原图未上传问题
-- 修复上传 PDF 等文件格式时的错误
-- 修复文件预览页面有重复链接时的错误
-- 优化部分代码
+- 优化删除配置信息选项
 
 = Other =
 
