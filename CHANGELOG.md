@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.3...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.4...master)
+
+## [v2.3.4](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.3...v2.3.4) - 2023-11-10
+
+- Optimize delete options by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/46
 
 ## [v2.3.3](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.2...v2.3.3) - 2023-10-20
 
