@@ -496,13 +496,14 @@ add_filter('post_thumbnail_html', 'cos_setting_post_thumbnail_ci', 10, 3);
 function cos_setting_content_ci($content)
 {
     $option = get_option('cos_options');
-    if (!empty(esc_attr($option['ci_style']))) {
+    $style = esc_attr($option['ci_style']);
+    if (!empty($style)) {
         preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $content, $images);
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
                 if (strpos($item, esc_attr($option['upload_url_path'])) !== false) {
-                    $content = str_replace($item, $item . esc_attr($option['ci_style']), $content);
+                    $content = str_replace($item, $item . $style, $content);
                 }
             }
         }
@@ -533,13 +534,14 @@ function cos_setting_content_ci($content)
 function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
 {
     $option = get_option('cos_options');
-    if (!empty(esc_attr($option['ci_style'])) && has_post_thumbnail()) {
+    $style = esc_attr($option['ci_style']);
+    if (!empty($style) && has_post_thumbnail()) {
         preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $html, $images);
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
                 if (strpos($item, esc_attr($option['upload_url_path'])) !== false) {
-                    $html = str_replace($item, $item . esc_attr($option['ci_style']), $html);
+                    $html = str_replace($item, $item . $style, $html);
                 }
             }
         }
@@ -599,6 +601,24 @@ function cos_sync_image_slim_config($slimConfigData, $currentOptions)
     ];
 
     return cos_update_config_parameters($sanitizedConfig, $currentOptions);
+}
+
+/**
+ * @param string $url
+ * @param array|null $options
+ * @return string
+ */
+function cos_append_ci_style($url, $options = null)
+{
+    if (empty($options)) $options = get_option('cos_options');
+
+    if (!empty($options['ci_style']) && !empty($options['upload_url_path'])) {
+        if (strpos($url, esc_attr($options['upload_url_path'])) !== false) {
+            $url .= esc_attr($options['ci_style']);
+        }
+    }
+
+    return $url;
 }
 
 function cos_get_regional($regional)
