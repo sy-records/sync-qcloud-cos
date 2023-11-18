@@ -1,6 +1,11 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.4...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.5...master)
+
+## [v2.3.5](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.4...v2.3.5) - 2023-11-18
+
+- Add cos_append_ci_style method by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/48
+- Add cos_local2remote method by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/50
 
 ## [v2.3.4](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.3...v2.3.4) - 2023-11-10
 
