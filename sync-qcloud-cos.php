@@ -846,14 +846,14 @@ function cos_ci_image_slim_page($options)
             $bucket = cos_get_bucket_name($options);
             $client = cos_get_client($options);
             $client = cos_replace_client_region($client, $bucket);
-            $imageSlimResult = ImageSlim::checkStatus($client, $bucket);
-            cos_sync_image_slim_config($imageSlimResult, $options);
-            $status = $imageSlimResult['Status'];
+            $result = ImageSlim::checkStatus($client, $bucket);
+            cos_sync_image_slim_config($result, $options);
+            $status = $result['Status'];
 
             $checked_ci_image_slim = $status == 'on' ? 'checked="checked"' : '';
             $remoteStatus = $status == 'on' ? '云端状态：<span class="open">已开启</span>' : '云端状态：<span class="close">已关闭</span>';
 
-            $remoteMode = explode(',', $imageSlimResult['SlimMode']);
+            $remoteMode = explode(',', $result['SlimMode']);
             $checked_mode_api = in_array('API', $remoteMode) ? 'checked="checked"' : '';
             $checked_mode_auto = in_array('Auto', $remoteMode) ? 'checked="checked"' : '';
         } catch (ServiceResponseException $e) {
