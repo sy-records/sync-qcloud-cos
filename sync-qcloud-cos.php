@@ -117,6 +117,28 @@ function cos_check_bucket($cos_options)
 }
 
 /**
+ * @param Client $client
+ * @param string $bucket
+ * @return Client
+ */
+function cos_replace_client_region($client, $bucket)
+{
+    if ($client->getCosConfig('region') != 'accelerate') {
+        return $client;
+    }
+
+    $list = $client->listBuckets();
+    $buckets = $list['Buckets'][0]['Bucket'];
+    $buckets = array_column($buckets, null, 'Name');
+
+    if (isset($buckets[$bucket])) {
+        $client->setCosConfig('region', $buckets[$bucket]['Location']);
+    }
+
+    return $client;
+}
+
+/**
  * @param $object
  * @param $filename
  * @param bool $no_local_file
@@ -133,7 +155,7 @@ function cos_file_upload($object, $filename, $no_local_file = false)
         $file = fopen($filename, 'rb');
         if ($file) {
             $cosClient = cos_get_client();
-            $cosClient->Upload($bucket, $object, $file);
+            $cosClient->upload($bucket, $object, $file);
 
             if (is_resource($file)) {
                 fclose($file);
@@ -776,6 +798,7 @@ function cos_ci_image_slim_setting($content)
     try {
         $client = cos_get_client($cos_options);
         $bucket = cos_get_bucket_name($cos_options);
+        $client = cos_replace_client_region($client, $bucket);
         ImageSlim::checkStatus($client, $bucket);
         if ($slim == 'on') {
             ImageSlim::open($client, $bucket, $mode, $suffix);
@@ -821,7 +844,9 @@ function cos_ci_image_slim_page($options)
     if (!empty($options['bucket']) && !empty($options['app_id']) && !empty($options['secret_id']) && !empty($options['secret_key'])) {
         try {
             $bucket = cos_get_bucket_name($options);
-            $imageSlimResult = ImageSlim::checkStatus(cos_get_client($options), $bucket);
+            $client = cos_get_client($options);
+            $client = cos_replace_client_region($client, $bucket);
+            $imageSlimResult = ImageSlim::checkStatus($client, $bucket);
             cos_sync_image_slim_config($imageSlimResult, $options);
             $status = $imageSlimResult['Status'];
 
@@ -1090,6 +1115,7 @@ function cos_request_txt_check($options, $comment)
 {
     $client = cos_get_client($options);
     $bucket = cos_get_bucket_name($options);
+    $client = cos_replace_client_region($client, $bucket);
     $result = Audit::comment($client, $bucket, $comment, $options['ci_text_comments_strategy'] ?? '');
     if (!$result['state'] || $result['result'] === 2) {
         // 人工审核
@@ -1147,7 +1173,9 @@ function cos_document_page($options)
     $status = false;
     if (!empty($options['bucket']) && !empty($options['app_id']) && !empty($options['secret_id']) && !empty($options['secret_key'])) {
         try {
-            $status = FilePreview::checkStatus(cos_get_client($options), $bucket);
+            $client = cos_get_client($options);
+            $client = cos_replace_client_region($client, $bucket);
+            $status = FilePreview::checkStatus($client, $bucket);
 
             if ($ci_attachment_preview == 'on' && !$status) {
                 cos_update_config_parameters(['attachment_preview' => 'off'], $options);
