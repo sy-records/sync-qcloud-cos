@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.5...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.6...master)
+
+## [v2.3.6](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.5...v2.3.6) - 2023-11-24
+
+- Fix CI domain error of use accelerate region by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/53
 
 ## [v2.3.5](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.4...v2.3.5) - 2023-11-18
 
