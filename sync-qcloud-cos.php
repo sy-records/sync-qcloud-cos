@@ -760,7 +760,7 @@ function cos_sync_setting_form($cos_options)
                     <input type="hidden" name="type" value="qcloud_cos_all">
                     <td>
                         <input type="submit" class="button button-secondary" value="开始同步"/>
-                        <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以，建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/10976">同步工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2809.html">使用 COSCLI 快速迁移本地数据到 COS</a></b></p>
+                        <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以，建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/63143">COSCLI 工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2809.html">使用 COSCLI 快速迁移本地数据到 COS</a></b></p>
                     </td>
                 </tr>
             </table>
