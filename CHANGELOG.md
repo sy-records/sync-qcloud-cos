@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.6...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.7...master)
+
+## [v2.3.7](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.6...v2.3.7) - 2023-12-05
+
+* Fix deletion failure when upload_url_path is `.` by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/56
 
 ## [v2.3.6](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.5...v2.3.6) - 2023-11-24
 
