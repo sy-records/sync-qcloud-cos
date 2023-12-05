@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.3.6
+Version: 2.3.7
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -25,7 +25,7 @@ use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 
-define('COS_VERSION', '2.3.6');
+define('COS_VERSION', '2.3.7');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -101,6 +101,10 @@ function cos_check_bucket($cos_options)
         $client = cos_get_client($cos_options);
         $bucket = cos_get_bucket_name($cos_options);
         $client->HeadBucket(['Bucket' => $bucket]);
+        $upload = $client->upload($bucket, 'sync-qcloud-cos.txt', COS_PLUGIN_SLUG);
+        if ($upload) {
+            $client->DeleteObject(['Bucket' => $bucket, 'Key' => 'sync-qcloud-cos.txt']);
+        }
 
         return true;
     } catch (ServiceResponseException $e) {
@@ -113,6 +117,7 @@ function cos_check_bucket($cos_options)
         }
         echo "<div class='error'><p><strong>{$message}</strong></p></div>";
     }
+
     return false;
 }
 
@@ -222,13 +227,18 @@ function cos_delete_cos_file($file)
 
 /**
  * 批量删除cos中的文件
- * @param array $files_key
+ * @param array $files
  */
-function cos_delete_cos_files(array $files_key)
+function cos_delete_cos_files(array $files)
 {
+    $deleteObjects = [];
+    foreach ($files as $file) {
+        $deleteObjects[] = ['Key' => str_replace(["\\", './'], ['/', ''], $file)];
+    }
+
     $bucket = cos_get_bucket_name();
     $cosClient = cos_get_client();
-    $cosClient->deleteObjects(['Bucket' => $bucket, 'Objects' => $files_key]);
+    $cosClient->deleteObjects(['Bucket' => $bucket, 'Objects' => $deleteObjects]);
 }
 
 function cos_get_option($key)
@@ -260,7 +270,7 @@ function cos_upload_attachments($metadata)
     if (!in_array($metadata['type'], $image_mime_types)) {
         //生成object在COS中的存储路径
         if (cos_get_option('upload_path') == '.') {
-            $metadata['file'] = str_replace("./", '', $metadata['file']);
+            $metadata['file'] = str_replace('./', '', $metadata['file']);
         }
         $object = str_replace("\\", '/', $metadata['file']);
         $home_path = get_home_path();
@@ -375,39 +385,36 @@ function cos_delete_remote_attachment($post_id)
 {
     // 获取图片类附件的meta信息
     $meta = wp_get_attachment_metadata($post_id);
+    $upload_path = cos_get_option('upload_path');
+    if ($upload_path == '') {
+        $upload_path = 'wp-content/uploads';
+    }
 
     if (!empty($meta['file'])) {
         $deleteObjects = [];
 
         // meta['file']的格式为 "2020/01/wp-bg.png"
-        $upload_path = cos_get_option('upload_path');
-        if ($upload_path == '') {
-            $upload_path = 'wp-content/uploads';
-        }
         $file_path = $upload_path . '/' . $meta['file'];
-
-        $deleteObjects[] = ['Key' => str_replace("\\", '/', $file_path)];
-
         $dirname = dirname($file_path) . '/';
+
+        $deleteObjects[] = $file_path;
 
         // 超大图原图
         if (!empty($meta['original_image'])) {
-            $deleteObjects[] = ['Key' => str_replace("\\", '/', $dirname . $meta['original_image'])];
+            $deleteObjects[] = $dirname . $meta['original_image'];
         }
 
         // 删除缩略图
         if (!empty($meta['sizes'])) {
             foreach ($meta['sizes'] as $val) {
-                $size_file = $dirname . $val['file'];
-
-                $deleteObjects[] = ['Key' => str_replace("\\", '/', $size_file)];
+                $deleteObjects[] = $dirname . $val['file'];
             }
         }
 
         $backup_sizes = get_post_meta($post_id, '_wp_attachment_backup_sizes', true);
         if (is_array($backup_sizes)) {
             foreach ($backup_sizes as $size) {
-                $deleteObjects[] = ['Key' => str_replace("\\", '/', $dirname . $size['file'])];
+                $deleteObjects[] = $dirname . $size['file'];
             }
         }
 
@@ -416,7 +423,6 @@ function cos_delete_remote_attachment($post_id)
         // 获取链接删除
         $link = wp_get_attachment_url($post_id);
         if ($link) {
-            $upload_path = cos_get_option('upload_path');
             if ($upload_path != '.') {
                 $file_info = explode($upload_path, $link);
                 if (count($file_info) >= 2) {

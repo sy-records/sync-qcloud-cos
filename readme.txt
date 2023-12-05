@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 6.4
 Requires PHP: 7.0
-Stable tag: 2.3.6
+Stable tag: 2.3.7
 License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -99,7 +99,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Stable =
 
-- Fixed CI domain error of use accelerate region.
+- Fixed deletion failure when upload_url_path is `.`
 
 = Other =
 
