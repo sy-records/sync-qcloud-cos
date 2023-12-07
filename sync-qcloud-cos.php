@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.3.7
+Version: 2.4.0
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -25,7 +25,7 @@ use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 
-define('COS_VERSION', '2.3.7');
+define('COS_VERSION', '2.4.0');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -116,6 +116,9 @@ function cos_check_bucket($cos_options)
             $message = '<code>SecretID</code> 或 <code>SecretKey</code> 有误，请检查配置信息！';
         }
         echo "<div class='error'><p><strong>{$message}</strong></p></div>";
+    } catch (\Throwable $e) {
+        $message = (string)$e;
+        echo "<div class='error'><p><strong>{$message}</strong></p></div>";
     }
 
     return false;
@@ -170,10 +173,9 @@ function cos_file_upload($object, $filename, $no_local_file = false)
                 cos_delete_local_file($filename);
             }
         }
-    } catch (ServiceResponseException $e) {
+    } catch (\Throwable $e) {
         if (WP_DEBUG) {
-            echo json_encode(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode(), 'requestId' => $e->getRequestId()]);
-            exit();
+            exit(json_encode(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode(), 'requestId' => $e->getRequestId()]));
         }
     }
 }
@@ -481,7 +483,7 @@ function cos_read_dir_queue($homePath, $uploadPath)
     $foundFiles = [];
 
     while (!$dirsToProcess->isEmpty()) {
-        list($currentDir, $relativeDir) = $dirsToProcess->dequeue();
+        [$currentDir, $relativeDir] = $dirsToProcess->dequeue();
 
         foreach (new DirectoryIterator($currentDir) as $fileInfo) {
             if ($fileInfo->isDot()) continue;
@@ -520,17 +522,37 @@ add_filter('plugin_action_links', 'cos_plugin_action_links', 10, 2);
 
 add_filter('the_content', 'cos_setting_content_ci');
 add_filter('post_thumbnail_html', 'cos_setting_post_thumbnail_ci', 10, 3);
+add_filter('wp_calculate_image_srcset', 'cos_custom_image_srcset', 10, 5);
+
+function cos_custom_image_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id)
+{
+    $option = get_option('oss_options');
+    $style = !empty($option['ci_style']) ? esc_attr($option['ci_style']) : '';
+    $upload_url_path = esc_attr($option['upload_url_path']);
+    if (empty($style)) {
+        return $sources;
+    }
+
+    foreach ($sources as $index => $source) {
+        if (strpos($source['url'], $upload_url_path) !== false && strpos($source['url'], $style) === false) {
+            $sources[$index]['url'] .= $style;
+        }
+    }
+
+    return $sources;
+}
 
 function cos_setting_content_ci($content)
 {
     $option = get_option('cos_options');
     $style = esc_attr($option['ci_style']);
+    $upload_url_path = esc_attr($option['upload_url_path']);
     if (!empty($style)) {
         preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $content, $images);
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
-                if (strpos($item, esc_attr($option['upload_url_path'])) !== false) {
+                if (strpos($item, $upload_url_path) !== false && strpos($item, $style) === false) {
                     $content = str_replace($item, $item . $style, $content);
                 }
             }
@@ -540,7 +562,7 @@ function cos_setting_content_ci($content)
     if (!empty($option['attachment_preview']) && $option['attachment_preview'] == 'on') {
         preg_match_all('/<a.*?href="(.*?)".*?\/a>/is', $content, $matches);
         if (!empty($matches)) {
-            list($tags, $links) = $matches;
+            [$tags, $links] = $matches;
             $handledLinks = [];
             foreach ($links as $index => $link) {
                 if (in_array($link, $handledLinks)) {
@@ -563,12 +585,13 @@ function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
 {
     $option = get_option('cos_options');
     $style = esc_attr($option['ci_style']);
+    $upload_url_path = esc_attr($option['upload_url_path']);
     if (!empty($style) && has_post_thumbnail()) {
         preg_match_all('/<img.*?(?: |\\t|\\r|\\n)?src=[\'"]?(.+?)[\'"]?(?:(?: |\\t|\\r|\\n)+.*?)?>/sim', $html, $images);
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
-                if (strpos($item, esc_attr($option['upload_url_path'])) !== false) {
+                if (strpos($item, $upload_url_path) !== false && strpos($item, $style) === false) {
                     $html = str_replace($item, $item . $style, $html);
                 }
             }
@@ -821,6 +844,10 @@ function cos_ci_image_slim_setting($content)
         }
         echo "<div class='error'><p><strong>{$msg}</strong></p></div>";
         return false;
+    } catch (\Throwable $e) {
+        $message = (string)$e;
+        echo "<div class='error'><p><strong>{$message}</strong></p></div>";
+        return false;
     }
 
     $cos_options['ci_image_slim'] = $slim;
@@ -871,6 +898,9 @@ function cos_ci_image_slim_page($options)
                 $msg = "存储桶所在地域 '{$options['regional']}' 暂不支持图片极智压缩";
             }
             echo "<div class='error'><p><strong>{$msg}</strong></p></div>";
+        } catch (\Throwable $e) {
+            $message = (string)$e;
+            echo "<div class='error'><p><strong>{$message}</strong></p></div>";
         }
     }
 
@@ -1195,6 +1225,9 @@ function cos_document_page($options)
                 $msg = "存储桶 {$bucket} 未绑定数据万象，若要开启文档处理，请先 <a href='https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a>";
             }
             echo "<div class='error'><p><strong>{$msg}</strong></p></div>";
+        } catch (\Throwable $e) {
+            $message = (string)$e;
+            echo "<div class='error'><p><strong>{$message}</strong></p></div>";
         }
     }
 

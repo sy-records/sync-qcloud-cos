@@ -9,4 +9,5 @@ jobs:
     with:
       build: true
       working-directory: cos-sdk-v5
+      php: '7.2'
     secrets: inherit

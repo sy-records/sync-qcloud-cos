@@ -4,8 +4,8 @@ Donate link: https://qq52o.me/sponsor.html
 Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 6.4
-Requires PHP: 7.0
-Stable tag: 2.3.7
+Requires PHP: 7.2
+Stable tag: 2.4.0
 License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -91,15 +91,17 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 这种问题请直接前往腾讯云[对象存储文档](https://cloud.tencent.com/document/product/436)搜索对应的`ErrorMessage`信息即可，或者访问[对象存储错误码列表](https://cloud.tencent.com/document/product/436/7730#.E9.94.99.E8.AF.AF.E7.A0.81.E5.88.97.E8.A1.A8)
 
-= 跟所有使用 Guzzle 组件的插件都可能发生冲突，发生报错 Call to undefined method GuzzleHttp... =
+= 跟所有使用 Guzzle 组件的插件或主题都可能发生冲突，发生报错 Call to undefined method GuzzleHttp... =
 
-不可同时开启同类插件；类似于腾讯云的官方插件 `tencentcloud-*` 系列；
+不可同时开启同类插件，类似于腾讯云的官方插件 `tencentcloud-*` 系列。
 
 == Changelog ==
 
 = Stable =
 
-- Fixed deletion failure when upload_url_path is `.`
+- No longer supported below PHP `7.2`.
+- Optimize catch exception
+- Optimize image style process
 
 = Other =
 
