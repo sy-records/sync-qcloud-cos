@@ -99,9 +99,9 @@ curl.cainfo=/path/to/cacert.pem
 
 这种问题请直接前往腾讯云 [对象存储文档](https://cloud.tencent.com/document/product/436) 搜索对应的`ErrorMessage`信息即可，或者访问 [对象存储错误码列表](https://cloud.tencent.com/document/product/436/7730#.E9.94.99.E8.AF.AF.E7.A0.81.E5.88.97.E8.A1.A8)
 
-8. 跟所有使用 Guzzle 组件的插件都可能发生冲突，发生报错`Call to undefined method GuzzleHttp...`
+8. 跟所有使用 Guzzle 组件的插件或主题都可能发生冲突，发生报错`Call to undefined method GuzzleHttp...`
 
-不可同时开启同类插件；类似于腾讯云的官方插件 `tencentcloud-*` 系列；
+不可同时开启同类插件，类似于腾讯云的官方插件 `tencentcloud-*` 系列。
 
 ## 配置指南
 
