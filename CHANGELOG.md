@@ -1,6 +1,12 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.7...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.4.0...master)
+
+## [v2.4.0](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.7...v2.4.0) - 2023-12-07
+
+- No longer supported below PHP `7.2`
+- Optimize catch exception
+- Optimize image style process
 
 ## [v2.3.7](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.6...v2.3.7) - 2023-12-05
 
