@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.4.0...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.4.1...master)
+
+## [v2.4.1](https://github.com/sy-records/sync-qcloud-cos/compare/v2.4.0...v2.4.1) - 2023-12-15
+
+- Fix duplicate append image style param by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/58
 
 ## [v2.4.0](https://github.com/sy-records/sync-qcloud-cos/compare/v2.3.7...v2.4.0) - 2023-12-07
 
