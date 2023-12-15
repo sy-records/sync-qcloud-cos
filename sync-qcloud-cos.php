@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
-Version: 2.4.0
+Version: 2.4.1
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -25,7 +25,7 @@ use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 
-define('COS_VERSION', '2.4.0');
+define('COS_VERSION', '2.4.1');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -526,7 +526,7 @@ add_filter('wp_calculate_image_srcset', 'cos_custom_image_srcset', 10, 5);
 
 function cos_custom_image_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id)
 {
-    $option = get_option('oss_options');
+    $option = get_option('cos_options');
     $style = !empty($option['ci_style']) ? esc_attr($option['ci_style']) : '';
     $upload_url_path = esc_attr($option['upload_url_path']);
     if (empty($style)) {
@@ -556,6 +556,8 @@ function cos_setting_content_ci($content)
                     $content = str_replace($item, $item . $style, $content);
                 }
             }
+
+            $content = str_replace($style . $style, $style, $content);
         }
     }
 
@@ -595,6 +597,8 @@ function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
                     $html = str_replace($item, $item . $style, $html);
                 }
             }
+
+            $html = str_replace($style . $style, $style, $html);
         }
     }
     return $html;
