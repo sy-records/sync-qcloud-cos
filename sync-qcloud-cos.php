@@ -2,7 +2,7 @@
 /*
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
-Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
+Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
 Version: 2.4.1
 Author: 沈唁
 Author URI: https://qq52o.me

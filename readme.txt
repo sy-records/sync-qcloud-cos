@@ -9,11 +9,11 @@ Stable tag: 2.4.1
 License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
-使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
+使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
 
 == Description ==
 
-使用腾讯云对象存储服务 COS 作为附件存储空间。（This is a plugin that uses Tencent Cloud Cloud Object Storage for attachments remote saving.）
+使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
 
 - 依赖腾讯云 COS 服务：https://cloud.tencent.com/product/cos
 - 使用说明：https://cloud.tencent.com/product/cos/details
