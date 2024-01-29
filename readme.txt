@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.2
 Tested up to: 6.4
 Requires PHP: 7.2
-Stable tag: 2.4.1
+Stable tag: 2.5.0
 License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -33,6 +33,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 11. 支持腾讯云数据万象图片极智压缩
 12. 支持文件预览
 13. 支持文本内容审核
+14. 支持原图保护
 
 插件更多详细介绍和安装：[https://github.com/sy-records/sync-qcloud-cos](https://github.com/sy-records/sync-qcloud-cos)
 
