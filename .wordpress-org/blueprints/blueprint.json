@@ -1,0 +1,27 @@
+{
+  "landingPage": "/wp-admin/admin.php?page=sync-qcloud-cos",
+  "preferredVersions": {
+    "php": "latest",
+    "wp": "latest"
+  },
+  "phpExtensionBundles": [
+    "kitchen-sink"
+  ],
+  "steps": [
+    {
+      "step": "login",
+      "username": "admin",
+      "password": "password"
+    },
+    {
+      "step": "installPlugin",
+      "pluginZipFile": {
+        "resource": "wordpress.org/plugins",
+        "slug": "sync-qcloud-cos"
+      },
+      "options": {
+        "activate": true
+      }
+    }
+  ]
+}
