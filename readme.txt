@@ -100,10 +100,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Stable =
 
-- No longer supported below PHP `7.2`
-- Optimize catch exception
-- Optimize image style process
-- Fix duplicate append image style param
+- Support origin protect
 
 = Other =
 
