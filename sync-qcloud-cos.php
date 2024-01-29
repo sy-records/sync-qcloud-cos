@@ -1736,9 +1736,11 @@ function cos_setting_page()
             <?php echo cos_ci_text_page($cos_options); ?>
         <?php elseif ($current_tab == 'metric'): ?>
         <script src="//cdnjs.cloudflare.com/ajax/libs/apexcharts/3.41.1/apexcharts.min.js"></script>
-        <?php $monitor = new DataPoints(cos_get_bucket_name($cos_options), $cos_options); ?>
         <div class="charts-container">
         <?php
+        $bucket = cos_get_bucket_name($cos_options);
+        if (!empty($bucket)) {
+            $monitor = new DataPoints($bucket, $cos_options);
             Charts::setColors($color_scheme->colors);
             echo Charts::storage($monitor->getStorage());
             echo Charts::objectNumber($monitor->getObjectNumber());
@@ -1757,6 +1759,7 @@ function cos_setting_page()
             if (!empty($cos_options['ci_text_comments']) && $cos_options['ci_text_comments'] == 'on') {
                 echo Charts::ciTextAuditing($monitor->getTextAuditing());
             }
+        }
         ?>
         </div>
         <?php elseif ($current_tab == 'contact'): ?>
