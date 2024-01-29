@@ -14,7 +14,7 @@
 [![plugin installs](https://img.shields.io/wordpress/plugin/installs/sync-qcloud-cos)](https://wordpress.org/plugins/sync-qcloud-cos/)
 [![Deploy to WordPress.org](https://github.com/sy-records/sync-qcloud-cos/actions/workflows/deploy.yml/badge.svg)](https://github.com/sy-records/sync-qcloud-cos/actions/workflows/deploy.yml)
 
-> 使用 WordPress Playground [预览 Sync QCloud COS 插件](https://playground.wordpress.net/?plugin=sync-qcloud-cos&blueprint-url=https://wordpress.org/plugins/wp-json/plugins/v1/plugin/sync-qcloud-cos/blueprint.json)
+> 使用 WordPress Playground 在线预览 [Sync QCloud COS](https://wordpress.org/plugins/sync-qcloud-cos/?preview=1) 插件
 
 ## 插件特色
 
