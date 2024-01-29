@@ -101,6 +101,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 = Stable =
 
 - Support origin protect
+- Add [Live Preview](https://wordpress.org/plugins/sync-qcloud-cos/?preview=1)
 
 = Other =
 

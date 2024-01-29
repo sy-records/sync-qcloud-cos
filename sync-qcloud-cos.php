@@ -926,7 +926,7 @@ function cos_ci_image_slim_setting($content)
     } catch (ServiceResponseException $e) {
         $msg = (string)$e;
         if ($e->getExceptionCode() === ErrorCode::NO_BIND_CI) {
-            $msg = "存储桶 {$bucket} 未绑定数据万象，若要开启极智压缩，请先 <a href= 'https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a >";
+            $msg = "存储桶 {$bucket} 未绑定数据万象，若要开启极智压缩，请先 <a href='https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a >";
         }
         if ($e->getExceptionCode() === ErrorCode::REGION_UNSUPPORTED) {
             $msg = "存储桶所在地域 {$cos_options['regional']} 暂不支持图片极智压缩";
@@ -1151,7 +1151,7 @@ function cos_ci_text_setting($content)
     $bucket = cos_get_bucket_name($cos_options);
     $ciService = Service::checkStatus($client, $bucket);
     if (!$ciService) {
-        echo "<div class='error'><p><strong>存储桶 {$bucket} 未绑定数据万象，若要开启文本审核，请先 <a href= 'https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a ></strong></p></div>";
+        echo "<div class='error'><p><strong>存储桶 {$bucket} 未绑定数据万象，若要开启文本审核，请先 <a href='https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a ></strong></p></div>";
         return false;
     }
 
