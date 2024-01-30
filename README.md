@@ -14,6 +14,8 @@
 [![plugin installs](https://img.shields.io/wordpress/plugin/installs/sync-qcloud-cos)](https://wordpress.org/plugins/sync-qcloud-cos/)
 [![Deploy to WordPress.org](https://github.com/sy-records/sync-qcloud-cos/actions/workflows/deploy.yml/badge.svg)](https://github.com/sy-records/sync-qcloud-cos/actions/workflows/deploy.yml)
 
+> 使用 WordPress Playground 在线预览 [Sync QCloud COS](https://wordpress.org/plugins/sync-qcloud-cos/?preview=1) 插件
+
 ## 插件特色
 
 - [x] 可配置是否上传缩略图和是否保留本地备份
@@ -29,6 +31,7 @@
 - [x] 支持腾讯云数据万象图片极智压缩
 - [x] 支持文件预览
 - [x] 支持文本内容审核
+- [x] 支持原图保护
 
 ## 安装
 

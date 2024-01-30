@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.4.1
+Version: 2.5.0
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -20,12 +20,13 @@ use Qcloud\Cos\Exception\ServiceResponseException;
 use SyncQcloudCos\CI\Audit;
 use SyncQcloudCos\CI\FilePreview;
 use SyncQcloudCos\CI\ImageSlim;
+use SyncQcloudCos\CI\OriginProtect;
 use SyncQcloudCos\CI\Service;
 use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 
-define('COS_VERSION', '2.4.1');
+define('COS_VERSION', '2.5.0');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -56,7 +57,8 @@ function cos_set_options()
         'ci_text_comments' => 'off',
         'skip_comment_validation_on_login' => 'off',
         'ci_text_comments_strategy' => '',
-        'ci_text_comments_check_roles' => ''
+        'ci_text_comments_check_roles' => '',
+        'origin_protect' => 'off',
     ];
     add_option('cos_options', $options, '', 'yes');
 }
@@ -144,6 +146,91 @@ function cos_replace_client_region($client, $bucket)
     }
 
     return $client;
+}
+
+$cos_options = get_option('cos_options', true);
+if (!empty($cos_options['origin_protect']) && esc_attr($cos_options['origin_protect']) === 'on' && !empty(esc_attr($cos_options['ci_style']))) {
+    add_filter('wp_get_attachment_url', 'cos_add_suffix_to_attachment_url', 10, 2);
+    add_filter('wp_get_attachment_thumb_url', 'cos_add_suffix_to_attachment_url', 10, 2);
+    add_filter('wp_get_original_image_url', 'cos_add_suffix_to_attachment_url', 10, 2);
+    add_filter('wp_prepare_attachment_for_js', 'cos_add_suffix_to_attachment', 10, 2);
+    add_filter('image_get_intermediate_size', 'cos_add_suffix_for_media_send_to_editor');
+}
+
+/**
+ * @param string $url
+ * @param int $post_id
+ * @return string
+ */
+function cos_add_suffix_to_attachment_url($url, $post_id)
+{
+    if (cos_is_image_type($url)) {
+        $url .= cos_get_image_style();
+    }
+
+    return $url;
+}
+
+/**
+ * @param array $response
+ * @param array $attachment
+ * @return array
+ */
+function cos_add_suffix_to_attachment($response, $attachment)
+{
+    if ($response['type'] != 'image') {
+        return $response;
+    }
+
+    $style = cos_get_image_style();
+    if (!empty($response['sizes'])) {
+        foreach ($response['sizes'] as $size_key => $size_file) {
+            if (cos_is_image_type($size_file['url'])) {
+                $response['sizes'][$size_key]['url'] .= $style;
+            }
+        }
+    }
+
+    if(!empty($response['originalImageURL'])) {
+        if (cos_is_image_type($response['originalImageURL'])) {
+            $response['originalImageURL'] .= $style;
+        }
+    }
+
+    return $response;
+}
+
+/**
+ * @param array $data
+ * @return array
+ */
+function cos_add_suffix_for_media_send_to_editor($data)
+{
+    // https://github.com/WordPress/wordpress-develop/blob/43d2455dc68072fdd43c3c800cc8c32590f23cbe/src/wp-includes/media.php#L239
+    if (cos_is_image_type($data['file'])) {
+        $data['file'] .= cos_get_image_style();
+    }
+
+    return $data;
+}
+
+/**
+ * @param string $url
+ * @return bool
+ */
+function cos_is_image_type($url)
+{
+    return (bool) preg_match('/\.(jpg|jpeg|jpe|gif|png|bmp|webp|heic|heif)$/i', $url);
+}
+
+/**
+ * @return string
+ */
+function cos_get_image_style()
+{
+    $cos_options = get_option('cos_options', true);
+
+    return esc_attr($cos_options['ci_style']);
 }
 
 /**
@@ -615,9 +702,7 @@ function cos_append_options($options)
     $options['ci_image_slim'] = $cos_options['ci_image_slim'] ?? 'off';
     $options['ci_image_slim_mode'] = $cos_options['ci_image_slim_mode'] ?? '';
     $options['ci_image_slim_suffix'] = $cos_options['ci_image_slim_suffix'] ?? '';
-
     $options['attachment_preview'] = $cos_options['attachment_preview'] ?? 'off';
-
     $options['ci_text_comments'] = $cos_options['ci_text_comments'] ?? 'off';
     $options['skip_comment_validation_on_login'] = $cos_options['skip_comment_validation_on_login'] ?? 'off';
     $options['ci_text_comments_strategy'] = $cos_options['ci_text_comments_strategy'] ?? '';
@@ -841,7 +926,7 @@ function cos_ci_image_slim_setting($content)
     } catch (ServiceResponseException $e) {
         $msg = (string)$e;
         if ($e->getExceptionCode() === ErrorCode::NO_BIND_CI) {
-            $msg = "存储桶 {$bucket} 未绑定数据万象，若要开启极智压缩，请先 <a href= 'https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a >";
+            $msg = "存储桶 {$bucket} 未绑定数据万象，若要开启极智压缩，请先 <a href='https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a >";
         }
         if ($e->getExceptionCode() === ErrorCode::REGION_UNSUPPORTED) {
             $msg = "存储桶所在地域 {$cos_options['regional']} 暂不支持图片极智压缩";
@@ -1066,7 +1151,7 @@ function cos_ci_text_setting($content)
     $bucket = cos_get_bucket_name($cos_options);
     $ciService = Service::checkStatus($client, $bucket);
     if (!$ciService) {
-        echo "<div class='error'><p><strong>存储桶 {$bucket} 未绑定数据万象，若要开启文本审核，请先 <a href= 'https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a ></strong></p></div>";
+        echo "<div class='error'><p><strong>存储桶 {$bucket} 未绑定数据万象，若要开启文本审核，请先 <a href='https://console.cloud.tencent.com/ci' target='_blank'>绑定数据万象服务</a ></strong></p></div>";
         return false;
     }
 
@@ -1352,6 +1437,7 @@ function cos_setting_page()
 
         $options['ci_style'] = isset($_POST['ci_style']) ? sanitize_text_field($_POST['ci_style']) : '';
         $options['update_file_name'] = isset($_POST['update_file_name']) ? sanitize_text_field($_POST['update_file_name']) : 'false';
+        $options['origin_protect'] = isset($_POST['origin_protect']) ? sanitize_text_field($_POST['origin_protect']) : 'off';
 
         $options = cos_append_options($options);
     }
@@ -1406,6 +1492,14 @@ function cos_setting_page()
             $check_status = cos_check_bucket($options);
         }
 
+        if ($options['origin_protect'] === 'on') {
+            $check_origin_protect = OriginProtect::checkStatus(cos_get_client($options), cos_get_bucket_name($options));
+            if (!$check_origin_protect) {
+                $options['origin_protect'] = 'off';
+                echo '<div class="error"><p><strong>未开启原图保护，请先访问腾讯云对象存储控制台开启！</strong></p></div>';
+            }
+        }
+
         if ($check_status) {
             //更新数据库
             update_option('cos_options', $options);
@@ -1430,6 +1524,8 @@ function cos_setting_page()
 
     $cos_delete_options = esc_attr($cos_options['delete_options']);
     $check_delete_options = $cos_delete_options == 'true' ? 'checked="checked"' : '';
+
+    $check_origin_protect = esc_attr($cos_options['origin_protect'] ?? 'off') !== 'off' ? 'checked="checked"' : '';
 
     $cos_update_file_name = esc_attr($cos_options['update_file_name']);
 
@@ -1609,6 +1705,21 @@ function cos_setting_page()
                     </td>
                 </tr>
                 <tr>
+                  <th>
+                    <legend>原图保护</legend>
+                  </th>
+                  <td>
+                    <label class="switch">
+                      <input type="checkbox" name="origin_protect" <?php echo $check_origin_protect; ?> />
+                      <span class="slider round"></span>
+                    </label>
+
+                    <p>开启原图保护功能后，存储桶中的图片文件仅能以带样式的 URL 进行访问，能够阻止恶意用户对源文件的请求。</p>
+                    <p>使用时请先访问腾讯云对象存储控制台<b>开启原图保护</b>并设置<b>图片处理样式</b>！</p>
+                    <p>注：此功能为实验性功能，如遇错误或不可用，请关闭后联系作者反馈。</p>
+                  </td>
+                </tr>
+                <tr>
                     <th></th>
                     <td><input type="submit" class="button button-primary" value="保存更改"/></td>
                 </tr>
@@ -1625,9 +1736,11 @@ function cos_setting_page()
             <?php echo cos_ci_text_page($cos_options); ?>
         <?php elseif ($current_tab == 'metric'): ?>
         <script src="//cdnjs.cloudflare.com/ajax/libs/apexcharts/3.41.1/apexcharts.min.js"></script>
-        <?php $monitor = new DataPoints(cos_get_bucket_name($cos_options), $cos_options); ?>
         <div class="charts-container">
         <?php
+        $bucket = cos_get_bucket_name($cos_options);
+        if (!empty($bucket)) {
+            $monitor = new DataPoints($bucket, $cos_options);
             Charts::setColors($color_scheme->colors);
             echo Charts::storage($monitor->getStorage());
             echo Charts::objectNumber($monitor->getObjectNumber());
@@ -1646,6 +1759,7 @@ function cos_setting_page()
             if (!empty($cos_options['ci_text_comments']) && $cos_options['ci_text_comments'] == 'on') {
                 echo Charts::ciTextAuditing($monitor->getTextAuditing());
             }
+        }
         ?>
         </div>
         <?php elseif ($current_tab == 'contact'): ?>
