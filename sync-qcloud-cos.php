@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.5.0
+Version: 2.5.1
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -26,7 +26,7 @@ use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 
-define('COS_VERSION', '2.5.0');
+define('COS_VERSION', '2.5.1');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -90,6 +90,10 @@ function cos_get_bucket_name($cos_options = null)
     }
     $cos_bucket = esc_attr($cos_options['bucket']);
     $cos_app_id = esc_attr($cos_options['app_id']);
+    if (empty($cos_bucket) && empty($cos_app_id)) {
+        return '';
+    }
+
     $needle = '-' . $cos_app_id;
     if (strpos($cos_bucket, $needle) !== false) {
         return $cos_bucket;
