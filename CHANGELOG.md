@@ -1,6 +1,11 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.4.1...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.0...master)
+
+## [v2.5.0](https://github.com/sy-records/sync-qcloud-cos/compare/v2.4.1...v2.5.0) - 2024-01-30
+
+* Add [Live Preview](https://wordpress.org/plugins/sync-qcloud-cos/?preview=1) by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/61
+* Support origin protect by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/60
 
 ## [v2.4.1](https://github.com/sy-records/sync-qcloud-cos/compare/v2.4.0...v2.4.1) - 2023-12-15
 
