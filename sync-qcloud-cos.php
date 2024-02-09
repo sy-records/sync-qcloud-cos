@@ -838,6 +838,9 @@ function cos_sync_setting_form($cos_options)
 
     $old_url = "{$protocol}{$_SERVER['HTTP_HOST']}/{$upload_path}";
     $new_url = $cos_options['upload_url_path'];
+
+    $nonce = wp_nonce_field('qcloud_cos_replace', 'qcloud_cos_replace-nonce', true, false);
+
     return <<<HTML
         <form method="post">
             <table class="form-table">
@@ -866,6 +869,7 @@ function cos_sync_setting_form($cos_options)
                         <legend></legend>
                     </th>
                     <input type="hidden" name="type" value="qcloud_cos_replace">
+                    {$nonce}
                     <td>
                         <input type="submit" class="button button-secondary" value="开始替换"/>
                         <p><b>注意：如果是首次替换，请注意备份！此功能会替换文章以及设置的特色图片（题图）等使用的资源链接，也可用于其他需要替换文章内容的场景。</b></p>
@@ -1458,23 +1462,31 @@ function cos_setting_page()
 
     // 替换数据库链接
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_replace') {
+        $nonce = $_POST['qcloud_cos_replace-nonce'] ?? '';
+        if (empty($nonce) || !wp_verify_nonce($nonce, 'qcloud_cos_replace')) {
+            wp_die('Illegal requests!');
+        }
+
         $old_url = esc_url_raw($_POST['old_url']);
         $new_url = esc_url_raw($_POST['new_url']);
+        if (!empty($old_url) && !empty($new_url)) {
+            global $wpdb;
+            $posts_name = $wpdb->prefix . 'posts';
+            // 文章内容
+            $posts_result = $wpdb->query(
+                "UPDATE $posts_name SET post_content = REPLACE(post_content, '$old_url', '$new_url')"
+            );
 
-        global $wpdb;
-        $posts_name = $wpdb->prefix . 'posts';
-        // 文章内容
-        $posts_result = $wpdb->query(
-            "UPDATE $posts_name SET post_content = REPLACE(post_content, '$old_url', '$new_url')"
-        );
+            // 修改题图之类的
+            $postmeta_name = $wpdb->prefix . 'postmeta';
+            $postmeta_result = $wpdb->query(
+                "UPDATE $postmeta_name SET meta_value = REPLACE(meta_value, '$old_url', '$new_url')"
+            );
 
-        // 修改题图之类的
-        $postmeta_name = $wpdb->prefix . 'postmeta';
-        $postmeta_result = $wpdb->query(
-            "UPDATE $postmeta_name SET meta_value = REPLACE(meta_value, '$old_url', '$new_url')"
-        );
-
-        echo '<div class="updated"><p><strong>替换成功！共替换文章内链' . $posts_result . '条、题图链接' . $postmeta_result . '条！</strong></p></div>';
+            echo '<div class="updated"><p><strong>替换成功！共替换文章内链' . $posts_result . '条、题图链接' . $postmeta_result . '条！</strong></p></div>';
+        } else {
+            echo '<div class="error"><p><strong>请填写资源链接URL地址！</strong></p></div>';
+        }
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_image_slim') {
