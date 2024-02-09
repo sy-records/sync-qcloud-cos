@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.0...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.1...master)
+
+## [v2.5.1](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.0...v2.5.1) - 2024-02-09
+
+* Fix CSRF error by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/62
 
 ## [v2.5.0](https://github.com/sy-records/sync-qcloud-cos/compare/v2.4.1...v2.5.0) - 2024-01-30
 
