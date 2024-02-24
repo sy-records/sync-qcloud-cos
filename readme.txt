@@ -100,7 +100,8 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Stable =
 
--
+- Support gif for image slim
+
 = Other =
 
 see [CHANGELOG.md](https://github.com/sy-records/sync-qcloud-cos/blob/master/CHANGELOG.md).
