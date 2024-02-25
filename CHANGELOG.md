@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.1...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.2...master)
+
+## [v2.5.2](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.1...v2.5.2) - 2024-02-25
+
+* Support gif for image slim by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/63
 
 ## [v2.5.1](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.0...v2.5.1) - 2024-02-09
 
