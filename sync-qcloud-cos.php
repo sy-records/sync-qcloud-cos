@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.5.1
+Version: 2.5.2
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -26,7 +26,7 @@ use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 
-define('COS_VERSION', '2.5.1');
+define('COS_VERSION', '2.5.2');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -969,6 +969,7 @@ function cos_ci_image_slim_page($options)
     $ci_image_slim_suffix = explode(',', esc_attr($options['ci_image_slim_suffix']));
     $checked_suffix_jpg = in_array('jpg', $ci_image_slim_suffix) ? 'checked="checked"' : '';
     $checked_suffix_png = in_array('png', $ci_image_slim_suffix) ? 'checked="checked"' : '';
+    $checked_suffix_gif = in_array('gif', $ci_image_slim_suffix) ? 'checked="checked"' : '';
 
     $remoteStatus = '';
     if (!empty($options['bucket']) && !empty($options['app_id']) && !empty($options['secret_id']) && !empty($options['secret_key'])) {
@@ -1039,6 +1040,7 @@ function cos_ci_image_slim_page($options)
                         <p>需要选择自动进行压缩的图片格式：</p>
                         <input type="checkbox" name="ci_image_slim_suffix[]" value="jpg" {$checked_suffix_jpg} /> jpg（包含<code>jpg</code>、<code>jpeg</code>）<br>
                         <input type="checkbox" name="ci_image_slim_suffix[]" value="png" {$checked_suffix_png} /> png <br>
+                        <input type="checkbox" name="ci_image_slim_suffix[]" value="gif" {$checked_suffix_gif} /> gif <br>
                     </td>
                 </tr>
                 <tr>
