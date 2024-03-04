@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.5.2
+Version: 2.5.3
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -25,8 +25,9 @@ use SyncQcloudCos\CI\Service;
 use SyncQcloudCos\ErrorCode;
 use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
+use SyncQcloudCos\Object\Head;
 
-define('COS_VERSION', '2.5.2');
+define('COS_VERSION', '2.5.3');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -614,6 +615,24 @@ add_filter('plugin_action_links', 'cos_plugin_action_links', 10, 2);
 add_filter('the_content', 'cos_setting_content_ci');
 add_filter('post_thumbnail_html', 'cos_setting_post_thumbnail_ci', 10, 3);
 add_filter('wp_calculate_image_srcset', 'cos_custom_image_srcset', 10, 5);
+add_filter('wp_prepare_attachment_for_js', 'cos_wp_prepare_attachment_for_js');
+
+function cos_wp_prepare_attachment_for_js($response)
+{
+    if (empty($response['filesizeInBytes']) || empty($response['filesizeHumanReadable'])) {
+        $cos_options = get_option('cos_options', true);
+        $upload_url_path = esc_attr($cos_options['upload_url_path']);
+        $upload_path = get_option('upload_path');
+        $object = str_replace($upload_url_path, $upload_path, $response['url']);
+        $contentLength = Head::getContentLength(cos_get_client($cos_options), cos_get_bucket_name($cos_options), $object);
+        if (!empty($contentLength)) {
+            $response['filesizeInBytes'] = $contentLength;
+            $response['filesizeHumanReadable'] = size_format($contentLength);
+        }
+    }
+
+    return $response;
+}
 
 function cos_custom_image_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id)
 {
