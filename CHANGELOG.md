@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.3...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.4...master)
+
+## [v2.5.4](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.3...v2.5.4) - 2024-03-10
+
+* Optimize wpdb query by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/65
 
 ## [v2.5.3](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.2...v2.5.3) - 2024-03-04
 
