@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.5.3
+Version: 2.5.4
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -27,7 +27,7 @@ use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Object\Head;
 
-define('COS_VERSION', '2.5.3');
+define('COS_VERSION', '2.5.4');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -1492,17 +1492,13 @@ function cos_setting_page()
         $new_url = esc_url_raw($_POST['new_url']);
         if (!empty($old_url) && !empty($new_url)) {
             global $wpdb;
-            $posts_name = $wpdb->prefix . 'posts';
             // 文章内容
-            $posts_result = $wpdb->query(
-                "UPDATE $posts_name SET post_content = REPLACE(post_content, '$old_url', '$new_url')"
-            );
+            $posts_name = $wpdb->prefix . 'posts';
+            $posts_result = $wpdb->query($wpdb->prepare("UPDATE $posts_name SET post_content = REPLACE(post_content, '%s', '%s')", [$old_url, $new_url]));
 
             // 修改题图之类的
             $postmeta_name = $wpdb->prefix . 'postmeta';
-            $postmeta_result = $wpdb->query(
-                "UPDATE $postmeta_name SET meta_value = REPLACE(meta_value, '$old_url', '$new_url')"
-            );
+            $postmeta_result = $wpdb->query($wpdb->prepare("UPDATE $postmeta_name SET meta_value = REPLACE(meta_value, '%s', '%s')", [$old_url, $new_url]));
 
             echo '<div class="updated"><p><strong>替换成功！共替换文章内链' . $posts_result . '条、题图链接' . $postmeta_result . '条！</strong></p></div>';
         } else {
