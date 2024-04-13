@@ -813,16 +813,25 @@ function cos_get_regional($regional)
         'ap-shenzhen-fsi' => ['ap-shenzhen-fsi', '深圳金融'],
         'ap-shanghai-fsi' => ['ap-shanghai-fsi', '上海金融'],
         'ap-beijing-fsi' => ['ap-beijing-fsi', '北京金融'],
+
         'ap-hongkong' => ['hk', '中国香港'],
         'ap-singapore' => ['sgp', '新加坡'],
-        'na-toronto' => ['ca', '多伦多'],
-        'eu-frankfurt' => ['ger', '法兰克福'],
         'ap-mumbai' => ['ap-mumbai', '孟买'],
+        'ap-jakarta' => ['ap-jakarta', '雅加达'],
         'ap-seoul' => ['ap-seoul', '首尔'],
-        'na-siliconvalley' => ['na-siliconvalley', '硅谷'],
-        'na-ashburn' => ['na-ashburn', '弗吉尼亚'],
         'ap-bangkok' => ['ap-bangkok', '曼谷'],
+        'ap-tokyo' => ['ap-tokyo', '东京'],
+
+        'na-siliconvalley' => ['na-siliconvalley', '硅谷（美西）'],
+        'na-ashburn' => ['na-ashburn', '弗吉尼亚（美东）'],
+        'na-toronto' => ['ca', '多伦多'],
+
+        'sa-saopaulo' => ['sa-saopaulo', '圣保罗'],
+
+        'eu-frankfurt' => ['ger', '法兰克福'],
+
         'eu-moscow' => ['eu-moscow', '莫斯科'],
+
         'accelerate' => ['accelerate', '全球加速']
     ];
 
