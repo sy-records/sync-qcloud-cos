@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.5...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.6...master)
+
+## [v2.5.6](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.5...v2.5.6) - 2024-05-29
+
+* Support disable charts and wp-cli commands by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/68
 
 ## [v2.5.5](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.4...v2.5.5) - 2024-05-19
 
