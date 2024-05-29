@@ -35,6 +35,10 @@ if (!function_exists('get_home_path')) {
     require_once ABSPATH . 'wp-admin/includes/file.php';
 }
 
+if (defined('WP_CLI') && WP_CLI) {
+    require_once plugin_dir_path(__FILE__) . 'cos-commands.php';
+}
+
 // 初始化选项
 register_activation_hook(__FILE__, 'cos_set_options');
 function cos_set_options()
