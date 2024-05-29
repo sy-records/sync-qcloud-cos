@@ -163,6 +163,10 @@ curl.cainfo=/path/to/cacert.pem
 
 ![文档处理](.wordpress-org/screenshot-5.png)
 
+![文本审核](.wordpress-org/screenshot-6.png)
+
+![内置 wp-cli 命令](.wordpress-org/screenshot-7.png)
+
 ## 更新记录
 
 [CHANGELOG](https://github.com/sy-records/sync-qcloud-cos/blob/master/CHANGELOG.md)

@@ -59,6 +59,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 4. 数据监控
 5. 文档处理
 6. 文本内容审核：评论审核
+7. 内置的 wp-cli 命令
 
 == Frequently Asked Questions ==
 
