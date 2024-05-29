@@ -32,6 +32,8 @@
 - [x] 支持文件预览
 - [x] 支持文本内容审核
 - [x] 支持原图保护
+- [x] 支持数据监控
+- [x] 支持 `wp-cli` 命令上传文件
 
 ## 安装
 
@@ -50,6 +52,31 @@ GitHub 下载节点：[https://github.com/sy-records/sync-qcloud-cos/releases/la
 - 方法一：在 WordPress 插件管理页面有设置按钮，进行设置
 - 方法二：在 WordPress 后台管理左侧导航栏`设置`下`腾讯云 COS`，点击进入设置页面
 - 方法三：在 WordPress 后台管理左侧一级导航栏`腾讯云 COS`，点击进入设置页面
+
+### 常量定义
+
+数据监控中默认根据配置项判断是否展示`图片处理`、`文档处理`和`文本审核`的图表，如果需要强制展示或关闭，可以在`wp-config.php`中定义常量：
+
+| 常量                     | 说明                 |
+| :----------------------- | :------------------- |
+| `COS_DISABLE_CHARTS`       | 禁用所有图表         |
+| `COS_ENABLE_STYLE_CHART`   | 强制展示图片处理图表 |
+| `COS_ENABLE_PREVIEW_CHART` | 强制展示文档处理图表 |
+| `COS_ENABLE_TEXT_CHART`    | 强制展示文本审核图表 |
+
+```php
+// 禁用所有图表
+define('COS_DISABLE_CHARTS', true);
+
+// 强制展示图片处理图表
+define('COS_ENABLE_STYLE_CHART', true);
+
+// 强制展示文档处理图表
+define('COS_ENABLE_PREVIEW_CHART', true);
+
+// 强制展示文本审核图表
+define('COS_ENABLE_TEXT_CHART', true);
+```
 
 ## Contributors
 
