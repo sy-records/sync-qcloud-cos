@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.6
 Tested up to: 6.5
 Requires PHP: 7.2
-Stable tag: 2.5.5
+Stable tag: 2.5.6
 License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -34,6 +34,8 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 12. 支持文件预览
 13. 支持文本内容审核
 14. 支持原图保护
+15. 支持数据监控
+16. 支持 `wp-cli` 命令上传文件
 
 插件更多详细介绍和安装：[https://github.com/sy-records/sync-qcloud-cos](https://github.com/sy-records/sync-qcloud-cos)
 
@@ -57,6 +59,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 4. 数据监控
 5. 文档处理
 6. 文本内容审核：评论审核
+7. 内置的 wp-cli 命令
 
 == Frequently Asked Questions ==
 
@@ -100,7 +103,8 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Stable =
 
-- Optimize wpdb query
+- Optimize chart display, you can set constants to be turned off.
+- Support wp-cli commands to upload files.
 
 = Other =
 

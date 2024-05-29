@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.5.5
+Version: 2.5.6
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -27,12 +27,16 @@ use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Object\Head;
 
-define('COS_VERSION', '2.5.5');
+define('COS_VERSION', '2.5.6');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
 if (!function_exists('get_home_path')) {
-    require_once(ABSPATH . 'wp-admin/includes/file.php');
+    require_once ABSPATH . 'wp-admin/includes/file.php';
+}
+
+if (defined('WP_CLI') && WP_CLI) {
+    require_once plugin_dir_path(__FILE__) . 'cos-commands.php';
 }
 
 // 初始化选项
@@ -73,15 +77,16 @@ function cos_get_client($cos_options = null)
     if ($cos_options === null) {
         $cos_options = get_option('cos_options', true);
     }
-    return new Client([
-                          'region' => esc_attr($cos_options['regional']),
-                          'scheme' => cos_get_url_scheme(''),
-                          'credentials' => [
-                              'secretId' => esc_attr($cos_options['secret_id']),
-                              'secretKey' => esc_attr($cos_options['secret_key'])
-                          ],
-                          'userAgent' => 'WordPress v' . $GLOBALS['wp_version'] . '; SyncQCloudCOS v' . COS_VERSION . '; SDK v' . Client::VERSION,
-                      ]);
+    $config = [
+        'region' => esc_attr($cos_options['regional']),
+        'scheme' => cos_get_url_scheme(''),
+        'credentials' => [
+            'secretId' => esc_attr($cos_options['secret_id']),
+            'secretKey' => esc_attr($cos_options['secret_key'])
+        ],
+        'userAgent' => 'WordPress v' . $GLOBALS['wp_version'] . '; SyncQCloudCOS v' . COS_VERSION . '; SDK v' . Client::VERSION,
+    ];
+    return new Client($config);
 }
 
 function cos_get_bucket_name($cos_options = null)
@@ -239,10 +244,10 @@ function cos_get_image_style()
 }
 
 /**
- * @param $object
- * @param $filename
+ * @param string $object
+ * @param string $filename
  * @param bool $no_local_file
- * @return false|void
+ * @return bool
  */
 function cos_file_upload($object, $filename, $no_local_file = false)
 {
@@ -264,12 +269,14 @@ function cos_file_upload($object, $filename, $no_local_file = false)
             if ($no_local_file) {
                 cos_delete_local_file($filename);
             }
+
+            return true;
         }
     } catch (\Throwable $e) {
-        if (WP_DEBUG) {
-            exit(json_encode(['errorMessage' => $e->getMessage(), 'statusCode' => $e->getStatusCode(), 'requestId' => $e->getRequestId()]));
-        }
+        error_log($e->getMessage());
     }
+
+    return false;
 }
 
 /**
@@ -1781,7 +1788,20 @@ function cos_setting_page()
         <div class="charts-container">
         <?php
         $bucket = cos_get_bucket_name($cos_options);
-        if (!empty($bucket)) {
+        $disableCharts = defined('COS_DISABLE_CHARTS') && COS_DISABLE_CHARTS;
+        if (!empty($bucket) && !$disableCharts) {
+            $styleChart = !empty($cos_options['ci_style']);
+            $previewChart = !empty($cos_options['attachment_preview']) && $cos_options['attachment_preview'] == 'on';
+            $textChart = !empty($cos_options['ci_text_comments']) && $cos_options['ci_text_comments'] == 'on';
+            if (defined('COS_ENABLE_STYLE_CHART')) {
+                $styleChart = COS_ENABLE_STYLE_CHART;
+            }
+            if (defined('COS_ENABLE_PREVIEW_CHART')) {
+                $previewChart = COS_ENABLE_PREVIEW_CHART;
+            }
+            if (defined('COS_ENABLE_TEXT_CHART')) {
+                $textChart = COS_ENABLE_TEXT_CHART;
+            }
             $monitor = new DataPoints($bucket, $cos_options);
             Charts::setColors($color_scheme->colors);
             echo Charts::storage($monitor->getStorage());
@@ -1789,16 +1809,16 @@ function cos_setting_page()
             echo Charts::requests($monitor->getRequests());
             echo Charts::traffic($monitor->getTraffic());
 
-            if (!empty($cos_options['ci_style'])) {
+            if ($styleChart) {
                 echo Charts::ciStyle($monitor->getImageBasicsRequests());
                 echo Charts::ciTraffic($monitor->getCITraffic());
             }
 
-            if (!empty($cos_options['attachment_preview']) && $cos_options['attachment_preview'] == 'on') {
+            if ($previewChart) {
                 echo Charts::ciDocumentHtml($monitor->getDocumentHtmlRequests());
             }
 
-            if (!empty($cos_options['ci_text_comments']) && $cos_options['ci_text_comments'] == 'on') {
+            if ($textChart) {
                 echo Charts::ciTextAuditing($monitor->getTextAuditing());
             }
         }
