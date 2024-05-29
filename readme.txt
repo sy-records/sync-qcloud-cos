@@ -103,6 +103,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 = Stable =
 
 - Optimize chart display, you can set constants to be turned off.
+- Support wp-cli commands to upload files.
 
 = Other =
 
