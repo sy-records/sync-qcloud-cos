@@ -33,7 +33,7 @@ class COS_CLI_Commands
 
         $files = cos_read_dir_queue(ABSPATH, $path);
         if (empty($files)) {
-            WP_CLI::success("No files to upload.");
+            WP_CLI::success('No files to upload.');
             return;
         }
 
@@ -47,7 +47,7 @@ class COS_CLI_Commands
         }
 
         $total = count($files);
-        WP_CLI::success("Uploaded $total files.");
+        WP_CLI::success("Uploaded {$total} files.");
     }
 
     /**
@@ -91,9 +91,9 @@ class COS_CLI_Commands
 
         $status = cos_file_upload("/{$key}", $file, $delete);
         if ($status) {
-            WP_CLI::success("Uploaded: $path");
+            WP_CLI::success("Uploaded: {$path}");
         } else {
-            WP_CLI::error("Failed: $path");
+            WP_CLI::error("Failed: {$path}");
         }
     }
 }
