@@ -364,7 +364,6 @@ function cos_upload_attachments($metadata)
         $mime_types['tiff|tif'],
         $mime_types['webp'],
         $mime_types['ico'],
-        $mime_types['heic'],
     ];
     // 例如mp4等格式 上传后根据配置选择是否删除 删除后媒体库会显示默认图片 点开内容是正常的
     // 图片在缩略图处理
