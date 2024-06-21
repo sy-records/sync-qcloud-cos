@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.5.6
+Version: 2.5.7
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -27,7 +27,7 @@ use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Object\Head;
 
-define('COS_VERSION', '2.5.6');
+define('COS_VERSION', '2.5.7');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -857,7 +857,7 @@ function cos_get_regional($regional)
  */
 function cos_get_url_scheme($separator = '://')
 {
-    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $_SERVER['SERVER_PORT'] == 443;
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (!empty($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
     $scheme = $isHttps ? 'https' : 'http';
 
     return $scheme . $separator;
@@ -1828,7 +1828,7 @@ function cos_setting_page()
         <?php endif; ?>
         <hr>
         <p>优惠活动：<a href="https://qq52o.me/welfare.html#qcloud" target="_blank">腾讯云优惠</a> / <a href="https://go.qq52o.me/a/cos" target="_blank">腾讯云COS资源包优惠</a>；</p>
-        <p>限时推广：<a href="https://cloud.tencent.com/developer/support-plan?invite_code=cqidlih5bagj" target="_blank">技术博客可以加入腾讯云云+社区定制周边礼品等你来拿</a>；</p>
+        <p>限时推广：<a href="https://cloud.tencent.com/developer/support-plan?invite_code=cqidlih5bagj" target="_blank">满足条件的自媒体，入驻腾讯云开发者社区，可分享总价值百万资源包</a>；</p>
     </div>
 <?php
 }

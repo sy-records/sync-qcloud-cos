@@ -96,6 +96,29 @@ class COS_CLI_Commands
             WP_CLI::error("Failed: {$path}");
         }
     }
+
+    /**
+     * 删除 COS 文件
+     *
+     * ## OPTIONS
+     *
+     * <key>
+     * : 要删除的文件 key
+     *
+     * ## EXAMPLES
+     *
+     *     wp cos delete-file 2021/01/1.jpg
+     *
+     * @when after_wp_load
+     * @subcommand delete-file
+     */
+    public function delete_file($args, $assoc_args)
+    {
+        [$key] = $args;
+        WP_CLI::line("Deleting file [{$key}] from COS...");
+
+        cos_delete_cos_file($key);
+    }
 }
 
 WP_CLI::add_command('cos', 'COS_CLI_Commands', ['shortdesc' => 'Commands used to operate COS.']);
