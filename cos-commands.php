@@ -98,12 +98,12 @@ class COS_CLI_Commands
     }
 
     /**
-     * 删除 COS 文件
+     * 删除 COS 中的文件
      *
      * ## OPTIONS
      *
      * <key>
-     * : 要删除的文件 key
+     * : 需要删除 COS 中的文件 key
      *
      * ## EXAMPLES
      *
