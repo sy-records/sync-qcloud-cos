@@ -1,6 +1,11 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.6...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.7...master)
+
+## [v2.5.7](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.6...v2.5.7) - 2024-06-22
+
+- Support delete file using `wp-cli` command by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/69
+- Fix upload heic format file error.
 
 ## [v2.5.6](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.5...v2.5.6) - 2024-05-29
 
