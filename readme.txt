@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.6
 Tested up to: 6.5
 Requires PHP: 7.2
-Stable tag: 2.5.7
+Stable tag: 2.5.8
 License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -103,12 +103,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Stable =
 
-- Fix upload heic format file error.
-- Support delete file using `wp-cli` command.
-
-= Develop =
-
-- Use wp_get_mime_types instead of get_allowed_mime_types. [#71](https://github.com/sy-records/sync-qcloud-cos/pull/71)
+- Use wp_get_mime_types instead of get_allowed_mime_types.
 
 = Other =
 
