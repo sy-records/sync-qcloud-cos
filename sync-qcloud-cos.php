@@ -355,7 +355,7 @@ function cos_get_option($key)
  */
 function cos_upload_attachments($metadata)
 {
-    $mime_types = get_allowed_mime_types();
+    $mime_types = wp_get_mime_types();
     $image_mime_types = [
         $mime_types['jpg|jpeg|jpe'],
         $mime_types['gif'],
