@@ -106,6 +106,10 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 - Fix upload heic format file error.
 - Support delete file using `wp-cli` command.
 
+= Develop =
+
+- Use wp_get_mime_types instead of get_allowed_mime_types. [#71](https://github.com/sy-records/sync-qcloud-cos/pull/71)
+
 = Other =
 
 see [CHANGELOG.md](https://github.com/sy-records/sync-qcloud-cos/blob/master/CHANGELOG.md).
