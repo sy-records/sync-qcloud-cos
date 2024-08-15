@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.6
 Tested up to: 6.6
 Requires PHP: 7.2
-Stable tag: 2.5.8
+Stable tag: 2.6.0
 License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -35,7 +35,8 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 13. 支持文本内容审核
 14. 支持原图保护
 15. 支持数据监控
-16. 支持 `wp-cli` 命令上传文件
+16. 支持使用 `wp-cli` 命令上传/删除文件
+17. 支持上传文件到存储桶子目录
 
 插件更多详细介绍和安装：[https://github.com/sy-records/sync-qcloud-cos](https://github.com/sy-records/sync-qcloud-cos)
 
@@ -103,7 +104,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Stable =
 
-- Use wp_get_mime_types instead of get_allowed_mime_types.
+- Support upload to subdirectories.
 
 = Other =
 
