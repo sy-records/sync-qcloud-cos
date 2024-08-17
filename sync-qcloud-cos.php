@@ -1755,7 +1755,7 @@ function cos_setting_page()
                     <legend>上传至子目录</legend>
                   </th>
                   <td>
-                    <input type="text" name="upload_subdirectory" value="<?php echo $cos_upload_subdirectory; ?>" size="50" placeholder="请输入需要上传的子目录文件夹"/>
+                    <input type="text" name="upload_subdirectory" value="<?php echo $cos_upload_subdirectory; ?>" size="50" placeholder="请输入子目录地址，不使用请保留为空"/>
 
                     <p>如果需要多个站点共用一个存储桶时设置，例如：<code>sub1</code>、<code>sub1/sub2</code>（注意不要以“/”开头和结尾），支持多级；</p>
                     <p>如果设置了上传至子目录，需要在 <b>URL前缀</b> 中增加对应的子目录，例如：<code><?php echo $protocol;?>{cos域名}/{子目录}/{本地文件夹}</code>。</p>
