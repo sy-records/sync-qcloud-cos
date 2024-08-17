@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.5.8
+Version: 2.6.0
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -27,7 +27,7 @@ use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Object\Head;
 
-define('COS_VERSION', '2.5.8');
+define('COS_VERSION', '2.6.0');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -52,6 +52,7 @@ function cos_set_options()
         'nothumb' => 'false', // 是否上传缩略图
         'nolocalsaving' => 'false', // 是否保留本地备份
         'delete_options' => 'true',
+        'upload_subdirectory' => '',
         'upload_url_path' => '', // URL前缀
         'update_file_name' => 'false', // 是否重命名文件名
         'ci_style' => '',
@@ -255,11 +256,15 @@ function cos_file_upload($object, $filename, $no_local_file = false)
     if (!@file_exists($filename)) {
         return false;
     }
-    $bucket = cos_get_bucket_name();
+    $options = get_option('cos_options', true);
+    $bucket = cos_get_bucket_name($options);
     try {
         $file = fopen($filename, 'rb');
         if ($file) {
-            $cosClient = cos_get_client();
+            if (!empty($options['upload_subdirectory'])) {
+                $object = '/' . esc_attr($options['upload_subdirectory']) . $object;
+            }
+            $cosClient = cos_get_client($options);
             $cosClient->upload($bucket, $object, $file);
 
             if (is_resource($file)) {
@@ -293,7 +298,7 @@ function cos_is_delete_local_file()
 /**
  * 删除本地文件
  *
- * @param  $file
+ * @param string $file
  * @return bool
  */
 function cos_delete_local_file($file)
@@ -317,12 +322,16 @@ function cos_delete_local_file($file)
 
 /**
  * 删除cos中的单个文件
- * @param $file
+ * @param string $file
  */
 function cos_delete_cos_file($file)
 {
-    $bucket = cos_get_bucket_name();
-    $cosClient = cos_get_client();
+    $options = get_option('cos_options', true);
+    $bucket = cos_get_bucket_name($options);
+    $cosClient = cos_get_client($options);
+    if (!empty($options['upload_subdirectory'])) {
+        $file = esc_attr($options['upload_subdirectory']) . '/' . ltrim($file, '/');
+    }
     $cosClient->deleteObject(['Bucket' => $bucket, 'Key' => $file]);
 }
 
@@ -332,13 +341,17 @@ function cos_delete_cos_file($file)
  */
 function cos_delete_cos_files(array $files)
 {
+    $options = get_option('cos_options', true);
+    $subdirectory = !empty($options['upload_subdirectory']) ? esc_attr($options['upload_subdirectory']) . '/' : '';
+
     $deleteObjects = [];
     foreach ($files as $file) {
-        $deleteObjects[] = ['Key' => str_replace(["\\", './'], ['/', ''], $file)];
+        $fileKey = str_replace(["\\", './'], ['/', ''], $subdirectory . $file);
+        $deleteObjects[] = ['Key' => $fileKey];
     }
 
-    $bucket = cos_get_bucket_name();
-    $cosClient = cos_get_client();
+    $bucket = cos_get_bucket_name($options);
+    $cosClient = cos_get_client($options);
     $cosClient->deleteObjects(['Bucket' => $bucket, 'Objects' => $deleteObjects]);
 }
 
@@ -486,9 +499,6 @@ function cos_delete_remote_attachment($post_id)
     // 获取图片类附件的meta信息
     $meta = wp_get_attachment_metadata($post_id);
     $upload_path = cos_get_option('upload_path');
-    if ($upload_path == '') {
-        $upload_path = 'wp-content/uploads';
-    }
 
     if (!empty($meta['file'])) {
         $deleteObjects = [];
@@ -523,19 +533,22 @@ function cos_delete_remote_attachment($post_id)
         // 获取链接删除
         $link = wp_get_attachment_url($post_id);
         if ($link) {
+            $cos_options = get_option('cos_options', true);
+            $subdirectory = !empty($cos_options['upload_subdirectory']) ? '/' . esc_attr($cos_options['upload_subdirectory']) : '';
             if ($upload_path != '.') {
                 $file_info = explode($upload_path, $link);
                 if (count($file_info) >= 2) {
-                    cos_delete_cos_file($upload_path . end($file_info));
+                    $file = $subdirectory . $upload_path . end($file_info);
                 }
             } else {
-                $cos_options = get_option('cos_options', true);
                 $cos_upload_url = esc_attr($cos_options['upload_url_path']);
                 $file_info = explode($cos_upload_url, $link);
                 if (count($file_info) >= 2) {
-                    cos_delete_cos_file(end($file_info));
+                    $file = $subdirectory . end($file_info);
                 }
             }
+
+            cos_delete_cos_file($file);
         }
     }
 }
@@ -1479,6 +1492,7 @@ function cos_setting_page()
         //仅用于插件卸载时比较使用
         $options['upload_url_path'] = isset($_POST['upload_url_path']) ? sanitize_text_field(stripslashes($_POST['upload_url_path'])) : '';
 
+        $options['upload_subdirectory'] = isset($_POST['upload_subdirectory']) ? sanitize_text_field(trim($_POST['upload_subdirectory'], '/')) : '';
         $options['ci_style'] = isset($_POST['ci_style']) ? sanitize_text_field($_POST['ci_style']) : '';
         $options['update_file_name'] = isset($_POST['update_file_name']) ? sanitize_text_field($_POST['update_file_name']) : 'false';
         $options['origin_protect'] = isset($_POST['origin_protect']) ? sanitize_text_field($_POST['origin_protect']) : 'off';
@@ -1576,6 +1590,7 @@ function cos_setting_page()
     $check_origin_protect = esc_attr($cos_options['origin_protect'] ?? 'off') !== 'off' ? 'checked="checked"' : '';
 
     $cos_update_file_name = esc_attr($cos_options['update_file_name']);
+    $cos_upload_subdirectory = esc_attr($cos_options['upload_subdirectory'] ?? '');
 
     $protocol = cos_get_url_scheme();
 
@@ -1734,6 +1749,17 @@ function cos_setting_page()
 
                         <p>3）如果需要使用 <code>独立域名</code> ，直接将 <code>{cos域名}</code> 替换为 <code>独立域名</code> 即可。</p>
                     </td>
+                </tr>
+                <tr>
+                  <th>
+                    <legend>上传至子目录</legend>
+                  </th>
+                  <td>
+                    <input type="text" name="upload_subdirectory" value="<?php echo $cos_upload_subdirectory; ?>" size="50" placeholder="请输入子目录地址，不使用请保留为空"/>
+
+                    <p>如果需要多个站点共用一个存储桶时设置，例如：<code>sub1</code>、<code>sub1/sub2</code>（注意不要以“/”开头和结尾），支持多级；</p>
+                    <p>如果设置了上传至子目录，需要在 <b>URL前缀</b> 中增加对应的子目录，例如：<code><?php echo $protocol;?>{cos域名}/{子目录}/{本地文件夹}</code>。</p>
+                  </td>
                 </tr>
                 <tr>
                     <th>
