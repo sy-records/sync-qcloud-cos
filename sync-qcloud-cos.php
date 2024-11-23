@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.6.0
+Version: 2.6.1
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -27,7 +27,7 @@ use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Object\Head;
 
-define('COS_VERSION', '2.6.0');
+define('COS_VERSION', '2.6.1');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -41,9 +41,9 @@ if (defined('WP_CLI') && WP_CLI) {
 
 // 初始化选项
 register_activation_hook(__FILE__, 'cos_set_options');
-function cos_set_options()
+function cos_get_default_options()
 {
-    $options = [
+    return [
         'bucket' => '',
         'regional' => 'ap-beijing',
         'app_id' => '',
@@ -66,7 +66,10 @@ function cos_set_options()
         'ci_text_comments_check_roles' => '',
         'origin_protect' => 'off',
     ];
-    add_option('cos_options', $options, '', 'yes');
+}
+function cos_set_options()
+{
+    add_option('cos_options', cos_get_default_options(), '', 'yes');
 }
 
 /**
@@ -76,7 +79,7 @@ function cos_set_options()
 function cos_get_client($cos_options = null)
 {
     if ($cos_options === null) {
-        $cos_options = get_option('cos_options', true);
+        $cos_options = get_option('cos_options', cos_get_default_options());
     }
     $config = [
         'region' => esc_attr($cos_options['regional']),
@@ -93,7 +96,7 @@ function cos_get_client($cos_options = null)
 function cos_get_bucket_name($cos_options = null)
 {
     if ($cos_options === null) {
-        $cos_options = get_option('cos_options', true);
+        $cos_options = get_option('cos_options', cos_get_default_options());
     }
     $cos_bucket = esc_attr($cos_options['bucket']);
     $cos_app_id = esc_attr($cos_options['app_id']);
@@ -159,7 +162,7 @@ function cos_replace_client_region($client, $bucket)
     return $client;
 }
 
-$cos_options = get_option('cos_options', true);
+$cos_options = get_option('cos_options', cos_get_default_options());
 if (!empty($cos_options['origin_protect']) && esc_attr($cos_options['origin_protect']) === 'on' && !empty(esc_attr($cos_options['ci_style']))) {
     add_filter('wp_get_attachment_url', 'cos_add_suffix_to_attachment_url', 10, 2);
     add_filter('wp_get_attachment_thumb_url', 'cos_add_suffix_to_attachment_url', 10, 2);
@@ -239,7 +242,7 @@ function cos_is_image_type($url)
  */
 function cos_get_image_style()
 {
-    $cos_options = get_option('cos_options', true);
+    $cos_options = get_option('cos_options', cos_get_default_options());
 
     return esc_attr($cos_options['ci_style']);
 }
@@ -256,7 +259,7 @@ function cos_file_upload($object, $filename, $no_local_file = false)
     if (!@file_exists($filename)) {
         return false;
     }
-    $options = get_option('cos_options', true);
+    $options = get_option('cos_options', cos_get_default_options());
     $bucket = cos_get_bucket_name($options);
     try {
         $file = fopen($filename, 'rb');
@@ -291,7 +294,7 @@ function cos_file_upload($object, $filename, $no_local_file = false)
  */
 function cos_is_delete_local_file()
 {
-    $cos_options = get_option('cos_options', true);
+    $cos_options = get_option('cos_options', cos_get_default_options());
     return esc_attr($cos_options['nolocalsaving']) == 'true';
 }
 
@@ -326,7 +329,7 @@ function cos_delete_local_file($file)
  */
 function cos_delete_cos_file($file)
 {
-    $options = get_option('cos_options', true);
+    $options = get_option('cos_options', cos_get_default_options());
     $bucket = cos_get_bucket_name($options);
     $cosClient = cos_get_client($options);
     if (!empty($options['upload_subdirectory'])) {
@@ -341,7 +344,7 @@ function cos_delete_cos_file($file)
  */
 function cos_delete_cos_files(array $files)
 {
-    $options = get_option('cos_options', true);
+    $options = get_option('cos_options', cos_get_default_options());
     $subdirectory = !empty($options['upload_subdirectory']) ? esc_attr($options['upload_subdirectory']) . '/' : '';
 
     $deleteObjects = [];
@@ -419,7 +422,7 @@ function cos_upload_thumbs($metadata)
     $basedir = $wp_uploads['basedir'];
     $upload_path = cos_get_option('upload_path');
 
-    $cos_options = get_option('cos_options', true);
+    $cos_options = get_option('cos_options', cos_get_default_options());
     $no_local_file = esc_attr($cos_options['nolocalsaving']) == 'true';
     $no_thumb = esc_attr($cos_options['nothumb']) == 'true';
 
@@ -496,9 +499,11 @@ function cos_image_editor_file_do($metadata)
  */
 function cos_delete_remote_attachment($post_id)
 {
+    $wp_uploads = wp_upload_dir();
+    $basedir = $wp_uploads['basedir'];
+    $upload_path = str_replace(get_home_path(), '', $basedir);
     // 获取图片类附件的meta信息
     $meta = wp_get_attachment_metadata($post_id);
-    $upload_path = cos_get_option('upload_path');
 
     if (!empty($meta['file'])) {
         $deleteObjects = [];
@@ -533,7 +538,7 @@ function cos_delete_remote_attachment($post_id)
         // 获取链接删除
         $link = wp_get_attachment_url($post_id);
         if ($link) {
-            $cos_options = get_option('cos_options', true);
+            $cos_options = get_option('cos_options', cos_get_default_options());
             $subdirectory = !empty($cos_options['upload_subdirectory']) ? '/' . esc_attr($cos_options['upload_subdirectory']) : '';
             if ($upload_path != '.') {
                 $file_info = explode($upload_path, $link);
@@ -568,7 +573,7 @@ if (cos_get_option('upload_path') == '.') {
 
 function cos_sanitize_file_name($filename)
 {
-    $cos_options = get_option('cos_options');
+    $cos_options = get_option('cos_options', cos_get_default_options());
     switch ($cos_options['update_file_name']) {
         case 'md5':
             return md5($filename) . '.' . pathinfo($filename, PATHINFO_EXTENSION);
@@ -639,7 +644,7 @@ add_filter('wp_prepare_attachment_for_js', 'cos_wp_prepare_attachment_for_js');
 function cos_wp_prepare_attachment_for_js($response)
 {
     if (empty($response['filesizeInBytes']) || empty($response['filesizeHumanReadable'])) {
-        $cos_options = get_option('cos_options', true);
+        $cos_options = get_option('cos_options', cos_get_default_options());
         $upload_url_path = esc_attr($cos_options['upload_url_path']);
         $upload_path = get_option('upload_path');
         $object = str_replace($upload_url_path, $upload_path, $response['url']);
@@ -655,7 +660,7 @@ function cos_wp_prepare_attachment_for_js($response)
 
 function cos_custom_image_srcset($sources, $size_array, $image_src, $image_meta, $attachment_id)
 {
-    $option = get_option('cos_options');
+    $option = get_option('cos_options', cos_get_default_options());
     $style = !empty($option['ci_style']) ? esc_attr($option['ci_style']) : '';
     $upload_url_path = esc_attr($option['upload_url_path']);
     if (empty($style)) {
@@ -673,7 +678,7 @@ function cos_custom_image_srcset($sources, $size_array, $image_src, $image_meta,
 
 function cos_setting_content_ci($content)
 {
-    $option = get_option('cos_options');
+    $option = get_option('cos_options', cos_get_default_options());
     $style = esc_attr($option['ci_style']);
     $upload_url_path = esc_attr($option['upload_url_path']);
     if (!empty($style)) {
@@ -714,7 +719,7 @@ function cos_setting_content_ci($content)
 
 function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
 {
-    $option = get_option('cos_options');
+    $option = get_option('cos_options', cos_get_default_options());
     $style = esc_attr($option['ci_style']);
     $upload_url_path = esc_attr($option['upload_url_path']);
     if (!empty($style) && has_post_thumbnail()) {
@@ -739,7 +744,7 @@ function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
  */
 function cos_append_options($options)
 {
-    $cos_options = get_option('cos_options');
+    $cos_options = get_option('cos_options', cos_get_default_options());
 
     $options['ci_image_slim'] = $cos_options['ci_image_slim'] ?? 'off';
     $options['ci_image_slim_mode'] = $cos_options['ci_image_slim_mode'] ?? '';
@@ -760,7 +765,7 @@ function cos_append_options($options)
  */
 function cos_update_config_parameters($parametersToUpdate, $currentOptions = null)
 {
-    $currentOptions = $currentOptions ?: get_option('cos_options');
+    $currentOptions = $currentOptions ?: get_option('cos_options', cos_get_default_options());
 
     $options = array_merge($currentOptions, $parametersToUpdate);
 
@@ -792,7 +797,7 @@ function cos_sync_image_slim_config($slimConfigData, $currentOptions)
  */
 function cos_append_ci_style($url, $options = null)
 {
-    if (empty($options)) $options = get_option('cos_options');
+    if (empty($options)) $options = get_option('cos_options', cos_get_default_options());
 
     if (!empty($options['ci_style']) && !empty($options['upload_url_path']) && strpos($url, esc_attr($options['upload_url_path'])) !== false) {
         $url .= esc_attr($options['ci_style']);
@@ -808,7 +813,7 @@ function cos_append_ci_style($url, $options = null)
  */
 function cos_local2remote($url, $options = null)
 {
-    if (empty($options)) $options = get_option('cos_options');
+    if (empty($options)) $options = get_option('cos_options', cos_get_default_options());
 
     $upload_path = get_option('upload_path');
 
@@ -947,7 +952,7 @@ HTML;
  */
 function cos_ci_image_slim_setting($content)
 {
-    $cos_options = get_option('cos_options', true);
+    $cos_options = get_option('cos_options', cos_get_default_options());
 
     if (!cos_validate_configuration($cos_options)) {
         return false;
@@ -1199,7 +1204,7 @@ EOF;
 
 function cos_ci_text_setting($content)
 {
-    $cos_options = get_option('cos_options', true);
+    $cos_options = get_option('cos_options', cos_get_default_options());
     if (!cos_validate_configuration($cos_options)) {
         return false;
     }
@@ -1259,7 +1264,7 @@ if (!function_exists('is_user_logged_in')) {
 
 function cos_process_comments($comment_data)
 {
-    $options = get_option('cos_options', true);
+    $options = get_option('cos_options', cos_get_default_options());
 
     // If CI text for comments is not enabled
     if (($options['ci_text_comments'] ?? 'off') !== 'on') {
@@ -1315,7 +1320,7 @@ function cos_request_txt_check($options, $comment)
  */
 function cos_ci_attachment_preview_setting($content)
 {
-    $cos_options = get_option('cos_options', true);
+    $cos_options = get_option('cos_options', cos_get_default_options());
     if (!cos_validate_configuration($cos_options)) {
         return false;
     }
@@ -1501,7 +1506,7 @@ function cos_setting_page()
     }
 
     if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_all') {
-        if (cos_validate_configuration(get_option('cos_options', true))) {
+        if (cos_validate_configuration(get_option('cos_options', cos_get_default_options()))) {
             $files = cos_read_dir_queue(get_home_path(), cos_get_option('upload_path'));
             foreach ($files as $file) {
                 cos_file_upload($file['key'], $file['filepath']);
@@ -1575,7 +1580,7 @@ function cos_setting_page()
         }
     }
 
-    $cos_options = get_option('cos_options', true);
+    $cos_options = get_option('cos_options', cos_get_default_options());
     $cos_regional = esc_attr($cos_options['regional']);
 
     $cos_nothumb = esc_attr($cos_options['nothumb']);
