@@ -1,6 +1,11 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.0...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.1...master)
+
+## [v2.6.1](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.0...v2.6.1) - 2024-11-23
+
+- Fix sub-site failure to delete remote images by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/74
+- Fix `get_option` default value error
 
 ## [v2.6.0](https://github.com/sy-records/sync-qcloud-cos/compare/v2.5.8...v2.6.0) - 2024-08-17
 
