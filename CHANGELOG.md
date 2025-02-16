@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.1...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.2...master)
+
+## [v2.6.2](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.1...v2.6.2) - 2025-02-16
+
+* Optimize uninstall code by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/76
 
 ## [v2.6.1](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.0...v2.6.1) - 2024-11-23
 
