@@ -97,7 +97,8 @@ HTML;
         $series = [
             ['name' => '外网下行流量', 'data' => $data['internet']],
             ['name' => '内网下行流量', 'data' => $data['internal']],
-            ['name' => 'CDN 回源流量', 'data' => $data['cdn']]
+            ['name' => 'CDN 回源流量', 'data' => $data['cdn']],
+            ['name' => '全球加速下行流量', 'data' => $data['accelerate']],
         ];
 
         return self::generateChartScript('cos-traffic-chart', '流量', $series, $data['date'], 'MB');

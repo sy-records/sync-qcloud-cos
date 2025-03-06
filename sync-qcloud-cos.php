@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.6.2
+Version: 2.6.3
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -27,7 +27,7 @@ use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Object\Head;
 
-define('COS_VERSION', '2.6.2');
+define('COS_VERSION', '2.6.3');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -131,12 +131,11 @@ function cos_check_bucket($cos_options)
         } elseif ($errorCode == ErrorCode::ACCESS_DENIED) {
             $message = '<code>SecretID</code> 或 <code>SecretKey</code> 有误，请检查配置信息！';
         }
-        echo "<div class='error'><p><strong>{$message}</strong></p></div>";
     } catch (\Throwable $e) {
         $message = (string)$e;
-        echo "<div class='error'><p><strong>{$message}</strong></p></div>";
     }
 
+    echo "<div class='error'><p><strong>{$message}</strong></p></div>";
     return false;
 }
 
@@ -561,14 +560,14 @@ function cos_delete_remote_attachment($post_id)
 add_action('delete_attachment', 'cos_delete_remote_attachment');
 
 // 当upload_path为根目录时，需要移除URL中出现的“绝对路径”
-function cos_modefiy_img_url($url, $post_id)
+function cos_modify_img_url($url, $post_id)
 {
     // 移除 ./ 和 项目根路径
     return str_replace(['./', get_home_path()], '', $url);
 }
 
 if (cos_get_option('upload_path') == '.') {
-    add_filter('wp_get_attachment_url', 'cos_modefiy_img_url', 30, 2);
+    add_filter('wp_get_attachment_url', 'cos_modify_img_url', 30, 2);
 }
 
 function cos_sanitize_file_name($filename)

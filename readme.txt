@@ -5,7 +5,7 @@ Tags: COS, 腾讯云, 对象存储, Tencent, Qcloud
 Requires at least: 4.6
 Tested up to: 6.7
 Requires PHP: 7.2
-Stable tag: 2.6.2
+Stable tag: 2.6.3
 License: Apache2.0
 License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
@@ -105,7 +105,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Stable =
 
-- Optimize uninstall code.
+- Add support for global acceleration downlink traffic in charts
 
 = Other =
 
