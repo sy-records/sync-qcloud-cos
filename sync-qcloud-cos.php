@@ -1103,7 +1103,7 @@ function cos_ci_image_slim_page($options)
                           <input type="checkbox" name="ci_image_slim_mode[]" value="API" {$checked_mode_api} />
                           <span class="slider round"></span>
                         </label>
-                        <p>开通极智压缩的 API 使用方式，开通后可在图片时通过极智压缩参数（需要配置配置图片处理样式<code>?imageSlim</code>）对图片进行压缩；</p>
+                        <p>开通极智压缩的 API 使用方式，开通后可在图片时通过极智压缩参数（需要配置图片处理样式<code>?imageSlim</code>）对图片进行压缩；</p>
                     </td>
                 </tr>
                 <tr>
@@ -1382,7 +1382,7 @@ function cos_document_page($options)
     }
 
     $disableSubmit = !$status ? 'disabled=disabled' : '';
-    $disableMessage = !$status ? "<p>如需使用请先访问 <a href='https://console.cloud.tencent.com/ci/bucket?bucket={$bucket}&region={$options['regional']}&type=document' target='_blank'>腾讯云控制台</a>开启。</p>" : '';
+    $disableMessage = !$status ? "<p>如需使用请先访问 <a href='https://console.cloud.tencent.com/ci/bucket?bucket={$bucket}&region={$options['regional']}&type=document' target='_blank'>腾讯云控制台</a> 开启。</p>" : '';
 
     return <<<EOF
         <form method="post">
