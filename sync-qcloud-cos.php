@@ -668,7 +668,7 @@ function cos_custom_image_srcset($sources, $size_array, $image_src, $image_meta,
     }
 
     foreach ($sources as $index => $source) {
-        if (strpos($source['url'], $upload_url_path) !== false && strpos($source['url'], $style) === false) {
+        if (strpos($source['url'], $upload_url_path) !== false && substr($source['url'], -strlen($style)) !== $style) {
             $sources[$index]['url'] .= $style;
         }
     }
@@ -686,7 +686,7 @@ function cos_setting_content_ci($content)
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
-                if (strpos($item, $upload_url_path) !== false && strpos($item, $style) === false) {
+                if (strpos($item, $upload_url_path) !== false && substr($item, -strlen($style)) !== $style) {
                     $content = str_replace($item, $item . $style, $content);
                 }
             }
@@ -727,7 +727,7 @@ function cos_setting_post_thumbnail_ci($html, $post_id, $post_image_id)
         if (!empty($images) && isset($images[1])) {
             $images[1] = array_unique($images[1]);
             foreach ($images[1] as $item) {
-                if (strpos($item, $upload_url_path) !== false && strpos($item, $style) === false) {
+                if (strpos($item, $upload_url_path) !== false && substr($item, -strlen($style)) !== $style) {
                     $html = str_replace($item, $item . $style, $html);
                 }
             }

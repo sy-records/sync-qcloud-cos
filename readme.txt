@@ -105,7 +105,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Stable =
 
-- Optimize uninstall code.
+- Fix URL style appending logic
 
 = Other =
 
