@@ -106,6 +106,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 = Stable =
 
 - Add support for global acceleration downlink traffic in charts
+- Fix URL style appending logic
 
 = Other =
 
