@@ -25,6 +25,7 @@ class DataPoints
     const METRIC_STORAGE = 'StdStorage'; // 标准存储-存储空间
     const METRIC_OBJECT_NUMBER = 'StdObjectNumber'; // 标准存储-对象数量
 
+    const METRIC_ACCELER_TRAFFIC_DOWN = 'AccelerTrafficDown'; // 全球加速下行流量
     const METRIC_INTERNET_TRAFFIC = 'InternetTraffic'; // 外网下行流量
     const METRIC_INTERNAL_TRAFFIC = 'InternalTraffic'; // 内网下行流量
     const METRIC_CDN_ORIGIN_TRAFFIC = 'CdnOriginTraffic'; // CDN 回源流量
@@ -252,11 +253,15 @@ class DataPoints
         $params = $this->buildParams(self::METRIC_CDN_ORIGIN_TRAFFIC);
         $cdn = $this->request($params);
 
+        $params = $this->buildParams(self::METRIC_ACCELER_TRAFFIC_DOWN);
+        $accelerate = $this->request($params);
+
         return [
             'date' => $date,
             'internet' => array_map([$this, 'bytes2MB'], $internet->Values ?? []),
             'internal' => array_map([$this, 'bytes2MB'], $internal->Values ?? []),
             'cdn' => array_map([$this, 'bytes2MB'], $cdn->Values ?? []),
+            'accelerate' => array_map([$this, 'bytes2MB'], $accelerate->Values ?? []),
         ];
     }
 

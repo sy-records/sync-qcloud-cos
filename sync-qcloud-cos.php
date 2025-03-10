@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.6.2
+Version: 2.6.3
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -27,7 +27,7 @@ use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Object\Head;
 
-define('COS_VERSION', '2.6.2');
+define('COS_VERSION', '2.6.3');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -131,12 +131,11 @@ function cos_check_bucket($cos_options)
         } elseif ($errorCode == ErrorCode::ACCESS_DENIED) {
             $message = '<code>SecretID</code> 或 <code>SecretKey</code> 有误，请检查配置信息！';
         }
-        echo "<div class='error'><p><strong>{$message}</strong></p></div>";
     } catch (\Throwable $e) {
         $message = (string)$e;
-        echo "<div class='error'><p><strong>{$message}</strong></p></div>";
     }
 
+    echo "<div class='error'><p><strong>{$message}</strong></p></div>";
     return false;
 }
 
@@ -561,14 +560,14 @@ function cos_delete_remote_attachment($post_id)
 add_action('delete_attachment', 'cos_delete_remote_attachment');
 
 // 当upload_path为根目录时，需要移除URL中出现的“绝对路径”
-function cos_modefiy_img_url($url, $post_id)
+function cos_modify_img_url($url, $post_id)
 {
     // 移除 ./ 和 项目根路径
     return str_replace(['./', get_home_path()], '', $url);
 }
 
 if (cos_get_option('upload_path') == '.') {
-    add_filter('wp_get_attachment_url', 'cos_modefiy_img_url', 30, 2);
+    add_filter('wp_get_attachment_url', 'cos_modify_img_url', 30, 2);
 }
 
 function cos_sanitize_file_name($filename)
@@ -938,7 +937,7 @@ function cos_sync_setting_form($cos_options)
                     <input type="hidden" name="type" value="qcloud_cos_all">
                     <td>
                         <input type="submit" class="button button-secondary" value="开始同步"/>
-                        <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以，建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/63143">COSCLI 工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2809.html">使用 COSCLI 快速迁移本地数据到 COS</a></b></p>
+                        <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/63143">COSCLI 工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2809.html">使用 COSCLI 快速迁移本地数据到 COS</a></b></p>
                     </td>
                 </tr>
             </table>
@@ -1104,7 +1103,7 @@ function cos_ci_image_slim_page($options)
                           <input type="checkbox" name="ci_image_slim_mode[]" value="API" {$checked_mode_api} />
                           <span class="slider round"></span>
                         </label>
-                        <p>开通极智压缩的 API 使用方式，开通后可在图片时通过极智压缩参数（需要配置配置图片处理样式<code>?imageSlim</code>）对图片进行压缩；</p>
+                        <p>开通极智压缩的 API 使用方式，开通后可在图片时通过极智压缩参数（需要配置图片处理样式<code>?imageSlim</code>）对图片进行压缩；</p>
                     </td>
                 </tr>
                 <tr>
@@ -1383,7 +1382,7 @@ function cos_document_page($options)
     }
 
     $disableSubmit = !$status ? 'disabled=disabled' : '';
-    $disableMessage = !$status ? "<p>如需使用请先访问 <a href='https://console.cloud.tencent.com/ci/bucket?bucket={$bucket}&region={$options['regional']}&type=document' target='_blank'>腾讯云控制台</a>开启。</p>" : '';
+    $disableMessage = !$status ? "<p>如需使用请先访问 <a href='https://console.cloud.tencent.com/ci/bucket?bucket={$bucket}&region={$options['regional']}&type=document' target='_blank'>腾讯云控制台</a> 开启。</p>" : '';
 
     return <<<EOF
         <form method="post">
