@@ -1,6 +1,11 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.2...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.3...master)
+
+## [v2.6.3](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.2...v2.6.3) - 2025-03-10
+
+* Fix URL style appending logic by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/79
+* Add support for global acceleration downlink traffic in charts by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/78
 
 ## [v2.6.2](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.1...v2.6.2) - 2025-02-16
 
