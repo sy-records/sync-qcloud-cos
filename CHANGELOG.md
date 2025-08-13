@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.3...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.4...master)
+
+## [v2.6.4](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.3...v2.6.4) - 2025-08-13
+
+* Improve user prompts in settings by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/80
 
 ## [v2.6.3](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.2...v2.6.3) - 2025-03-10
 
