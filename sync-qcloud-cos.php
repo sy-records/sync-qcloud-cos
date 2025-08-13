@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.6.3
+Version: 2.6.4
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -889,6 +889,9 @@ function cos_sync_setting_form($cos_options)
 
     $old_url = "{$protocol}{$_SERVER['HTTP_HOST']}/{$upload_path}";
     $new_url = $cos_options['upload_url_path'];
+    if (!empty($upload_path) && strpos($new_url, $upload_path) === false) {
+        $new_url = "{$new_url}/{$upload_path}";
+    }
 
     $nonce = wp_nonce_field('qcloud_cos_replace', 'qcloud_cos_replace-nonce', true, false);
 
@@ -902,7 +905,7 @@ function cos_sync_setting_form($cos_options)
                     <td>
                         <input type="text" name="old_url" size="50" placeholder="请输入要替换的内容"/>
                         <p><b>可能会填入：<code>{$old_url}</code></b></p>
-                        <p>例如：<code>https://qq52o.me</code></p>
+                        <p>例如：<code>https://qq52o.me/wp-content/uploads</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -912,7 +915,7 @@ function cos_sync_setting_form($cos_options)
                     <td>
                         <input type="text" name="new_url" size="50" placeholder="请输入要替换为的内容"/>
                         <p><b>可能会填入：<code>{$new_url}</code></b></p>
-                        <p>例如：COS访问域名<code>https://bucket-appid.cos.ap-xxx.myqcloud.com</code>或自定义域名<code>https://resources.qq52o.me</code></p>
+                        <p>例如：COS访问域名<code>https://bucket-appid.cos.ap-xxx.myqcloud.com/wp-content/uploads</code>或自定义域名<code>https://resources.qq52o.me/wp-content/uploads</code></p>
                     </td>
                 </tr>
                 <tr>
@@ -1250,7 +1253,7 @@ function cos_contact_page()
         </tr>
         <tr>
           <th>打赏一杯咖啡或一杯香茗</th>
-          <td><img height="290px" src="https://cdn.jsdelivr.net/gh/sy-records/staticfile@master/images/donate.png"></td>
+          <td><img height="290px" src="https://img.qq52o.me/staticfiles/donate.png"></td>
         </tr>
       </tbody>
     </table>
@@ -1258,7 +1261,7 @@ EOF;
 }
 
 if (!function_exists('is_user_logged_in')) {
-    require_once(ABSPATH . WPINC . '/pluggable.php');
+    require_once ABSPATH . WPINC . '/pluggable.php';
 }
 
 function cos_process_comments($comment_data)
@@ -1621,7 +1624,7 @@ function cos_setting_page()
     <div class="wrap" style="margin: 10px;">
         <h1>腾讯云 COS <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
         <p>插件网站：<a href="https://qq52o.me/" target="_blank">沈唁志</a> / <a href="https://qq52o.me/2518.html" target="_blank">Sync QCloud COS发布页面</a> / <a href="https://qq52o.me/2722.html" target="_blank">详细使用教程</a>；</p>
-        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/sync-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>，<code>Watch</code>关注更新；<a href="?page=sync-qcloud-cos-contact">打赏一杯咖啡或一杯香茗</a></p>
+        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/sync-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>；有 WordPress 账号？给个 <a href="https://wordpress.org/support/plugin/sync-qcloud-cos/reviews/#new-post" target="_blank">五星好评</a>；<a href="?page=sync-qcloud-cos-contact">打赏一杯咖啡或一杯香茗</a></p>
         <h3 class="nav-tab-wrapper">
             <?php global $pagenow; ?>
             <?php foreach (cos_setting_page_tabs() as $tab => $label): ?>
@@ -1638,7 +1641,7 @@ function cos_setting_page()
                         <legend>存储桶名称</legend>
                     </th>
                     <td>
-                        <input type="text" name="bucket" value="<?php echo esc_attr($cos_options['bucket']); ?>" size="50" placeholder="请填写存储桶名称"/>
+                        <input type="text" name="bucket" required value="<?php echo esc_attr($cos_options['bucket']); ?>" size="50" placeholder="请填写存储桶名称"/>
 
                         <p>请先访问 <a href="https://console.cloud.tencent.com/cos5/bucket" target="_blank">腾讯云控制台</a> 创建<code>存储桶</code>，再填写以上内容。</p>
                     </td>
@@ -1657,7 +1660,7 @@ function cos_setting_page()
                         <legend>APP ID</legend>
                     </th>
                     <td>
-                        <input type="text" name="app_id" value="<?php echo esc_attr($cos_options['app_id']); ?>" size="50" placeholder="APP ID"/>
+                        <input type="text" name="app_id" required value="<?php echo esc_attr($cos_options['app_id']); ?>" size="50" placeholder="APP ID"/>
 
                         <p>请先访问 <a href="https://console.cloud.tencent.com/cos5/key" target="_blank">腾讯云控制台</a> 获取 <code>APP ID、SecretID、SecretKey</code>。</p>
                     </td>
@@ -1666,14 +1669,14 @@ function cos_setting_page()
                     <th>
                         <legend>SecretID</legend>
                     </th>
-                    <td><input type="text" name="secret_id" value="<?php echo esc_attr($cos_options['secret_id']); ?>" size="50" placeholder="SecretID"/></td>
+                    <td><input type="text" name="secret_id" required value="<?php echo esc_attr($cos_options['secret_id']); ?>" size="50" placeholder="SecretID"/></td>
                 </tr>
                 <tr>
                     <th>
                         <legend>SecretKey</legend>
                     </th>
                     <td>
-                        <input type="password" name="secret_key" value="<?php echo esc_attr($cos_options['secret_key']); ?>" size="50" placeholder="SecretKey"/>
+                        <input type="password" name="secret_key" required value="<?php echo esc_attr($cos_options['secret_key']); ?>" size="50" placeholder="SecretKey"/>
                     </td>
                 </tr>
                 <tr>
@@ -1733,9 +1736,9 @@ function cos_setting_page()
                         <legend>本地文件夹</legend>
                     </th>
                     <td>
-                        <input type="text" name="upload_path" value="<?php echo cos_get_option('upload_path'); ?>" size="50" placeholder="请输入上传文件夹"/>
+                        <input type="text" name="upload_path" required value="<?php echo cos_get_option('upload_path'); ?>" size="50" placeholder="请输入本地文件夹"/>
 
-                        <p>附件在服务器上的存储位置，例如：<code>wp-content/uploads</code>（注意不要以“/”开头和结尾），根目录请输入<code>.</code>。</p>
+                        <p>附件在服务器上的存储位置，例如：<code>wp-content/uploads</code>（注意不要以<code>/</code>开头和结尾），根目录请输入<code>.</code>。</p>
                     </td>
                 </tr>
                 <tr>
@@ -1743,7 +1746,7 @@ function cos_setting_page()
                         <legend>URL前缀</legend>
                     </th>
                     <td>
-                        <input type="text" name="upload_url_path" value="<?php echo cos_get_option('upload_url_path'); ?>" size="50" placeholder="请输入URL前缀"/>
+                        <input type="text" name="upload_url_path" required value="<?php echo cos_get_option('upload_url_path'); ?>" size="50" placeholder="请输入URL前缀"/>
 
                         <p><b>注意：</b></p>
 
@@ -1759,9 +1762,9 @@ function cos_setting_page()
                     <legend>上传至子目录</legend>
                   </th>
                   <td>
-                    <input type="text" name="upload_subdirectory" value="<?php echo $cos_upload_subdirectory; ?>" size="50" placeholder="请输入子目录地址，不使用请保留为空"/>
+                    <input type="text" name="upload_subdirectory" value="<?php echo $cos_upload_subdirectory; ?>" size="50" placeholder="请输入子目录地址，不使用请留空"/>
 
-                    <p>如果需要多个站点共用一个存储桶时设置，例如：<code>sub1</code>、<code>sub1/sub2</code>（注意不要以“/”开头和结尾），支持多级；</p>
+                    <p>如果需要多个站点共用一个存储桶时设置，例如：<code>sub1</code>、<code>sub1/sub2</code>（注意不要以<code>/</code>开头和结尾），支持多级；</p>
                     <p>如果设置了上传至子目录，需要在 <b>URL前缀</b> 中增加对应的子目录，例如：<code><?php echo $protocol;?>{cos域名}/{子目录}/{本地文件夹}</code>。</p>
                   </td>
                 </tr>
@@ -1770,7 +1773,7 @@ function cos_setting_page()
                         <legend>图片处理样式</legend>
                     </th>
                     <td>
-                        <input type="text" name="ci_style" value="<?php echo esc_attr($cos_options['ci_style']); ?>" size="50" placeholder="请输入图片处理样式，留空表示不处理"/>
+                        <input type="text" name="ci_style" value="<?php echo esc_attr($cos_options['ci_style']); ?>" size="50" placeholder="请输入图片处理样式，不使用请留空"/>
 
                         <p><b>获取样式：</b></p>
 
@@ -1856,9 +1859,6 @@ function cos_setting_page()
         <?php elseif ($current_tab == 'contact'): ?>
             <?php echo cos_contact_page(); ?>
         <?php endif; ?>
-        <hr>
-        <p>优惠活动：<a href="https://qq52o.me/welfare.html#qcloud" target="_blank">腾讯云优惠</a> / <a href="https://go.qq52o.me/a/cos" target="_blank">腾讯云COS资源包优惠</a>；</p>
-        <p>限时推广：<a href="https://cloud.tencent.com/developer/support-plan?invite_code=cqidlih5bagj" target="_blank">满足条件的自媒体，入驻腾讯云开发者社区，可分享总价值百万资源包</a>；</p>
     </div>
 <?php
 }
