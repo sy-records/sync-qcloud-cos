@@ -1,6 +1,11 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.4...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.5...master)
+
+## [v2.6.5](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.4...v2.6.5) - 2025-08-23
+
+* Delete useless model directories by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/81
+* Improve donation image URL by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/82
 
 ## [v2.6.4](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.3...v2.6.4) - 2025-08-13
 
