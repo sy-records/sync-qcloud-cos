@@ -904,7 +904,7 @@ function cos_sync_setting_form($cos_options)
                         <legend>数据库内容替换</legend>
                     </th>
                     <td>
-                        <input type="text" name="old_url" size="50" placeholder="请输入要替换的内容"/>
+                        <input type="text" required name="old_url" size="50" placeholder="请输入要替换的内容"/>
                         <p><b>可能会填入：<code>{$old_url}</code></b></p>
                         <p>例如：<code>https://qq52o.me/wp-content/uploads</code></p>
                     </td>
