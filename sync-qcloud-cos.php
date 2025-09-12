@@ -1616,7 +1616,7 @@ function cos_setting_page()
     $current_tab = cos_get_current_tab();
 
     $color_scheme = cos_get_user_color_scheme();
-    ?>
+?>
     <style>
       .new-tab{margin-left: 5px;padding: 3px;border-radius: 10px;font-size: 10px;}
       .open{color: #007017;}
