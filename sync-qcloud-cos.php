@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.6.5
+Version: 2.6.6
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -27,7 +27,7 @@ use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Object\Head;
 
-define('COS_VERSION', '2.6.5');
+define('COS_VERSION', '2.6.6');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -894,6 +894,7 @@ function cos_sync_setting_form($cos_options)
     }
 
     $nonce = wp_nonce_field('qcloud_cos_replace', 'qcloud_cos_replace-nonce', true, false);
+    $replaceNonce = wp_nonce_field('qcloud_cos_all', 'qcloud_cos_all-nonce', true, false);
 
     return <<<HTML
         <form method="post">
@@ -938,6 +939,7 @@ function cos_sync_setting_form($cos_options)
                         <legend>同步历史附件</legend>
                     </th>
                     <input type="hidden" name="type" value="qcloud_cos_all">
+                    {$replaceNonce}
                     <td>
                         <input type="submit" class="button button-secondary" value="开始同步"/>
                         <p><b>注意：如果是首次同步，执行时间将会非常长（根据你的历史附件数量），有可能会因为执行时间过长，导致页面显示超时或者报错。<br> 所以建议附件数量过多的用户，直接使用官方的<a target="_blank" rel="nofollow" href="https://cloud.tencent.com/document/product/436/63143">COSCLI 工具</a>进行迁移，具体可参考<a target="_blank" rel="nofollow" href="https://qq52o.me/2809.html">使用 COSCLI 快速迁移本地数据到 COS</a></b></p>
@@ -1056,6 +1058,8 @@ function cos_ci_image_slim_page($options)
         }
     }
 
+    $nonce = wp_nonce_field('qcloud_cos_ci_image_slim', 'qcloud_cos_ci_image_slim-nonce', true, false);
+
     return <<<EOF
         <form method="post">
             <table class="form-table">
@@ -1112,6 +1116,7 @@ function cos_ci_image_slim_page($options)
                 <tr>
                     <th></th>
                     <input type="hidden" name="type" value="qcloud_cos_ci_image_slim">
+                    {$nonce}
                     <td><input type="submit" class="button button-primary" value="保存"/></td>
                 </tr>
             </table>
@@ -1149,6 +1154,8 @@ function cos_ci_text_page($options)
         }
         $select_roles .= '<input type="checkbox" name="ci_text_comments_check_roles[]" value="' . $role . '" ' . $check . '>' . $name . '<br>';
     }
+
+    $nonce = wp_nonce_field('qcloud_cos_ci_text', 'qcloud_cos_ci_text-nonce', true, false);
 
     return <<<EOF
         <form method="post">
@@ -1197,6 +1204,7 @@ function cos_ci_text_page($options)
                 <tr>
                     <th></th>
                     <input type="hidden" name="type" value="qcloud_cos_ci_text">
+                    {$nonce}
                     <td><input type="submit" class="button button-primary" value="保存"/></td>
                 </tr>
             </table>
@@ -1298,7 +1306,7 @@ function cos_process_comments($comment_data)
     return $comment_data;
 }
 
-add_filter('preprocess_comment', 'cos_process_comments');
+add_filter('preprocess_comment', 'cos_process_comments', 99);
 
 function cos_request_txt_check($options, $comment)
 {
@@ -1387,6 +1395,8 @@ function cos_document_page($options)
     $disableSubmit = !$status ? 'disabled=disabled' : '';
     $disableMessage = !$status ? "<p>如需使用请先访问 <a href='https://console.cloud.tencent.com/ci/bucket?bucket={$bucket}&region={$options['regional']}&type=document' target='_blank'>腾讯云控制台</a> 开启。</p>" : '';
 
+    $nonce = wp_nonce_field('qcloud_cos_ci_attachment_preview', 'qcloud_cos_ci_attachment_preview-nonce', true, false);
+
     return <<<EOF
         <form method="post">
             <table class="form-table">
@@ -1406,6 +1416,7 @@ function cos_document_page($options)
                 <tr>
                     <th></th>
                     <input type="hidden" name="type" value="qcloud_cos_ci_attachment_preview">
+                    {$nonce}
                     <td>
                         <input type="submit" class="button button-primary" {$disableSubmit} value="保存"/>
                         {$disableMessage}
@@ -1485,8 +1496,14 @@ function cos_setting_page()
     if (!current_user_can('manage_options')) {
         wp_die('Insufficient privileges!');
     }
+    if (!empty($_POST) && !empty($_POST['type'])) {
+        $nonce = $_POST["{$_POST['type']}-nonce"] ?? '';
+        if (empty($nonce) || !wp_verify_nonce($nonce, $_POST['type'])) {
+            wp_die('Illegal requests!');
+        }
+    }
     $options = [];
-    if (!empty($_POST) and $_POST['type'] == 'cos_set') {
+    if (!empty($_POST) && $_POST['type'] == 'qcloud_cos_set') {
         $options['bucket'] = isset($_POST['bucket']) ? sanitize_text_field($_POST['bucket']) : '';
         $options['regional'] = isset($_POST['regional']) ? sanitize_text_field($_POST['regional']) : '';
         $options['app_id'] = isset($_POST['app_id']) ? sanitize_text_field($_POST['app_id']) : '';
@@ -1518,15 +1535,10 @@ function cos_setting_page()
     }
 
     // 替换数据库链接
-    if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_replace') {
-        $nonce = $_POST['qcloud_cos_replace-nonce'] ?? '';
-        if (empty($nonce) || !wp_verify_nonce($nonce, 'qcloud_cos_replace')) {
-            wp_die('Illegal requests!');
-        }
-
+    if (!empty($_POST) && $_POST['type'] == 'qcloud_cos_replace') {
         $old_url = esc_url_raw($_POST['old_url']);
         $new_url = esc_url_raw($_POST['new_url']);
-        if (!empty($old_url) && !empty($new_url)) {
+        if (!empty($old_url)) {
             global $wpdb;
             // 文章内容
             $posts_name = $wpdb->prefix . 'posts';
@@ -1542,15 +1554,15 @@ function cos_setting_page()
         }
     }
 
-    if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_image_slim') {
+    if (!empty($_POST) && $_POST['type'] == 'qcloud_cos_ci_image_slim') {
         cos_ci_image_slim_setting($_POST);
     }
 
-    if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_text') {
+    if (!empty($_POST) && $_POST['type'] == 'qcloud_cos_ci_text') {
         cos_ci_text_setting($_POST);
     }
 
-    if (!empty($_POST) and $_POST['type'] == 'qcloud_cos_ci_attachment_preview') {
+    if (!empty($_POST) && $_POST['type'] == 'qcloud_cos_ci_attachment_preview') {
         cos_ci_attachment_preview_setting($_POST);
     }
 
@@ -1805,7 +1817,8 @@ function cos_setting_page()
                     <td><input type="submit" class="button button-primary" value="保存更改"/></td>
                 </tr>
             </table>
-            <input type="hidden" name="type" value="cos_set">
+            <input type="hidden" name="type" value="qcloud_cos_set">
+            <?php wp_nonce_field('qcloud_cos_set', 'qcloud_cos_set-nonce'); ?>
         </form>
         <?php elseif ($current_tab == 'sync'): ?>
             <?php echo cos_sync_setting_form($cos_options); ?>
