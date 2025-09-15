@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.5...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.6...master)
+
+## [v2.6.6](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.5...v2.6.6) - 2025-09-15
+
+* Add nonce fields for enhanced security by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/84
 
 ## [v2.6.5](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.4...v2.6.5) - 2025-08-23
 
