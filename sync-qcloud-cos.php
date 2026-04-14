@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.6.6
+Version: 2.6.7
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -1512,10 +1512,7 @@ function cos_setting_page()
         $options['nothumb'] = isset($_POST['nothumb']) ? 'true' : 'false';
         $options['nolocalsaving'] = isset($_POST['nolocalsaving']) ? 'true' : 'false';
         $options['delete_options'] = isset($_POST['delete_options']) ? 'true' : 'false';
-
-        //仅用于插件卸载时比较使用
-        $options['upload_url_path'] = isset($_POST['upload_url_path']) ? sanitize_text_field(stripslashes($_POST['upload_url_path'])) : '';
-
+        $options['upload_url_path'] = isset($_POST['upload_url_path']) ? sanitize_text_field(trim(stripslashes($_POST['upload_url_path']), '/')) : '';
         $options['upload_subdirectory'] = isset($_POST['upload_subdirectory']) ? sanitize_text_field(trim($_POST['upload_subdirectory'], '/')) : '';
         $options['ci_style'] = isset($_POST['ci_style']) ? sanitize_text_field($_POST['ci_style']) : '';
         $options['update_file_name'] = isset($_POST['update_file_name']) ? sanitize_text_field($_POST['update_file_name']) : 'false';
@@ -1588,8 +1585,7 @@ function cos_setting_page()
             $upload_path = sanitize_text_field(trim(stripslashes($_POST['upload_path']), '/'));
             $upload_path = $upload_path == '' ? 'wp-content/uploads' : $upload_path;
             update_option('upload_path', $upload_path);
-            $upload_url_path = sanitize_text_field(trim(stripslashes($_POST['upload_url_path']), '/'));
-            update_option('upload_url_path', $upload_url_path);
+            update_option('upload_url_path', $options['upload_url_path']);
             echo '<div class="updated"><p><strong>设置已保存！</strong></p></div>';
         }
     }
