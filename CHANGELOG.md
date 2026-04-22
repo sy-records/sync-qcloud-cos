@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.6...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.7...master)
+
+## [v2.6.7](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.6...v2.6.7) - 2026-04-22
+
+* Improve upload URL path sanitization by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/85
 
 ## [v2.6.6](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.5...v2.6.6) - 2025-09-15
 
