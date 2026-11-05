@@ -3,7 +3,7 @@
 Plugin Name: Sync QCloud COS
 Plugin URI: https://qq52o.me/2518.html
 Description: 使用腾讯云对象存储服务 COS 作为附件存储空间。(Using Tencent Cloud Object Storage Service COS as Attachment Storage Space.)
-Version: 2.6.7
+Version: 2.6.8
 Author: 沈唁
 Author URI: https://qq52o.me
 License: Apache2.0
@@ -27,7 +27,7 @@ use SyncQcloudCos\Monitor\Charts;
 use SyncQcloudCos\Monitor\DataPoints;
 use SyncQcloudCos\Object\Head;
 
-define('COS_VERSION', '2.6.6');
+define('COS_VERSION', '2.6.8');
 define('COS_PLUGIN_SLUG', 'sync-qcloud-cos');
 define('COS_PLUGIN_PAGE', plugin_basename(dirname(__FILE__)) . '%2F' . basename(__FILE__));
 
@@ -1630,13 +1630,14 @@ function cos_setting_page()
       .slider.round:before{border-radius:50%}
     </style>
     <div class="wrap" style="margin: 10px;">
+        <?php global $pagenow; ?>
+        <?php $isAdminPage = $pagenow === 'admin.php'; ?>
         <h1>腾讯云 COS <span style="font-size: 13px;">当前版本：<?php echo COS_VERSION; ?></span></h1>
         <p>插件网站：<a href="https://qq52o.me/" target="_blank">沈唁志</a> / <a href="https://qq52o.me/2518.html" target="_blank">Sync QCloud COS发布页面</a> / <a href="https://qq52o.me/2722.html" target="_blank">详细使用教程</a>；</p>
-        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/sync-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>；有 WordPress 账号？给个 <a href="https://wordpress.org/support/plugin/sync-qcloud-cos/reviews/#new-post" target="_blank">五星好评</a>；<a href="?page=sync-qcloud-cos-contact">打赏一杯咖啡或一杯香茗</a></p>
+        <p>如果觉得此插件对你有所帮助，不妨到 <a href="https://github.com/sy-records/sync-qcloud-cos" target="_blank">GitHub</a> 上点个<code>Star</code>；有 WordPress 账号？给个 <a href="https://wordpress.org/support/plugin/sync-qcloud-cos/reviews/#new-post" target="_blank">五星好评</a>；<a href="?page=<?php echo $isAdminPage ? COS_PLUGIN_SLUG . '-contact' : COS_PLUGIN_PAGE . '&tab=contact'; ?>">打赏一杯咖啡或一杯香茗</a></p>
         <h3 class="nav-tab-wrapper">
-            <?php global $pagenow; ?>
             <?php foreach (cos_setting_page_tabs() as $tab => $label): ?>
-              <?php $href = $pagenow === 'admin.php' ? COS_PLUGIN_SLUG . '-' . $tab : COS_PLUGIN_PAGE . '&tab=' . $tab; ?>
+              <?php $href = $isAdminPage ? COS_PLUGIN_SLUG . '-' . $tab : COS_PLUGIN_PAGE . '&tab=' . $tab; ?>
               <?php $label = $tab == 'contact' ? $label . '<span class="wp-ui-notification new-tab">NEW</span>' : $label; ?>
               <a class="nav-tab <?php echo $current_tab == $tab ? 'nav-tab-active' : '' ?>" href="?page=<?php echo $href;?>"><?php echo $label; ?></a>
             <?php endforeach; ?>
