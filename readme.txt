@@ -105,7 +105,7 @@ License URI: http://www.apache.org/licenses/LICENSE-2.0.html
 
 = Stable =
 
-- Improve upload URL path sanitization
+- Enhance admin page link handling
 
 = Other =
 
