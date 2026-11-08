@@ -1,6 +1,10 @@
 # Release Notes
 
-## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.7...master)
+## [Unreleased](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.8...master)
+
+## [v2.6.8](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.7...v2.6.8) - 2026-11-08
+
+* Enhance admin page link handling by [@sy-records](https://github.com/sy-records) in https://github.com/sy-records/sync-qcloud-cos/pull/87
 
 ## [v2.6.7](https://github.com/sy-records/sync-qcloud-cos/compare/v2.6.6...v2.6.7) - 2026-04-22
 
